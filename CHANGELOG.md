@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2](https://github.com/artmizu/analytics-nuxt/compare/v1.0.1...v1.0.2) (2022-12-14)
+
+
+### Bug Fixes
+
+* path calculation ([29ce8b4](https://github.com/artmizu/analytics-nuxt/commit/29ce8b4ede9231f07fb4a5cd821334a5a774950c))
+
 ## [1.0.1](https://github.com/artmizu/analytics-nuxt/compare/v1.0.0...v1.0.1) (2022-12-14)
 
 
