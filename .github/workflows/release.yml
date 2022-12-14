@@ -29,6 +29,10 @@ jobs:
       - run: pnpm install --shamefully-hoist
         if: ${{ steps.release.outputs.release_created }}
 
+      - name: Prepare is needed, because it generate types
+        run: pnpm dev:prepare
+        if: ${{ steps.release.outputs.release_created }}
+
       - name: Let's build it
         run: pnpm prepack
         if: ${{ steps.release.outputs.release_created }}
