@@ -1,6 +1,7 @@
 {
   "name": "@artmizu/analytics-nuxt",
   "type": "module",
+  "version": "1.0.0",
   "packageManager": "pnpm@7.16.1",
   "description": "Allows you to better understand what's going on with your application and how to optimize performance and other things in production",
   "license": "MIT",
@@ -51,6 +52,5 @@
     "playwright": "^1.28.1",
     "typescript": "4.8.4",
     "vitest": "^0.25.8"
-  },
-  "version": "1.0.0"
+  }
 }

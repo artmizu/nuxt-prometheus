@@ -21,13 +21,13 @@ Actually package is worked, but requests time coudn't be calculated due to limit
 Install package via a package manager: 
 ```bash
 # using npm
-npm install --save-dev @artmizu/analytics-nuxt
+npm install @artmizu/analytics-nuxt
 
-# using yarm
-yarn add -D @artmizu/analytics-nuxt
+# using yarn
+yarn add @artmizu/analytics-nuxt
 
 # using pnpm
-pnpm add -D @artmizu/analytics-nuxt
+pnpm add @artmizu/analytics-nuxt
 ```
 
 Add it to a modules section of your nuxt config:
