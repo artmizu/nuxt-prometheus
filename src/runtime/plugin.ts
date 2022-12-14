@@ -10,7 +10,7 @@ import { defineNuxtPlugin, useRouter, useRuntimeConfig } from '#app'
 export default defineNuxtPlugin((ctx) => {
   const params = useRuntimeConfig().public.analytics
   const router = useRouter()
-  const path = router.currentRoute.value.path === '' ? '/' : router.currentRoute.value.path
+  const path = router.currentRoute.value.matched[0]?.path || ''
   const name = router.currentRoute.value.name
   const interceptor = new BatchInterceptor({
     name: 'nuxt-analytics',
