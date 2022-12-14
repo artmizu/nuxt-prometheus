@@ -5,6 +5,13 @@
 
 ### Bug Fixes
 
+* initial ([cfc7d78](https://github.com/artmizu/analytics-nuxt/commit/cfc7d78df718f736121d7c1e02e94e74cb15b314))
+
+## 1.0.0 (2022-12-14)
+
+
+### Bug Fixes
+
 * initial ([4619644](https://github.com/artmizu/analytics-nuxt/commit/46196445066c09cb539e446b07a4486a7b4eabf7))
 * initial release ([41f7b80](https://github.com/artmizu/analytics-nuxt/commit/41f7b80052dd96ddd678c76af916d36912352b6c))
 * release ([918123d](https://github.com/artmizu/analytics-nuxt/commit/918123d5715cf06507373263611aac01e62b0d81))
