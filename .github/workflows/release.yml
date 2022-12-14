@@ -1,0 +1,39 @@
+on:
+  push:
+    branches:
+      - main
+name: release-please
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: google-github-actions/release-please-action@v3
+        id: release
+        with:
+          release-type: node
+
+      - uses: actions/checkout@v3
+        if: ${{ steps.release.outputs.release_created }}
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        if: ${{ steps.release.outputs.release_created }}
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+          registry-url: 'https://registry.npmjs.org'
+          cache: pnpm
+        if: ${{ steps.release.outputs.release_created }}
+
+      - run: pnpm install --shamefully-hoist
+        if: ${{ steps.release.outputs.release_created }}
+
+      - name: Let's build it
+        run: pnpm prepack
+        if: ${{ steps.release.outputs.release_created }}
+
+      - run: pnpm publish
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+        if: ${{ steps.release.outputs.release_created }}
