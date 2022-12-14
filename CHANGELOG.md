@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/artmizu/analytics-nuxt/compare/v1.0.0...v1.0.1) (2022-12-14)
+
+
+### Bug Fixes
+
+* release ([3facdbe](https://github.com/artmizu/analytics-nuxt/commit/3facdbe3aaa965518213131bd44998a0547005ab))
+
 ## 1.0.0 (2022-12-14)
 
 
