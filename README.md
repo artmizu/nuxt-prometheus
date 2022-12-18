@@ -1,4 +1,4 @@
-![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/artmizu/analytics-nuxt/ci.yml?branch=main) ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/artmizu/analytics-nuxt/release.yml?branch=main)
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/artmizu/analytics-nuxt/release.yml?branch=main)
 
 ![Cover](https://raw.githubusercontent.com/artmizu/analytics-nuxt/main/.github/cover.jpg) 
 
