@@ -1,7 +1,5 @@
 ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/artmizu/analytics-nuxt/ci.yml?branch=main) ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/artmizu/analytics-nuxt/release.yml?branch=main)
 
-https://img.shields.io/github/actions/workflow/status/artmizu/analytics-nuxt/CI.yml?branch=main&style=plastic
-
 ![Cover](https://raw.githubusercontent.com/artmizu/analytics-nuxt/main/.github/cover.jpg) 
 
 # 📊 Nuxt 3 Analytics 
