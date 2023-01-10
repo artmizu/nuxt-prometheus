@@ -1,12 +1,12 @@
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/artmizu/analytics-nuxt/CI?label=CI&style=plastic) ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/artmizu/analytics-nuxt/release-please?label=release&style=plastic)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/artmizu/nuxt-prometheus/CI?label=CI&style=plastic) ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/artmizu/nuxt-prometheus/release-please?label=release&style=plastic)
 
-![Cover](https://raw.githubusercontent.com/artmizu/analytics-nuxt/main/.github/cover.jpg) 
+![Cover](https://raw.githubusercontent.com/artmizu/nuxt-prometheus/main/.github/cover.jpg) 
 
-# 📊 Nuxt 3 Analytics 
+# 📊 Prometheus integration for Nuxt 3
 Allows you to better understand what's going on with your application and how to optimize performance and other things in production. **Nuxt 2** users can use [this version](https://github.com/artmizu/analytics-nuxt-2).
 
 ## Package support Node <= 17.x, for Node >= 18.x users
-Actually package is worked, but requests time coudn't be calculated due to limitation of the [@mswjs/interceptors](https://www.npmjs.com/package/@mswjs/interceptors). When it is updated, I will update this package.
+Actually package is worked, but requests time coudn't be calculated due to limitation of the [@mswjs/interceptors](https://github.com/mswjs/interceptors/pull/283). When it is updated, I will update this package.
 
 ## Features
 * Default NodeJS metrics exported through the prometheus middleware
@@ -21,25 +21,25 @@ Actually package is worked, but requests time coudn't be calculated due to limit
 Install package via a package manager: 
 ```bash
 # using npm
-npm install @artmizu/analytics-nuxt
+npm install @artmizu/nuxt-prometheus
 
 # using yarn
-yarn add @artmizu/analytics-nuxt
+yarn add @artmizu/nuxt-prometheus
 
 # using pnpm
-pnpm add @artmizu/analytics-nuxt
+pnpm add @artmizu/nuxt-prometheus
 ```
 
 Add it to a modules section of your nuxt config:
 ```js
 export default {
-  modules: ['@artmizu/analytics-nuxt']
+  modules: ['@artmizu/nuxt-prometheus']
 }
 ```
 
 ## Grafana sample setup
 Once the metrics have been collected by Prometheus, you will want to review them. I use Grafana for this purpose, and my metrics setup looks something like this:
-![Cover](https://raw.githubusercontent.com/artmizu/analytics-nuxt/main/.github/grafana.jpg)
+![Cover](https://raw.githubusercontent.com/artmizu/nuxt-prometheus/main/.github/grafana.jpg)
 
 ## Options
 You can pass it through module options and the nuxt config property `analytics`.
