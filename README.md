@@ -1,4 +1,4 @@
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/artmizu/nuxt-prometheus/CI?label=CI&style=plastic) ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/artmizu/nuxt-prometheus/release-please?label=release&style=plastic)
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/artmizu/nuxt-prometheus/release.yml?branch=main)
 
 ![Cover](https://raw.githubusercontent.com/artmizu/nuxt-prometheus/main/.github/cover.jpg) 
 
