@@ -1,5 +1,5 @@
 import { defu } from 'defu'
-import { addPlugin, addServerHandler, createResolver, defineNuxtModule, isNuxt2 } from '@nuxt/kit'
+import { addPlugin, addServerHandler, createResolver, defineNuxtModule } from '@nuxt/kit'
 import type { NuxtModule } from '@nuxt/schema'
 import { name, version } from '../package.json'
 import type { AnalyticsModuleParams } from './runtime/type'
@@ -12,35 +12,40 @@ const module: NuxtModule<Partial<AnalyticsModuleParams>> = defineNuxtModule<Part
   meta: {
     name,
     version,
-    configKey: 'analytics',
+    configKey: 'prometheus',
     compatibility: {
       nuxt: '^3.0.0',
     },
   },
   defaults: {
     verbose: true,
+    healthCheck: true,
+    prometheusPath: '/metrics',
+    healthCheckPath: '/health',
   },
   async setup(options, nuxt) {
     const moduleOptions: AnalyticsModuleParams = defu(
-      nuxt.options.runtimeConfig.public.analytics,
+      nuxt.options.runtimeConfig.public.prometheus,
       options,
     )
-    nuxt.options.runtimeConfig.public.analytics = moduleOptions
+    nuxt.options.runtimeConfig.public.prometheus = moduleOptions
 
     const { resolve } = createResolver(import.meta.url)
     nuxt.options.build.transpile.push(resolve('runtime'))
 
     addServerHandler({
-      route: '/metrics',
+      route: options.prometheusPath,
       method: 'get',
       handler: resolve('./runtime/handler'),
     })
 
-    addServerHandler({
-      route: '/health',
-      method: 'get',
-      handler: resolve('./runtime/health'),
-    })
+    if (options.healthCheck) {
+      addServerHandler({
+        route: options.healthCheckPath,
+        method: 'get',
+        handler: resolve('./runtime/health'),
+      })
+    }
 
     addPlugin({ src: resolve('./runtime/plugin'), mode: 'server' })
   },

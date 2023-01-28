@@ -8,12 +8,12 @@ import { calculateTime } from './utils'
 import { defineNuxtPlugin, useRouter, useRuntimeConfig } from '#app'
 
 export default defineNuxtPlugin((ctx) => {
-  const params = useRuntimeConfig().public.analytics
+  const params = useRuntimeConfig().public.prometheus
   const router = useRouter()
   const path = router.currentRoute.value.matched[0]?.path || ''
   const name = router.currentRoute.value.name
   const interceptor = new BatchInterceptor({
-    name: 'nuxt-analytics',
+    name: 'nuxt-prometheus',
     interceptors: [
       new XMLHttpRequestInterceptor(),
       new ClientRequestInterceptor(),
@@ -34,9 +34,9 @@ export default defineNuxtPlugin((ctx) => {
     requestTime.labels(state.path).set(time.request)
     totalTime.labels(state.path).set(time.total)
     if (params.verbose) {
-      logger.info('[analytics] api request time:', time.request)
-      logger.info('[analytics] render time:', time.render)
-      logger.info('[analytics] total time:', time.total)
+      logger.info('[nuxt-prometheus] api request time:', time.request)
+      logger.info('[nuxt-prometheus] render time:', time.render)
+      logger.info('[nuxt-prometheus] total time:', time.total)
     }
   })
 
@@ -47,7 +47,7 @@ export default defineNuxtPlugin((ctx) => {
     }
 
     if (params.verbose)
-      logger.info(`[analytics] request: ${req.url}, ${new Date().toISOString()}`)
+      logger.info(`[nuxt-prometheus] request: ${req.url}, ${new Date().toISOString()}`)
   })
 
   interceptor.on('response', (_, res) => {
