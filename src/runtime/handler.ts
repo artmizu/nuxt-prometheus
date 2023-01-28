@@ -1,13 +1,14 @@
 import { defineEventHandler } from 'h3'
 import { register } from 'prom-client'
 
-export default defineEventHandler(async ({ res }) => {
+export default defineEventHandler(async (event) => {
   try {
-    res.setHeader('Content-Type', register.contentType)
-    res.end(await register.metrics())
+    const data = await register.metrics()
+    event.res.setHeader('Content-Type', register.contentType)
+    event.res.end(data)
   }
   catch (e) {
-    res.statusCode = 500
-    res.end(e)
+    event.res.statusCode = 500
+    event.res.end(e)
   }
 })

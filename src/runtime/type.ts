@@ -20,4 +20,19 @@ export interface AnalyticsModuleParams {
    * @default true
    */
   verbose: boolean
+  /**
+   * To turn on and off the healthcheck route
+   * @default true
+   */
+  healthCheck: boolean
+  /**
+   * Healthcheck url path
+   * @default '/health'
+   */
+  healthCheckPath: string
+  /**
+   * Pormetheus exporter url path
+   * @default '/metrics'
+   */
+  prometheusPath: string
 }

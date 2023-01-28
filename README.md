@@ -13,7 +13,7 @@ Actually package is worked, but requests time coudn't be calculated due to limit
 * Custom metrics about pages render time and external request consumption time
 * Health check middleware
 
-## Default routes
+## Default routes that you can customise via the module options
 * `/metrics` - prometheus metrics
 * `/health` - health check
 
@@ -42,9 +42,24 @@ Once the metrics have been collected by Prometheus, you will want to review them
 ![Cover](https://raw.githubusercontent.com/artmizu/nuxt-prometheus/main/.github/grafana.jpg)
 
 ## Options
-You can pass it through module options and the nuxt config property `analytics`.
+You can pass it through module options and the nuxt config property `prometheus`.
 
 ### verbose
 - Type: `boolean`
 - Default: `true`
-- Description: Additional logs in dev mode, about page rendering time and time of external API requests
+- Description: Additional logs in the dev mode, about page rendering time and time of external API requests
+
+### healthCheck
+- Type: `boolean`
+- Default: `true`
+- Description: To turn on and off the healthcheck route
+
+### healthCheckPath
+- Type: `string`
+- Default: `/health`
+- Description: Healthcheck url path
+
+### prometheusPath
+- Type: `string`
+- Default: `/metrics`
+- Description: Pormetheus exporter url path
