@@ -76,3 +76,6 @@ jobs:
 
       - name: Run tests
         run: pnpm vitest run
+
+      - name: Run type tests
+        run: pnpm vitest typecheck --run
