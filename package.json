@@ -29,6 +29,7 @@
     "dev:build": "nuxi build playground",
     "dev:prepare": "nuxt-module-build --stub && nuxi prepare playground",
     "test": "vitest",
+    "test:type": "vitest typecheck",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "prepare": "husky install"
