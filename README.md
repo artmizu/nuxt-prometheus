@@ -62,4 +62,4 @@ You can pass it through module options and the nuxt config property `prometheus`
 ### prometheusPath
 - Type: `string`
 - Default: `/metrics`
-- Description: Pormetheus exporter url path
+- Description: Prometheus exporter url path
