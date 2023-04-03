@@ -6,6 +6,7 @@ describe('custom module params test', async () => {
   await setup({
     rootDir: fileURLToPath(new URL('../playground', import.meta.url)),
     nuxtConfig: {
+      // @ts-expect-error TODO figure out
       prometheus: {
         healthCheckPath: '/h',
         prometheusPath: '/p',

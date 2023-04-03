@@ -37,6 +37,7 @@
   "dependencies": {
     "@mswjs/interceptors": "^0.19.2",
     "@nuxt/kit": "^3.0.0",
+    "consola": "^2.15.3",
     "defu": "^6.1.1",
     "h3": "^0.8.6",
     "prom-client": "^14.1.0"
@@ -49,9 +50,11 @@
     "@types/node": "^18.11.15",
     "eslint": "^8.29.0",
     "husky": "^8.0.2",
-    "nuxt": "^3.0.0",
+    "nuxt": "^3.3.3",
     "playwright": "^1.28.1",
     "typescript": "4.8.4",
-    "vitest": "^0.25.8"
+    "vitest": "^0.25.8",
+    "vue": "^3.2.47",
+    "vue-router": "^4.1.6"
   }
 }
