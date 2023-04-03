@@ -1,7 +1,7 @@
 import { BatchInterceptor } from '@mswjs/interceptors'
 import { XMLHttpRequestInterceptor } from '@mswjs/interceptors/lib/interceptors/XMLHttpRequest'
 import { ClientRequestInterceptor } from '@mswjs/interceptors/lib/interceptors/ClientRequest'
-import { logger } from '@nuxt/kit'
+import consola from 'consola'
 import { renderTime, requestTime, totalTime } from './registry'
 import type { AnalyticsModuleState } from './type'
 import { calculateTime } from './utils'
@@ -34,20 +34,29 @@ export default defineNuxtPlugin((ctx) => {
     requestTime.labels(state.path).set(time.request)
     totalTime.labels(state.path).set(time.total)
     if (params.verbose) {
-      logger.info('[nuxt-prometheus] api request time:', time.request)
-      logger.info('[nuxt-prometheus] render time:', time.render)
-      logger.info('[nuxt-prometheus] total time:', time.total)
+      consola.info('[nuxt-prometheus] api request time:', time.request)
+      consola.info('[nuxt-prometheus] render time:', time.render)
+      consola.info('[nuxt-prometheus] total time:', time.total)
     }
   })
 
   interceptor.on('request', (req) => {
+    const url = new URL(req.url)
+
+    /**
+     * Exclude Nuxt requests to parts of the application, it's not about business-logic
+     */
+    const isNuxtRequest = /^\/__/.test(url.pathname)
+    if (isNuxtRequest)
+      return
+
     state.requests[req.url] = {
       start: Date.now(),
       end: Date.now(),
     }
 
     if (params.verbose)
-      logger.info(`[nuxt-prometheus] request: ${req.url}, ${new Date().toISOString()}`)
+      consola.info(`[nuxt-prometheus] request: ${req.url}, ${new Date().toISOString()}`)
   })
 
   interceptor.on('response', (_, res) => {
