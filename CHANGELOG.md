@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.1.0](https://github.com/artmizu/nuxt-prometheus/compare/v2.0.0...v2.1.0) (2023-04-03)
+
+
+### Features
+
+* consola as explicit dependency and exclude nuxt request from the logs ([b22f6b2](https://github.com/artmizu/nuxt-prometheus/commit/b22f6b2e1264298b395fcf5e52602b64aa1c7dd7))
+
+
+### Bug Fixes
+
+* readme typo ([a3fbaeb](https://github.com/artmizu/nuxt-prometheus/commit/a3fbaeb217ce1579941c9a60699dea3d8b81bb7e))
+
 ## [2.0.0](https://github.com/artmizu/nuxt-prometheus/compare/v1.0.3...v2.0.0) (2023-01-28)
 
 
