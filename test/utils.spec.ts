@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { expect, it, vi } from 'vitest'
 import { calculateTime } from '../src/runtime/utils'
 
 it('calculateTime check', () => {
@@ -34,4 +34,3 @@ it('calculateTime check', () => {
 
   expect(time).toEqual({ request: 310, render: 190, total: 500 })
 })
-

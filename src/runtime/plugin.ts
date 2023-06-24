@@ -1,6 +1,6 @@
 import { BatchInterceptor } from '@mswjs/interceptors'
-import { XMLHttpRequestInterceptor } from '@mswjs/interceptors/lib/interceptors/XMLHttpRequest'
-import { ClientRequestInterceptor } from '@mswjs/interceptors/lib/interceptors/ClientRequest'
+import { XMLHttpRequestInterceptor } from '@mswjs/interceptors/XMLHttpRequest'
+import { ClientRequestInterceptor } from '@mswjs/interceptors/ClientRequest'
 import consola from 'consola'
 import { renderTime, requestTime, totalTime } from './registry'
 import type { AnalyticsModuleState } from './type'
