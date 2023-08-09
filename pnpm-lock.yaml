@@ -9,6 +9,7 @@ specifiers:
   '@nuxt/test-utils': 3.0.0
   '@types/node': ^18.11.15
   consola: ^3.2.3
+  defu: ^6.1.2
   eslint: ^8.29.0
   h3: ^1.7.1
   husky: ^8.0.2
@@ -24,6 +25,7 @@ dependencies:
   '@mswjs/interceptors': 0.19.5
   '@nuxt/kit': 3.6.5
   consola: 3.2.3
+  defu: 6.1.2
   h3: 1.7.1
   prom-client: 14.2.0
 

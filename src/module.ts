@@ -1,12 +1,18 @@
+import { defu } from 'defu'
 import { addPlugin, addServerHandler, createResolver, defineNuxtModule } from '@nuxt/kit'
+import type { NuxtModule } from '@nuxt/schema'
 import { name, version } from '../package.json'
 import type { AnalyticsModuleParams } from './runtime/type'
 
+interface RuntimeConfig {
+  prometheus: Partial<AnalyticsModuleParams>
+}
+
 export interface ModuleOptions extends AnalyticsModuleParams { }
-export interface ModulePublicRuntimeConfig extends AnalyticsModuleParams { }
+export interface ModulePublicRuntimeConfig extends RuntimeConfig { }
 
 // immediate return via export default brings the build errors
-const module = defineNuxtModule<Partial<AnalyticsModuleParams>>({
+const module: NuxtModule<Partial<AnalyticsModuleParams>> = defineNuxtModule<Partial<AnalyticsModuleParams>>({
   meta: {
     name,
     version,
@@ -22,7 +28,11 @@ const module = defineNuxtModule<Partial<AnalyticsModuleParams>>({
     healthCheckPath: '/health',
   },
   async setup(options, nuxt) {
-    nuxt.options.runtimeConfig.public.prometheus = options
+    const moduleOptions: Partial<AnalyticsModuleParams> = defu(
+      nuxt.options.runtimeConfig.public.prometheus,
+      options,
+    )
+    nuxt.options.runtimeConfig.public.prometheus = moduleOptions
 
     const { resolve } = createResolver(import.meta.url)
     nuxt.options.build.transpile.push(resolve('runtime'))

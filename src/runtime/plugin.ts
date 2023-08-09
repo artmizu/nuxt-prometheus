@@ -3,12 +3,12 @@ import { XMLHttpRequestInterceptor } from '@mswjs/interceptors/lib/interceptors/
 import { ClientRequestInterceptor } from '@mswjs/interceptors/lib/interceptors/ClientRequest'
 import consola from 'consola'
 import { renderTime, requestTime, totalTime } from './registry'
-import type { AnalyticsModuleParams, AnalyticsModuleState } from './type'
+import type { AnalyticsModuleState } from './type'
 import { calculateTime } from './utils'
 import { defineNuxtPlugin, useRouter, useRuntimeConfig } from '#app'
 
 export default defineNuxtPlugin((ctx) => {
-  const params = useRuntimeConfig().public.prometheus as Partial<AnalyticsModuleParams>
+  const params = useRuntimeConfig().public.prometheus
   const router = useRouter()
   const path = router.currentRoute.value.matched[0]?.path || ''
   const name = router.currentRoute.value.name

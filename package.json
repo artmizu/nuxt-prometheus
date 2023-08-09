@@ -38,6 +38,7 @@
     "@mswjs/interceptors": "^0.19.2",
     "@nuxt/kit": "^3.6.5",
     "consola": "^3.2.3",
+    "defu": "^6.1.2",
     "h3": "^1.7.1",
     "prom-client": "^14.2.0"
   },
