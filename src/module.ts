@@ -4,8 +4,12 @@ import type { NuxtModule } from '@nuxt/schema'
 import { name, version } from '../package.json'
 import type { AnalyticsModuleParams } from './runtime/type'
 
+interface RuntimeConfig {
+  prometheus: Partial<AnalyticsModuleParams>
+}
+
 export interface ModuleOptions extends AnalyticsModuleParams { }
-export interface ModulePublicRuntimeConfig extends AnalyticsModuleParams { }
+export interface ModulePublicRuntimeConfig extends RuntimeConfig { }
 
 // immediate return via export default brings the build errors
 const module: NuxtModule<Partial<AnalyticsModuleParams>> = defineNuxtModule<Partial<AnalyticsModuleParams>>({
@@ -24,7 +28,7 @@ const module: NuxtModule<Partial<AnalyticsModuleParams>> = defineNuxtModule<Part
     healthCheckPath: '/health',
   },
   async setup(options, nuxt) {
-    const moduleOptions: AnalyticsModuleParams = defu(
+    const moduleOptions: Partial<AnalyticsModuleParams> = defu(
       nuxt.options.runtimeConfig.public.prometheus,
       options,
     )
