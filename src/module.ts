@@ -29,7 +29,7 @@ const module: NuxtModule<Partial<AnalyticsModuleParams>> = defineNuxtModule<Part
   },
   async setup(options, nuxt) {
     const moduleOptions: Partial<AnalyticsModuleParams> = defu(
-      nuxt.options.runtimeConfig.public.prometheus,
+      nuxt.options.runtimeConfig.public.prometheus as any, // TODO
       options,
     )
     nuxt.options.runtimeConfig.public.prometheus = moduleOptions
