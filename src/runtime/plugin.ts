@@ -10,8 +10,8 @@ import { defineNuxtPlugin, useRouter, useRuntimeConfig } from '#app'
 export default defineNuxtPlugin((ctx) => {
   const params = useRuntimeConfig().public.prometheus
   const router = useRouter()
-  const path = router.currentRoute.value.matched[0]?.path || ''
-  const name = router.currentRoute.value.name
+  const path = router.currentRoute.value?.matched?.[0]?.path || 'empty'
+  const name = router.currentRoute.value?.name || 'empty'
   const interceptor = new BatchInterceptor({
     name: 'nuxt-prometheus',
     interceptors: [
