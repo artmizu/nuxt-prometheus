@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.5](https://github.com/artmizu/nuxt-prometheus/compare/v2.1.4...v2.1.5) (2023-08-25)
+
+
+### Bug Fixes
+
+* empty route handling ([44fd111](https://github.com/artmizu/nuxt-prometheus/commit/44fd111df9560206a1c4f2dc50ea9ca064193469))
+
 ## [2.1.4](https://github.com/artmizu/nuxt-prometheus/compare/v2.1.3...v2.1.4) (2023-08-25)
 
 
