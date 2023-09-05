@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.0](https://github.com/artmizu/nuxt-prometheus/compare/v2.1.5...v2.2.0) (2023-09-05)
+
+
+### Features
+
+* allow nuxt bridge ([efdbf67](https://github.com/artmizu/nuxt-prometheus/commit/efdbf67c822151869fce62ab05dc6ac25fde54ca))
+
 ## [2.1.5](https://github.com/artmizu/nuxt-prometheus/compare/v2.1.4...v2.1.5) (2023-08-25)
 
 
