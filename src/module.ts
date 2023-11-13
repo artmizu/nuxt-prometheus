@@ -1,6 +1,8 @@
 import { defu } from 'defu'
 import { addPlugin, addServerHandler, createResolver, defineNuxtModule } from '@nuxt/kit'
 import type { NuxtModule } from '@nuxt/schema'
+import { collectDefaultMetrics, register } from 'prom-client'
+
 import { name, version } from '../package.json'
 import type { AnalyticsModuleParams } from './runtime/type'
 
@@ -37,6 +39,12 @@ const module: NuxtModule<Partial<AnalyticsModuleParams>> = defineNuxtModule<Part
 
     const { resolve } = createResolver(import.meta.url)
     nuxt.options.build.transpile.push(resolve('runtime'))
+
+    console.log('setup server')
+    collectDefaultMetrics({
+      prefix: moduleOptions.prefix,
+      register,
+    })
 
     addServerHandler({
       route: options.prometheusPath,

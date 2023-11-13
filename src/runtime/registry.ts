@@ -1,6 +1,4 @@
-import { Gauge, collectDefaultMetrics, register } from 'prom-client'
-
-collectDefaultMetrics({ register })
+import { Gauge } from 'prom-client'
 
 const renderTime = new Gauge({
   name: 'page_render_time',
