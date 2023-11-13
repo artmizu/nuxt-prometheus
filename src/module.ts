@@ -37,14 +37,15 @@ const module: NuxtModule<Partial<AnalyticsModuleParams>> = defineNuxtModule<Part
     )
     nuxt.options.runtimeConfig.public.prometheus = moduleOptions
 
+    
+    console.log('setup server', moduleOptions)
+    // collectDefaultMetrics({
+    //   prefix: moduleOptions.prefix,
+    //   register,
+    // })
+
     const { resolve } = createResolver(import.meta.url)
     nuxt.options.build.transpile.push(resolve('runtime'))
-
-    console.log('setup server')
-    collectDefaultMetrics({
-      prefix: moduleOptions.prefix,
-      register,
-    })
 
     addServerHandler({
       route: options.prometheusPath,

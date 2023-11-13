@@ -2,6 +2,9 @@ import { BatchInterceptor } from '@mswjs/interceptors'
 import { XMLHttpRequestInterceptor } from '@mswjs/interceptors/lib/interceptors/XMLHttpRequest'
 import { ClientRequestInterceptor } from '@mswjs/interceptors/lib/interceptors/ClientRequest'
 import consola from 'consola'
+
+import { collectDefaultMetrics, register } from "prom-client"
+
 import { renderTime, requestTime, totalTime } from './registry'
 import type { AnalyticsModuleState } from './type'
 import { calculateTime } from './utils'
@@ -10,6 +13,15 @@ import { defineNuxtPlugin, useRouter, useRuntimeConfig } from '#app'
 export default defineNuxtPlugin((ctx) => {
   const params = useRuntimeConfig().public.prometheus
   const router = useRouter()
+
+  console.log('params:', params)
+
+  collectDefaultMetrics({
+    register,
+    prefix: params.prefix,
+  })
+  
+
   const path = router.currentRoute.value?.matched?.[0]?.path || 'empty'
   const name = router.currentRoute.value?.name || 'empty'
   const interceptor = new BatchInterceptor({
