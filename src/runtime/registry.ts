@@ -12,9 +12,6 @@ export const requestTime = metrics.requestTime
 export const totalTime = metrics.totalTime
 
 export const initMetrics = (p: Partial<AnalyticsModuleParams>) => {
-
-  console.log('init metrics')
-
   collectDefaultMetrics({
     prefix: p.prefix,
     register,

@@ -34,7 +34,7 @@ export interface AnalyticsModuleParams {
    * Prometheus exporter url path
    * @default '/metrics'
    */
-  prometheusPath: string,
+  prometheusPath: string
 
   /**
    * An optional prefix for metric names.
