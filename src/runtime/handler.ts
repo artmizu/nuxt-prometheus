@@ -1,35 +1,60 @@
 import { defineEventHandler } from 'h3'
 
 import { AggregatorRegistry, register } from 'prom-client'
-
 import { useRuntimeConfig } from '#app'
 
 export default defineEventHandler(async (event) => {
-  try {
-    const params = useRuntimeConfig().public.prometheus
+  const params = useRuntimeConfig(event).public.prometheus
 
-    const allMetrics = await register.getMetricsAsJSON()
+  console.log('params:', params.prefix)
 
-    if (params.prefix) {
-      allMetrics.map((m) => {
-        return {
-          ...m,
-          name: `${params.prefix}${m.name}`,
-        }
-      })
-    }
+  return `params: ${params}`
 
-    const aggrRegistry = AggregatorRegistry.aggregate(allMetrics)
+  // try {
+  //   console.log('get all metrics')
 
-    const data = await aggrRegistry.metrics()
+  //   // todo: error
 
-    console.log('got data:', data)
+  //   const params = useRuntimeConfig().public.prometheus
 
-    event.res.setHeader('Content-Type', register.contentType)
-    event.res.end(data)
-  }
-  catch (e) {
-    event.res.statusCode = 500
-    event.res.end(e)
-  }
+    
+  //   console.log('params', params, params.prefix)
+    
+  //   let allMetrics = await register.getMetricsAsJSON()
+
+  //   console.log('line 13')
+
+  //   if (params.prefix) {
+  //     allMetrics = allMetrics.map((m) => {
+  //       let m1 = {
+  //         ...m,
+  //         name: `${params.prefix}${m.name}`,
+  //       }
+
+  //       console.log('m1:', m1)
+
+  //       return m1
+  //     })
+  //   }
+
+
+  //   console.log('line 13 done', allMetrics)
+
+  //   const aggrRegistry = AggregatorRegistry.aggregate(allMetrics)
+
+  //   console.log('get metrics')
+
+  //   const data = await aggrRegistry.metrics()
+
+  //   console.log('got data:', data)
+
+  //   event.res.setHeader('Content-Type', register.contentType)
+  //   event.res.end(data)
+  // }
+  // catch (e) {
+  //   console.log('error', e)
+
+  //   event.res.statusCode = 500
+  //   event.res.end(e)
+  // }
 })
