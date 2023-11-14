@@ -1,23 +1,40 @@
 import { Gauge, collectDefaultMetrics, register } from 'prom-client'
+import type { AnalyticsModuleParams } from './type'
 
-collectDefaultMetrics({ register })
+const metrics = {
+  renderTime: null as Gauge | null,
+  requestTime: null as Gauge | null,
+  totalTime: null as Gauge | null,
+}
 
-const renderTime = new Gauge({
-  name: 'page_render_time',
-  help: 'page_render_time_help',
-  labelNames: ['path'],
-})
+export const renderTime = metrics.renderTime
+export const requestTime = metrics.requestTime
+export const totalTime = metrics.totalTime
 
-const requestTime = new Gauge({
-  name: 'page_request_time',
-  help: 'page_request_time_help',
-  labelNames: ['path'],
-})
+export const initMetrics = (p: Partial<AnalyticsModuleParams>) => {
+  collectDefaultMetrics({
+    prefix: p.prefix,
+    register,
+  })
 
-const totalTime = new Gauge({
-  name: 'page_total_time',
-  help: 'page_total_time_help',
-  labelNames: ['path'],
-})
+  const prefix = p.prefix ?? ''
 
-export { renderTime, requestTime, totalTime }
+  metrics.renderTime = new Gauge({
+    name: `${prefix}page_render_time`,
+    help: 'Time took to render a page',
+    labelNames: ['path'],
+  })
+
+  metrics.requestTime = new Gauge({
+    name: `${prefix}page_request_time`,
+    help: 'Time took to process a request, before rendering page',
+    labelNames: ['path'],
+  })
+
+  metrics.totalTime = new Gauge({
+    name: `${prefix}page_total_time`,
+    help: 'Total time it took to complete a request',
+    labelNames: ['path'],
+  })
+}
+
