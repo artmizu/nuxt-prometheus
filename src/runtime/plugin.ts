@@ -7,11 +7,10 @@ import type { AnalyticsModuleState } from './type'
 import { calculateTime } from './utils'
 import { defineNuxtPlugin, useRouter, useRuntimeConfig } from '#app'
 
+
 export default defineNuxtPlugin((ctx) => {
   const params = useRuntimeConfig().public.prometheus
   const router = useRouter()
-
-  initMetrics(params)
 
   const path = router.currentRoute.value?.matched?.[0]?.path || 'empty'
   const name = router.currentRoute.value?.name || 'empty'

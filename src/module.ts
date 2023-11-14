@@ -1,5 +1,5 @@
 import { defu } from 'defu'
-import { addPlugin, addServerHandler, createResolver, defineNuxtModule } from '@nuxt/kit'
+import { addPlugin, addServerHandler, addServerPlugin, createResolver, defineNuxtModule } from '@nuxt/kit'
 import type { NuxtModule } from '@nuxt/schema'
 import { name, version } from '../package.json'
 import type { AnalyticsModuleParams } from './runtime/type'
@@ -52,6 +52,7 @@ const module: NuxtModule<Partial<AnalyticsModuleParams>> = defineNuxtModule<Part
       })
     }
 
+    addServerPlugin(resolve('./runtime/init-plugin'))
     addPlugin({ src: resolve('./runtime/plugin'), mode: 'server' })
   },
 })

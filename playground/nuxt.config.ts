@@ -5,4 +5,8 @@ export default defineNuxtConfig({
   modules: [
     MyModule,
   ],
+
+  prometheus: {
+    prefix: 'playground_',
+  },
 })
