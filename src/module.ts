@@ -52,7 +52,6 @@ const module: NuxtModule<Partial<AnalyticsModuleParams>> = defineNuxtModule<Part
       })
     }
 
-    addServerPlugin(resolve('./runtime/init-plugin'))
     addPlugin({ src: resolve('./runtime/plugin'), mode: 'server' })
   },
 })
