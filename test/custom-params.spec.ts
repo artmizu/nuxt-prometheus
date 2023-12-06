@@ -23,6 +23,6 @@ describe('custom module params test', async () => {
     await createPage('/')
     const page = await createPage('/p')
     const content = await page.innerText('body')
-    expect(content).toMatch(/^process_start_time_seconds\ \d+/gm)
+    expect(content).toMatch(/^playground_process_start_time_seconds\ \d+/gm)
   })
 })
