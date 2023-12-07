@@ -1,6 +1,6 @@
 import { BatchInterceptor } from '@mswjs/interceptors'
-import { XMLHttpRequestInterceptor } from '@mswjs/interceptors/lib/interceptors/XMLHttpRequest'
-import { ClientRequestInterceptor } from '@mswjs/interceptors/lib/interceptors/ClientRequest'
+import { XMLHttpRequestInterceptor } from '@mswjs/interceptors/XMLHttpRequest'
+import { ClientRequestInterceptor } from '@mswjs/interceptors/ClientRequest'
 import consola from 'consola'
 import { renderTime, requestTime, totalTime } from './registry'
 import type { AnalyticsModuleState } from './type'
@@ -41,7 +41,7 @@ export default defineNuxtPlugin((ctx) => {
   })
 
   interceptor.on('request', (req) => {
-    const url = new URL(req.url)
+    const url = new URL(req.request.url)
 
     /**
      * Exclude Nuxt requests to parts of the application, it's not about business-logic
@@ -50,17 +50,17 @@ export default defineNuxtPlugin((ctx) => {
     if (isNuxtRequest)
       return
 
-    state.requests[req.url] = {
+    state.requests[req.request.url] = {
       start: Date.now(),
       end: Date.now(),
     }
 
     if (params.verbose)
-      consola.info(`[nuxt-prometheus] request: ${req.url}, ${new Date().toISOString()}`)
+      consola.info(`[nuxt-prometheus] request: ${req.request.url}, ${new Date().toISOString()}`)
   })
 
-  interceptor.on('response', (_, res) => {
-    if (state.requests[res.url])
-      state.requests[res.url].end = Date.now()
+  interceptor.on('response', (res) => {
+    if (state.requests[res.request.url])
+      state.requests[res.request.url].end = Date.now()
   })
 })
