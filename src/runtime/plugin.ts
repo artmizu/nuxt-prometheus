@@ -2,12 +2,13 @@ import { BatchInterceptor } from '@mswjs/interceptors'
 import { XMLHttpRequestInterceptor } from '@mswjs/interceptors/XMLHttpRequest'
 import { ClientRequestInterceptor } from '@mswjs/interceptors/ClientRequest'
 import consola from 'consola'
+import type { NuxtApp } from 'nuxt/app'
 import { renderTime, requestTime, totalTime } from './registry'
 import type { AnalyticsModuleState } from './type'
 import { calculateTime } from './utils'
-import { defineNuxtPlugin, useRouter, useRuntimeConfig } from '#app'
+import { defineNuxtPlugin, useRouter, useRuntimeConfig } from 'nuxt/app'
 
-export default defineNuxtPlugin((ctx) => {
+export default defineNuxtPlugin((ctx: NuxtApp) => {
   const params = useRuntimeConfig().public.prometheus
   const router = useRouter()
   const path = router.currentRoute.value?.matched?.[0]?.path || 'empty'

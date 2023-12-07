@@ -9,13 +9,13 @@ describe('module tests', async () => {
 
   it('health page check', async () => {
     const page = await createPage('/health')
-    expect(await page.innerText('body')).toContain('ok')
+    expect(await page.textContent('body')).toContain('ok')
   })
 
   it('node metrics check', async () => {
     await createPage('/')
     const page = await createPage('/metrics')
-    const content = await page.innerText('body')
+    const content = await page.textContent('body')
     expect(content).toMatch(/^process_start_time_seconds\ \d+/gm)
   })
 
@@ -25,7 +25,7 @@ describe('module tests', async () => {
     await page.goto(`${ctx.url}/a`)
     await page.goto(`${ctx.url}/b`)
     await page.goto(`${ctx.url}/metrics`)
-    const content = await page.innerText('body')
+    const content = await page.textContent('body')
 
     expect(content).toMatch(/page_render_time\{path=\"index: \/\"}\ \d+/gm)
     expect(content).toMatch(/page_render_time\{path=\"a: \/a\"}\ \d+/gm)

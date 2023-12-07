@@ -15,6 +15,6 @@ describe('custom module params test', async () => {
 
   it('health page check', async () => {
     const page = await createPage('/health')
-    expect(await page.innerText('body')).toContain('404')
+    expect(await page.textContent('body')).toContain('404')
   })
 })

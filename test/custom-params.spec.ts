@@ -16,13 +16,13 @@ describe('custom module params test', async () => {
 
   it('health page check', async () => {
     const page = await createPage('/h')
-    expect(await page.innerText('body')).toContain('ok')
+    expect(await page.textContent('body')).toContain('ok')
   })
 
   it('node metrics check', async () => {
     await createPage('/')
     const page = await createPage('/p')
-    const content = await page.innerText('body')
+    const content = await page.textContent('body')
     expect(content).toMatch(/^process_start_time_seconds\ \d+/gm)
   })
 })
