@@ -1,6 +1,6 @@
 import type { BatchInterceptor, HttpRequestEventMap } from '@mswjs/interceptors'
-import { XMLHttpRequestInterceptor } from '@mswjs/interceptors/XMLHttpRequest'
-import { ClientRequestInterceptor } from '@mswjs/interceptors/ClientRequest'
+import type { XMLHttpRequestInterceptor } from '@mswjs/interceptors/XMLHttpRequest'
+import type { ClientRequestInterceptor } from '@mswjs/interceptors/ClientRequest'
 
 export interface AnalyticsModuleState {
   path: string
