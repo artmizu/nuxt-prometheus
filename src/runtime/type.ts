@@ -31,8 +31,15 @@ export interface AnalyticsModuleParams {
    */
   healthCheckPath: string
   /**
-   * Pormetheus exporter url path
+   * Prometheus exporter url path
    * @default '/metrics'
    */
   prometheusPath: string
+
+  /**
+   * An optional prefix for metric names.
+   *
+   * @default no prefix
+   */
+  prefix?: string
 }

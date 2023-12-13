@@ -16,7 +16,7 @@ describe('module tests', async () => {
     await createPage('/')
     const page = await createPage('/metrics')
     const content = await page.innerText('body')
-    expect(content).toMatch(/^process_start_time_seconds\ \d+/gm)
+    expect(content).toMatch(/^playground_process_start_time_seconds\ \d+/gm)
   })
 
   it('custom metrics check', async () => {
