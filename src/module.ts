@@ -1,11 +1,14 @@
 import { defu } from 'defu'
 import { addPlugin, addServerHandler, createResolver, defineNuxtModule } from '@nuxt/kit'
 import type { NuxtModule } from '@nuxt/schema'
-import { name, version } from '../package.json'
+import type { RuntimeConfig } from 'nuxt/schema'
 import type { AnalyticsModuleParams } from './runtime/type'
+import { name, version } from './../package.json'
 
-interface RuntimeConfig {
-  prometheus: Partial<AnalyticsModuleParams>
+declare module 'nuxt/schema' {
+  interface NuxtConfig {
+    prometheus: Partial<AnalyticsModuleParams>
+  }
 }
 
 export interface ModuleOptions extends AnalyticsModuleParams { }
@@ -30,10 +33,10 @@ const module: NuxtModule<Partial<AnalyticsModuleParams>> = defineNuxtModule<Part
   },
   async setup(options, nuxt) {
     const moduleOptions: Partial<AnalyticsModuleParams> = defu(
-      nuxt.options.runtimeConfig.public.prometheus as any, // TODO
+      nuxt.options.appConfig.prometheus as any, // TODO
       options,
     )
-    nuxt.options.runtimeConfig.public.prometheus = moduleOptions
+    nuxt.options.appConfig.prometheus = moduleOptions
 
     const { resolve } = createResolver(import.meta.url)
     nuxt.options.build.transpile.push(resolve('runtime'))

@@ -10,7 +10,7 @@ export const metrics = {
   totalTime: null as Gauge | null,
 }
 
-export const initMetrics = (p: Partial<AnalyticsModuleParams>) => {
+export function initMetrics(p: Partial<AnalyticsModuleParams>) {
   if (metrics.isInitialized)
     return
 
@@ -41,4 +41,3 @@ export const initMetrics = (p: Partial<AnalyticsModuleParams>) => {
 
   metrics.isInitialized = true
 }
-

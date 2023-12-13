@@ -4,14 +4,14 @@ import { ClientRequestInterceptor } from '@mswjs/interceptors/ClientRequest'
 import consola from 'consola'
 
 import type { NuxtApp } from 'nuxt/app'
-import { defineNuxtPlugin, useRouter, useRuntimeConfig } from 'nuxt/app'
-import { renderTime, requestTime, totalTime, initMetrics, metrics } from './registry'
+import { defineNuxtPlugin, useAppConfig, useRouter } from 'nuxt/app'
+import { initMetrics, metrics } from './registry'
 
-import type { AnalyticsModuleState } from './type'
+import type { AnalyticsModuleParams, AnalyticsModuleState } from './type'
 import { calculateTime } from './utils'
 
 export default defineNuxtPlugin((ctx: NuxtApp) => {
-  const params = useRuntimeConfig().public.prometheus
+  const params = useAppConfig().prometheus as Partial<AnalyticsModuleParams> // @todo Fix
   const router = useRouter()
 
   initMetrics(params)
