@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.1](https://github.com/artmizu/nuxt-prometheus/compare/v2.2.0...v2.2.1) (2023-12-13)
+
+
+### Bug Fixes
+
+* release ([502e1a2](https://github.com/artmizu/nuxt-prometheus/commit/502e1a2a6acca974d0710b1e0ae6c5e7e89ef533))
+
 ## [2.2.0](https://github.com/artmizu/nuxt-prometheus/compare/v2.1.5...v2.2.0) (2023-09-05)
 
 

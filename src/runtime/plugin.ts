@@ -2,15 +2,20 @@ import { BatchInterceptor } from '@mswjs/interceptors'
 import { XMLHttpRequestInterceptor } from '@mswjs/interceptors/XMLHttpRequest'
 import { ClientRequestInterceptor } from '@mswjs/interceptors/ClientRequest'
 import consola from 'consola'
+
 import type { NuxtApp } from 'nuxt/app'
 import { defineNuxtPlugin, useRouter, useRuntimeConfig } from 'nuxt/app'
-import { renderTime, requestTime, totalTime } from './registry'
+import { renderTime, requestTime, totalTime, initMetrics, metrics } from './registry'
+
 import type { AnalyticsModuleState } from './type'
 import { calculateTime } from './utils'
 
 export default defineNuxtPlugin((ctx: NuxtApp) => {
   const params = useRuntimeConfig().public.prometheus
   const router = useRouter()
+
+  initMetrics(params)
+
   const path = router.currentRoute.value?.matched?.[0]?.path || 'empty'
   const name = router.currentRoute.value?.name || 'empty'
   const interceptor = new BatchInterceptor({
@@ -31,9 +36,10 @@ export default defineNuxtPlugin((ctx: NuxtApp) => {
   ctx.hook('app:rendered', () => {
     state.interceptor?.dispose()
     const time = calculateTime(state)
-    renderTime.labels(state.path).set(time.render)
-    requestTime.labels(state.path).set(time.request)
-    totalTime.labels(state.path).set(time.total)
+
+    metrics.renderTime?.labels(state.path).set(time.render)
+    metrics.requestTime?.labels(state.path).set(time.request)
+    metrics.totalTime?.labels(state.path).set(time.total)
     if (params.verbose) {
       consola.info('[nuxt-prometheus] api request time:', time.request)
       consola.info('[nuxt-prometheus] render time:', time.render)
