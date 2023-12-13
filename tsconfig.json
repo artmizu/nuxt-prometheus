@@ -1,6 +1,8 @@
 {
-  "resolveJsonModule": true,
   "extends": "./playground/.nuxt/tsconfig.json",
+  "compilerOptions": {
+    "resolveJsonModule": true
+  },
   "include": [
     "./src",
     "./test",
