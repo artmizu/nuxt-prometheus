@@ -11,6 +11,7 @@
   },
   "exports": {
     ".": {
+      "types": "./dist/types.d.ts",
       "require": "./dist/module.cjs",
       "import": "./dist/module.mjs"
     }
@@ -24,19 +25,20 @@
     "node": "<=17"
   },
   "scripts": {
-    "prepack": "nuxt-module-build",
     "dev": "nuxi dev playground",
     "dev:build": "nuxi build playground",
-    "dev:prepare": "nuxt-module-build --stub && nuxi prepare playground",
-    "test": "vitest",
-    "test:type": "vitest typecheck",
+    "dev:prepare": "nuxt-module-build build --stub && nuxt-module-build prepare && nuxi prepare playground",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit",
-    "prepare": "husky install"
+    "prepack": "nuxt-module-build build",
+    "prepare": "husky install",
+    "test": "vitest run",
+    "test:type": "vitest run --typecheck.only --typecheck.tsconfig=./test/tsconfig.json",
+    "test:watch": "vitest watch",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@mswjs/interceptors": "^0.19.2",
-    "@nuxt/kit": "^3.6.5",
+    "@nuxt/kit": "^3.9.0",
     "consola": "^3.2.3",
     "defu": "^6.1.2",
     "h3": "^1.7.1",
@@ -44,18 +46,18 @@
   },
   "devDependencies": {
     "@antfu/eslint-config": "^0.30.1",
-    "@nuxt/module-builder": "^0.2.1",
-    "@nuxt/schema": "^3.6.5",
-    "@nuxt/test-utils": "3.0.0",
+    "@nuxt/module-builder": "^0.5.5",
+    "@nuxt/schema": "^3.9.0",
+    "@nuxt/test-utils": "3.9.0",
     "@types/node": "^18.11.15",
     "eslint": "^8.29.0",
     "husky": "^8.0.2",
-    "nuxt": "^3.6.5",
+    "nuxt": "^3.9.0",
     "playwright": "^1.28.1",
-    "typescript": "4.8.4",
-    "vitest": "^0.34.3",
-    "vue": "^3.3.4",
-    "vue-router": "^4.2.4"
+    "typescript": "5.3.3",
+    "vitest": "^0.34.6",
+    "vue": "^3.4.3",
+    "vue-router": "^4.2.5"
   },
   "volta": {
     "node": "16.20.2",

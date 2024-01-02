@@ -75,7 +75,7 @@ jobs:
         run: pnpm dev:prepare
 
       - name: Run tests
-        run: pnpm vitest run
+        run: pnpm test
 
       - name: Run type tests
-        run: pnpm vitest typecheck --run
+        run: pnpm test:type

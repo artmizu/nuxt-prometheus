@@ -1,6 +1,6 @@
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
-import { createPage, setup, useTestContext } from '@nuxt/test-utils'
+import { createPage, setup, useTestContext } from '@nuxt/test-utils/e2e'
 
 describe('module tests', async () => {
   await setup({

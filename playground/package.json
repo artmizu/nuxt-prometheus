@@ -1,4 +1,13 @@
 {
-  "name": "nuxt-yandex-metrika-playground-nuxt-2",
-  "private": true
+  "name": "nuxt-prometheus-playground",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "nuxi dev",
+    "build": "nuxi build",
+    "generate": "nuxi generate"
+  },
+  "devDependencies": {
+    "nuxt": "latest"
+  }
 }
