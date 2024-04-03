@@ -20,14 +20,7 @@ Actually package is worked, but requests time coudn't be calculated due to limit
 ## Installation
 Install package via a package manager: 
 ```bash
-# using npm
-npm install @artmizu/nuxt-prometheus
-
-# using yarn
-yarn add @artmizu/nuxt-prometheus
-
-# using pnpm
-pnpm add @artmizu/nuxt-prometheus
+npx nuxi@latest module add prometheus
 ```
 
 Add it to a modules section of your nuxt config:
