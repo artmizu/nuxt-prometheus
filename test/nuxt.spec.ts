@@ -1,6 +1,6 @@
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
-import { createPage, setup, useTestContext } from '@nuxt/test-utils'
+import { createPage, setup, useTestContext } from '@nuxt/test-utils/e2e'
 
 describe('module tests', async () => {
   await setup({
@@ -8,13 +8,18 @@ describe('module tests', async () => {
   })
 
   it('health page check', async () => {
-    const page = await createPage('/health')
+    const ctx = useTestContext()
+    const page = await createPage('/')
+    await page.goto(`${ctx.url}/health`)
+
     expect(await page.innerText('body')).toContain('ok')
   })
 
   it('node metrics check', async () => {
-    await createPage('/')
-    const page = await createPage('/metrics')
+    const ctx = useTestContext()
+    const page = await createPage('/')
+    await page.goto(`${ctx.url}/metrics`)
+
     const content = await page.innerText('body')
     expect(content).toMatch(/^playground_process_start_time_seconds\ \d+/gm)
   })
