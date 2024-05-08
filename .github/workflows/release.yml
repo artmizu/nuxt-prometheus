@@ -16,12 +16,14 @@ jobs:
         if: ${{ steps.release.outputs.release_created }}
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v2
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8
         if: ${{ steps.release.outputs.release_created }}
 
       - uses: actions/setup-node@v3
         with:
-          node-version: 16.x
+          node-version: 20.x
           registry-url: 'https://registry.npmjs.org'
           cache: pnpm
         if: ${{ steps.release.outputs.release_created }}
