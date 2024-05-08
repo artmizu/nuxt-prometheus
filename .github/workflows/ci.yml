@@ -17,11 +17,11 @@ jobs:
       - name: Set node
         uses: actions/setup-node@v3
         with:
-          node-version: 16.x
+          node-version: 20.x
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install --shamefully-hoist
+        run: pnpm install
 
       - name: Prepare is needed, because it generate types
         run: pnpm dev:prepare
@@ -40,11 +40,11 @@ jobs:
       - name: Set node
         uses: actions/setup-node@v3
         with:
-          node-version: 16.x
+          node-version: 20.x
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install --shamefully-hoist
+        run: pnpm install
 
       - name: Prepare is needed, because it generate types
         run: pnpm dev:prepare
@@ -63,13 +63,12 @@ jobs:
       - name: Set node
         uses: actions/setup-node@v3
         with:
-          node-version: 16.x
+          node-version: 20.x
           cache: pnpm
 
       - name: Install dependencies
         run: |
-          pnpm install --shamefully-hoist
-          npx playwright install
+          pnpm install
 
       - name: Prepare is needed, because it generate types
         run: pnpm dev:prepare
