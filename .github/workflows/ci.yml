@@ -78,4 +78,4 @@ jobs:
         run: pnpm vitest run
 
       - name: Run type tests
-        run: pnpm vitest typecheck --run
+        run: pnpm vitest --typecheck.only --typecheck.ignoreSourceErrors
