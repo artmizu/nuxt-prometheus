@@ -2,7 +2,7 @@
   "name": "@artmizu/nuxt-prometheus",
   "type": "module",
   "version": "2.2.1",
-  "packageManager": "pnpm@7.16.1",
+  "packageManager": "pnpm@8.15.3",
   "description": "Allows you to better understand what's going on with your application and how to optimize performance and other things in production",
   "license": "MIT",
   "repository": "artmizu/nuxt-prometheus",
