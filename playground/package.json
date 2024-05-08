@@ -2,7 +2,7 @@
   "name": "nuxt-yandex-metrika-playground-nuxt-2",
   "private": true,
   "dependencies": {
-    "@artmizu/nuxt-prometheus": "workspace:*",
+    "@artmizu/nuxt-prometheus": "workspace:^",
     "nuxt": "latest"
   },
   "devDependencies": {
