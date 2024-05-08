@@ -76,7 +76,7 @@ importers:
   playground:
     dependencies:
       '@artmizu/nuxt-prometheus':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:..
       nuxt:
         specifier: latest
