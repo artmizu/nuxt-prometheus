@@ -5,8 +5,8 @@
 # 📊 Prometheus integration for Nuxt 3
 Allows you to better understand what's going on with your application and how to optimize performance and other things in production. **Nuxt 2** users can use [this version](https://github.com/artmizu/analytics-nuxt-2).
 
-## Package support Node <= 17.x, for Node >= 18.x users
-Actually package is worked, but requests time coudn't be calculated due to limitation of the [@mswjs/interceptors](https://github.com/mswjs/interceptors/pull/283). When it is updated, I will update this package.
+## Limitations
+Due to this [issue in ofetch package](https://github.com/unjs/ofetch/issues/295) @artmizu/nuxt-prometheus cannot detect network requests which take place through useFetch or $fetch, because they both use ofetch inside. So on the /metrics page, you don't see any request time related to ofetch. Future investigation will take place [here](https://github.com/artmizu/nuxt-prometheus/issues/42).
 
 ## Features
 * Default NodeJS metrics exported through the prometheus middleware
@@ -20,6 +20,9 @@ Actually package is worked, but requests time coudn't be calculated due to limit
 ## Installation
 Install package via a package manager: 
 ```bash
+# using nuxi, it automatically appends the module in your nuxt.config
+npx nuxi@latest module add prometheus
+
 # using npm
 npm install @artmizu/nuxt-prometheus
 
