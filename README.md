@@ -63,3 +63,8 @@ You can pass it through module options and the nuxt config property `prometheus`
 - Type: `string`
 - Default: `/metrics`
 - Description: Prometheus exporter url path
+
+### prefix
+- Type: `string`
+- Default: no prefix
+- Description: An optional prefix for metric names
