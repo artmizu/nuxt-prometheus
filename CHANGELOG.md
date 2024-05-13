@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.1](https://github.com/artmizu/nuxt-prometheus/compare/v2.3.0...v2.3.1) (2024-05-13)
+
+
+### Bug Fixes
+
+* lockfile ([b7a77bc](https://github.com/artmizu/nuxt-prometheus/commit/b7a77bc43a0e2f184e0d34a3d32917a10f920718))
+
 ## [2.3.0](https://github.com/artmizu/nuxt-prometheus/compare/v2.2.1...v2.3.0) (2024-05-13)
 
 
