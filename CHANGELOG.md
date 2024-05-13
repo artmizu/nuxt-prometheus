@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.3.0](https://github.com/artmizu/nuxt-prometheus/compare/v2.2.1...v2.3.0) (2024-05-13)
+
+
+### Features
+
+* Node 20+ support, nuxt update ([5fbd06c](https://github.com/artmizu/nuxt-prometheus/commit/5fbd06ca998c09ad2779a47112ef03da02c62154))
+
+
+### Bug Fixes
+
+* release ([e47f8e1](https://github.com/artmizu/nuxt-prometheus/commit/e47f8e153738b53cc0516747724b27d96e94df05))
+
 ## [2.2.1](https://github.com/artmizu/nuxt-prometheus/compare/v2.2.0...v2.2.1) (2023-12-13)
 
 
