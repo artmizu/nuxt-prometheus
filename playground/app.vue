@@ -9,6 +9,9 @@
     <NuxtLink to="/b">
       To B
     </NuxtLink>
+    <NuxtLink to="/c">
+      To C
+    </NuxtLink>
     <NuxtPage />
   </div>
 </template>

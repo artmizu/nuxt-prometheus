@@ -44,4 +44,25 @@ describe('module tests', async () => {
     expect(content).toMatch(/page_total_time\{path=\"a: \/a\"}\ \d+/gm)
     expect(content).toMatch(/page_total_time\{path=\"b: \/b\"}\ \d+/gm)
   })
+
+  // TODO
+  // it('check the useFetch measuring time on /b route', async () => {
+  //   const ctx = useTestContext()
+  //   const page = await createPage('/')
+  //   await page.goto(`${ctx.url}/b`)
+  //   await page.goto(`${ctx.url}/metrics`)
+  //   const content = await page.innerText('body')
+
+  //   expect(content).toMatch(/page_request_time\{path=\"b: \/b\"}\ [1-9]+/gm)
+  // })
+
+  it('check the native fetch measuring time on /c route', async () => {
+    const ctx = useTestContext()
+    const page = await createPage('/')
+    await page.goto(`${ctx.url}/c`)
+    await page.goto(`${ctx.url}/metrics`)
+    const content = await page.innerText('body')
+
+    expect(content).toMatch(/page_request_time\{path=\"c: \/c\"}\ [1-9]+/gm)
+  })
 })
