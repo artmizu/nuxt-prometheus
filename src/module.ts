@@ -16,7 +16,7 @@ const module: NuxtModule<Partial<AnalyticsModuleParams>> = defineNuxtModule<Part
     version,
     configKey: 'prometheus',
     compatibility: {
-      nuxt: '^3.0.0 || ^2.16.0',
+      nuxt: '>=3.0.0 || ^2.16.0',
       bridge: true,
     },
   },
