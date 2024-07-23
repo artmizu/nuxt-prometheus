@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.4.0](https://github.com/artmizu/nuxt-prometheus/compare/v2.3.1...v2.4.0) (2024-07-23)
+
+
+### Features
+
+* Disable requests measuring time by default due to https://github.com/artmizu/nuxt-prometheus/issues/42 ([6fefa56](https://github.com/artmizu/nuxt-prometheus/commit/6fefa56091863bb22ce8a8a2dfa687863d213902))
+
 ## [2.3.1](https://github.com/artmizu/nuxt-prometheus/compare/v2.3.0...v2.3.1) (2024-05-13)
 
 
