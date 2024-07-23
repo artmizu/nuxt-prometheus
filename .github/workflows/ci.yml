@@ -69,7 +69,7 @@ jobs:
       - name: Install dependencies
         run: |
           pnpm install
-          npx playwright install
+          pnpm exec playwright-core install
 
       - name: Prepare is needed, because it generate types
         run: pnpm dev:prepare
