@@ -16,20 +16,49 @@ export default defineNuxtPlugin((ctx) => {
 
   const path = router.currentRoute.value?.matched?.[0]?.path || 'empty'
   const name = router.currentRoute.value?.name || 'empty'
-  const interceptor = new BatchInterceptor({
-    name: 'nuxt-prometheus',
-    interceptors: [
-      new XMLHttpRequestInterceptor(),
-      new ClientRequestInterceptor(),
-      new FetchInterceptor(),
-    ],
-  })
-  interceptor.apply()
+
   const state: AnalyticsModuleState = {
     start: Date.now(),
     path: `${String(name)}: ${path}`,
     requests: {},
-    interceptor,
+    interceptor: null,
+  }
+
+  if (params.enableRequestTimeMeasure) {
+    state.interceptor = new BatchInterceptor({
+      name: 'nuxt-prometheus',
+      interceptors: [
+        new XMLHttpRequestInterceptor(),
+        new ClientRequestInterceptor(),
+        new FetchInterceptor(),
+      ],
+    })
+
+    state.interceptor.apply()
+
+    state.interceptor.on('request', (req) => {
+      const url = new URL(req.request.url)
+
+      /**
+       * Exclude Nuxt requests to parts of the application, it's not about business-logic
+       */
+      const isNuxtRequest = /^\/__/.test(url.pathname)
+      if (isNuxtRequest)
+        return
+
+      state.requests[req.request.url] = {
+        start: Date.now(),
+        end: Date.now(),
+      }
+
+      if (params.verbose)
+        consola.info(`[nuxt-prometheus] request: ${req.request.url}, ${new Date().toISOString()}`)
+    })
+
+    state.interceptor.on('response', ({ response }) => {
+      if (state.requests[response.url])
+        state.requests[response.url].end = Date.now()
+    })
   }
 
   ctx.hook('app:rendered', () => {
@@ -44,29 +73,5 @@ export default defineNuxtPlugin((ctx) => {
       consola.info('[nuxt-prometheus] render time:', time.render)
       consola.info('[nuxt-prometheus] total time:', time.total)
     }
-  })
-
-  interceptor.on('request', (req) => {
-    const url = new URL(req.request.url)
-
-    /**
-     * Exclude Nuxt requests to parts of the application, it's not about business-logic
-     */
-    const isNuxtRequest = /^\/__/.test(url.pathname)
-    if (isNuxtRequest)
-      return
-
-    state.requests[req.request.url] = {
-      start: Date.now(),
-      end: Date.now(),
-    }
-
-    if (params.verbose)
-      consola.info(`[nuxt-prometheus] request: ${req.request.url}, ${new Date().toISOString()}`)
-  })
-
-  interceptor.on('response', ({ response }) => {
-    if (state.requests[response.url])
-      state.requests[response.url].end = Date.now()
   })
 })

@@ -12,7 +12,7 @@ export interface AnalyticsModuleState {
       end: number
     }
   }
-  interceptor?: BatchInterceptor<(ClientRequestInterceptor | XMLHttpRequestInterceptor | FetchInterceptor)[], HttpRequestEventMap>
+  interceptor: BatchInterceptor<(ClientRequestInterceptor | XMLHttpRequestInterceptor | FetchInterceptor)[], HttpRequestEventMap> | null
 }
 
 export interface AnalyticsModuleParams {
@@ -43,4 +43,9 @@ export interface AnalyticsModuleParams {
    * @default no prefix
    */
   prefix?: string
+  /**
+   * Temporarily don't recommend to turn it on,
+   * due to https://github.com/artmizu/nuxt-prometheus/issues/42
+   */
+  enableRequestTimeMeasure?: boolean
 }

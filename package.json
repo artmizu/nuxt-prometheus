@@ -33,7 +33,7 @@
     "dev": "nuxi dev playground",
     "dev:build": "nuxi build playground",
     "dev:prepare": "nuxt-module-build prepare && nuxt-module-build build && nuxi prepare playground",
-    "test": "vitest",
+    "test": "yarn playwright-core install && vitest",
     "test:type": "vitest --typecheck.only --typecheck.ignoreSourceErrors",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",

@@ -6,4 +6,6 @@ export default defineNuxtConfig({
   prometheus: {
     prefix: 'playground_',
   },
+
+  compatibilityDate: '2024-07-23',
 })
