@@ -5,6 +5,11 @@ import { createPage, setup, useTestContext } from '@nuxt/test-utils/e2e'
 describe('module tests', async () => {
   await setup({
     rootDir: fileURLToPath(new URL('../playground', import.meta.url)),
+    nuxtConfig: {
+      prometheus: {
+        enableRequestTimeMeasure: true,
+      },
+    },
   })
 
   it('health page check', async () => {
@@ -45,7 +50,7 @@ describe('module tests', async () => {
     expect(content).toMatch(/page_total_time\{path=\"b: \/b\"}\ \d+/gm)
   })
 
-  // TODO
+  // TODO https://github.com/artmizu/nuxt-prometheus/issues/42
   // it('check the useFetch measuring time on /b route', async () => {
   //   const ctx = useTestContext()
   //   const page = await createPage('/')

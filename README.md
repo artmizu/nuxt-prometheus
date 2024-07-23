@@ -8,6 +8,8 @@ Allows you to better understand what's going on with your application and how to
 ## Limitations
 Due to this [issue in ofetch package](https://github.com/unjs/ofetch/issues/295) @artmizu/nuxt-prometheus cannot detect network requests which take place through useFetch or $fetch, because they both use ofetch inside. So on the /metrics page, you don't see any request time related to ofetch. Future investigation will take place [here](https://github.com/artmizu/nuxt-prometheus/issues/42).
 
+For now request measurment time is disabled by default. 
+
 ## Features
 * Default NodeJS metrics exported through the prometheus middleware
 * Custom metrics about pages render time and external request consumption time
@@ -71,3 +73,8 @@ You can pass it through module options and the nuxt config property `prometheus`
 - Type: `string`
 - Default: no prefix
 - Description: An optional prefix for metric names
+
+### enableRequestTimeMeasure
+- Type: `boolean`
+- Default: `false`
+- Description: Temporarily don't recommend to turn it on due to https://github.com/artmizu/nuxt-prometheus/issues/42
