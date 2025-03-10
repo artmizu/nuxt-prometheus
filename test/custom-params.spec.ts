@@ -16,7 +16,7 @@ describe('custom module params test', async () => {
   it('health page check', async () => {
     const ctx = useTestContext()
     const page = await createPage('/')
-    await page.goto(`${ctx.url}/h`)
+    await page.goto(`${ctx.url}h`)
 
     expect(await page.innerText('body')).toContain('ok')
   })
@@ -24,7 +24,7 @@ describe('custom module params test', async () => {
   it('node metrics check', async () => {
     const ctx = useTestContext()
     const page = await createPage('/')
-    await page.goto(`${ctx.url}/p`)
+    await page.goto(`${ctx.url}p`)
 
     const content = await page.innerText('body')
     expect(content).toMatch(/^playground_process_start_time_seconds\ \d+/gm)

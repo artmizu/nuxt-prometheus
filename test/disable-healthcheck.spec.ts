@@ -15,7 +15,7 @@ describe('custom module params test', async () => {
   it('health page check', async () => {
     const ctx = useTestContext()
     const page = await createPage('/')
-    await page.goto(`${ctx.url}/health`)
+    await page.goto(`${ctx.url}health`)
 
     expect(await page.innerText('body')).toContain('404')
   })

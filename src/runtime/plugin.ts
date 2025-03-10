@@ -24,42 +24,40 @@ export default defineNuxtPlugin((ctx) => {
     interceptor: null,
   }
 
-  if (params.enableRequestTimeMeasure) {
-    state.interceptor = new BatchInterceptor({
-      name: 'nuxt-prometheus',
-      interceptors: [
-        new XMLHttpRequestInterceptor(),
-        new ClientRequestInterceptor(),
-        new FetchInterceptor(),
-      ],
-    })
+  state.interceptor = new BatchInterceptor({
+    name: 'nuxt-prometheus',
+    interceptors: [
+      new XMLHttpRequestInterceptor(),
+      new ClientRequestInterceptor(),
+      new FetchInterceptor(),
+    ],
+  })
 
-    state.interceptor.apply()
+  state.interceptor.apply()
 
-    state.interceptor.on('request', (req) => {
-      const url = new URL(req.request.url)
+  state.interceptor.on('request', (req) => {
+    const url = new URL(req.request.url)
 
-      /**
-       * Exclude Nuxt requests to parts of the application, it's not about business-logic
-       */
-      const isNuxtRequest = /^\/__/.test(url.pathname)
-      if (isNuxtRequest)
-        return
+    /**
+     * Exclude Nuxt requests to parts of the application, it's not about business-logic
+     */
+    const isNuxtRequest = /^\/__/.test(url.pathname)
+    if (isNuxtRequest)
+      return
 
-      state.requests[req.request.url] = {
-        start: Date.now(),
-        end: Date.now(),
-      }
+    state.requests[req.request.url] = {
+      start: Date.now(),
+      end: Date.now(),
+    }
 
-      if (params.verbose)
-        consola.info(`[nuxt-prometheus] request: ${req.request.url}, ${new Date().toISOString()}`)
-    })
+    if (params.verbose)
+      consola.info(`[nuxt-prometheus] request: ${req.request.url}, ${new Date().toISOString()}`)
+  })
 
-    state.interceptor.on('response', ({ response }) => {
-      if (state.requests[response.url])
-        state.requests[response.url].end = Date.now()
-    })
-  }
+  state.interceptor.on('response', ({ response }) => {
+    if (state.requests[response.url])
+      state.requests[response.url].end = Date.now()
+  })
 
   ctx.hook('app:rendered', () => {
     state.interceptor?.dispose()
