@@ -73,8 +73,3 @@ You can pass it through module options and the nuxt config property `prometheus`
 - Type: `string`
 - Default: no prefix
 - Description: An optional prefix for metric names
-
-### enableRequestTimeMeasure
-- Type: `boolean`
-- Default: `false`
-- Description: Temporarily don't recommend to turn it on due to https://github.com/artmizu/nuxt-prometheus/issues/42
