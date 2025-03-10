@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.4.1](https://github.com/artmizu/nuxt-prometheus/compare/v2.4.0...v2.4.1) (2025-03-10)
+
+
+### Bug Fixes
+
+* requests time measure & deps update ([6cedcd7](https://github.com/artmizu/nuxt-prometheus/commit/6cedcd7e30ae25032b41a52302c417124ae0bcbb))
+
 ## [2.4.0](https://github.com/artmizu/nuxt-prometheus/compare/v2.3.1...v2.4.0) (2024-07-23)
 
 
