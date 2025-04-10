@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.4.2](https://github.com/artmizu/nuxt-prometheus/compare/v2.4.1...v2.4.2) (2025-04-10)
+
+
+### Bug Fixes
+
+* fix for «Failed to Patch the 'fetch' Module: Already Patched», also change the strategy how interceptor are applying ([7f651f0](https://github.com/artmizu/nuxt-prometheus/commit/7f651f083203ed7b969f552829df3c96efa8717d))
+
 ## [2.4.1](https://github.com/artmizu/nuxt-prometheus/compare/v2.4.0...v2.4.1) (2025-03-10)
 
 
