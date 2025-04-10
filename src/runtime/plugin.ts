@@ -70,6 +70,11 @@ export default defineNuxtPlugin((ctx) => {
     metrics.renderTime?.labels(state.path).set(time.render)
     metrics.requestTime?.labels(state.path).set(time.request)
     metrics.totalTime?.labels(state.path).set(time.total)
+
+    metrics.renderTimeSummary?.labels(state.path).observe(time.render)
+    metrics.requestTimeSummary?.labels(state.path).observe(time.request)
+    metrics.totalTimeSummary?.labels(state.path).observe(time.total)
+
     if (params.verbose) {
       consola.info('[nuxt-prometheus] api request time:', time.request)
       consola.info('[nuxt-prometheus] render time:', time.render)
