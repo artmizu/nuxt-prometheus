@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.5.0](https://github.com/artmizu/nuxt-prometheus/compare/v2.4.2...v2.5.0) (2025-04-10)
+
+
+### Features
+
+* Additional metrics collection with Summary type, allows to see more precise data in additional percentiles ([8dd735d](https://github.com/artmizu/nuxt-prometheus/commit/8dd735de1b6f4ba1b8ea9517c4c7ffa56964ed89))
+
 ## [2.4.2](https://github.com/artmizu/nuxt-prometheus/compare/v2.4.1...v2.4.2) (2025-04-10)
 
 
