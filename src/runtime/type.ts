@@ -1,8 +1,3 @@
-import type { BatchInterceptor, HttpRequestEventMap } from '@mswjs/interceptors'
-import type { ClientRequestInterceptor } from '@mswjs/interceptors/ClientRequest'
-import type { XMLHttpRequestInterceptor } from '@mswjs/interceptors/XMLHttpRequest'
-import type { FetchInterceptor } from '@mswjs/interceptors/fetch'
-
 export interface AnalyticsModuleState {
   path: string
   start: number
@@ -12,7 +7,6 @@ export interface AnalyticsModuleState {
       end: number
     }
   }
-  interceptor: BatchInterceptor<(ClientRequestInterceptor | XMLHttpRequestInterceptor | FetchInterceptor)[], HttpRequestEventMap> | null
 }
 
 export interface AnalyticsModuleParams {
