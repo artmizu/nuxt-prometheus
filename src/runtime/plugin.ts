@@ -8,6 +8,17 @@ import type { AnalyticsModuleState } from './type'
 import { calculateTime } from './utils'
 import { defineNuxtPlugin, useRouter, useRuntimeConfig } from '#app'
 
+const interceptor = new BatchInterceptor({
+  name: 'nuxt-prometheus',
+  interceptors: [
+    new XMLHttpRequestInterceptor(),
+    new ClientRequestInterceptor(),
+    new FetchInterceptor(),
+  ],
+})
+
+interceptor.apply()
+
 export default defineNuxtPlugin((ctx) => {
   const params = useRuntimeConfig().public.prometheus
   const router = useRouter()
@@ -21,22 +32,10 @@ export default defineNuxtPlugin((ctx) => {
     start: Date.now(),
     path: `${String(name)}: ${path}`,
     requests: {},
-    interceptor: null,
   }
 
-  state.interceptor = new BatchInterceptor({
-    name: 'nuxt-prometheus',
-    interceptors: [
-      new XMLHttpRequestInterceptor(),
-      new ClientRequestInterceptor(),
-      new FetchInterceptor(),
-    ],
-  })
-
-  state.interceptor.apply()
-
-  state.interceptor.on('request', (req) => {
-    const url = new URL(req.request.url)
+  function onRequest({ request }: { request: Request }) {
+    const url = new URL(request.url)
 
     /**
      * Exclude Nuxt requests to parts of the application, it's not about business-logic
@@ -45,22 +44,27 @@ export default defineNuxtPlugin((ctx) => {
     if (isNuxtRequest)
       return
 
-    state.requests[req.request.url] = {
+    state.requests[request.url] = {
       start: Date.now(),
       end: Date.now(),
     }
 
     if (params.verbose)
-      consola.info(`[nuxt-prometheus] request: ${req.request.url}, ${new Date().toISOString()}`)
-  })
+      consola.info(`[nuxt-prometheus] request: ${request.url}, ${new Date().toISOString()}`)
+  }
 
-  state.interceptor.on('response', ({ response }) => {
+  function onResponse({ response }: { response: Response }) {
     if (state.requests[response.url])
       state.requests[response.url].end = Date.now()
-  })
+  }
+
+  interceptor.on('request', onRequest)
+  interceptor.on('response', onResponse)
 
   ctx.hook('app:rendered', () => {
-    state.interceptor?.dispose()
+    interceptor.off('request', onRequest)
+    interceptor.off('response', onResponse)
+
     const time = calculateTime(state)
 
     metrics.renderTime?.labels(state.path).set(time.render)

@@ -30,7 +30,6 @@ it('calculateTime check', () => {
         end: 410,
       },
     },
-    interceptor: null,
   })
 
   expect(time).toEqual({ request: 310, render: 190, total: 500 })

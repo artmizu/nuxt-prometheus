@@ -30,11 +30,11 @@
   ],
   "scripts": {
     "prepack": "nuxt-module-build build",
-    "dev": "nuxi dev playground --inspect",
+    "dev": "nuxi dev playground --inspect --host",
     "dev:build": "nuxi build playground",
     "dev:prepare": "nuxt-module-build prepare && nuxt-module-build build && nuxi prepare playground",
-    "test": "pnpm exec playwright-core install && vitest",
-    "test:type": "vitest --typecheck.only --typecheck.ignoreSourceErrors",
+    "test": "pnpm exec playwright-core install && vitest --dir ./test",
+    "test:type": "vitest --typecheck.only --typecheck.ignoreSourceErrors --dir ./test",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "prepare": "husky"
