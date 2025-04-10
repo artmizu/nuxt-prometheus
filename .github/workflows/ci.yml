@@ -75,7 +75,7 @@ jobs:
         run: pnpm dev:prepare
 
       - name: Run tests
-        run: pnpm vitest run
+        run: pnpm vitest run --dir ./test
 
       - name: Run type tests
-        run: pnpm vitest --typecheck.only --typecheck.ignoreSourceErrors
+        run: pnpm vitest --dir ./test --typecheck.only --typecheck.ignoreSourceErrors
