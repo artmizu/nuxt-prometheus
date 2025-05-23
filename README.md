@@ -1,6 +1,6 @@
 ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/artmizu/nuxt-prometheus/release.yml?branch=main)
 
-![Cover](https://raw.githubusercontent.com/artmizu/nuxt-prometheus/main/.github/cover.jpg) 
+![Cover](https://raw.githubusercontent.com/artmizu/nuxt-prometheus/main/.github/cover.jpg)
 
 # 📊 Prometheus integration for Nuxt 3
 Allows you to better understand what's going on with your application and how to optimize performance and other things in production. **Nuxt 2** users can use [this version](https://github.com/artmizu/analytics-nuxt-2).
@@ -15,7 +15,7 @@ Allows you to better understand what's going on with your application and how to
 * `/health` - health check
 
 ## Installation
-Install package via a package manager: 
+Install package via a package manager:
 ```bash
 # using nuxi, it automatically appends the module in your nuxt.config
 npx nuxi@latest module add prometheus
@@ -43,6 +43,11 @@ Once the metrics have been collected by Prometheus, you will want to review them
 
 ## Options
 You can pass it through module options and the nuxt config property `prometheus`.
+
+### enabled
+- Type: `boolean`
+- Default: `true`
+- Description: Enables or disables Prometheus integration at runtime
 
 ### verbose
 - Type: `boolean`

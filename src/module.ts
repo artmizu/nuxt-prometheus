@@ -21,6 +21,7 @@ const module: NuxtModule<Partial<AnalyticsModuleParams>> = defineNuxtModule<Part
     },
   },
   defaults: {
+    enabled: true,
     verbose: true,
     healthCheck: true,
     prometheusPath: '/metrics',
