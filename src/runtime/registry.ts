@@ -1,5 +1,18 @@
+import { BatchInterceptor, InterceptorReadyState } from '@mswjs/interceptors'
+import { ClientRequestInterceptor } from '@mswjs/interceptors/ClientRequest'
+import { XMLHttpRequestInterceptor } from '@mswjs/interceptors/XMLHttpRequest'
+import { FetchInterceptor } from '@mswjs/interceptors/fetch'
 import { Gauge, Summary, collectDefaultMetrics, register } from 'prom-client'
 import type { AnalyticsModuleParams } from './type'
+
+export const interceptor = new BatchInterceptor({
+  name: 'nuxt-prometheus',
+  interceptors: [
+    new XMLHttpRequestInterceptor(),
+    new ClientRequestInterceptor(),
+    new FetchInterceptor(),
+  ],
+})
 
 export const metrics = {
   /** If `true`, metrics was initialized with `initMetrics` */
@@ -14,6 +27,12 @@ export const metrics = {
   renderTimeSummary: null as Summary | null,
   requestTimeSummary: null as Summary | null,
   totalTimeSummary: null as Summary | null,
+}
+
+export const initInterceptor = (p: Partial<AnalyticsModuleParams>) => {
+  if (!p.enabled || interceptor.readyState !== InterceptorReadyState.INACTIVE) return
+
+  interceptor.apply()
 }
 
 export const initMetrics = (p: Partial<AnalyticsModuleParams>) => {
@@ -65,4 +84,3 @@ export const initMetrics = (p: Partial<AnalyticsModuleParams>) => {
 
   metrics.isInitialized = true
 }
-

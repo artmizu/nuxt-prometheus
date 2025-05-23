@@ -11,6 +11,11 @@ export interface AnalyticsModuleState {
 
 export interface AnalyticsModuleParams {
   /**
+   * Enables or disables Prometheus integration at runtime
+   * @default true
+   */
+  enabled: boolean
+  /**
    * stdout logs about external requests and render time of the page
    * @default true
    */
