@@ -37,7 +37,7 @@
     "test:type": "vitest --typecheck.only --typecheck.ignoreSourceErrors",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "prepare": "husky install"
+    "prepare": "husky install && nuxt-module-build prepare && echo 'Already prepared'"
   },
   "dependencies": {
     "@mswjs/interceptors": "^0.28.4",

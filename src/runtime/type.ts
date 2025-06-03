@@ -48,4 +48,6 @@ export interface AnalyticsModuleParams {
    * due to https://github.com/artmizu/nuxt-prometheus/issues/42
    */
   enableRequestTimeMeasure?: boolean
+
+  clusterPort?: number
 }

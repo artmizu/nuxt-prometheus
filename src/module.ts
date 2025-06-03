@@ -1,5 +1,5 @@
 import { defu } from 'defu'
-import { addPlugin, addServerHandler, createResolver, defineNuxtModule } from '@nuxt/kit'
+import { addPlugin, addServerHandler, addServerPlugin, createResolver, defineNuxtModule } from '@nuxt/kit'
 import type { NuxtModule } from '@nuxt/schema'
 import { name, version } from '../package.json'
 import type { AnalyticsModuleParams } from './runtime/type'
@@ -26,6 +26,7 @@ const module: NuxtModule<Partial<AnalyticsModuleParams>> = defineNuxtModule<Part
     prometheusPath: '/metrics',
     healthCheckPath: '/health',
     enableRequestTimeMeasure: false,
+    clusterPort: 9100,
   },
   async setup(options, nuxt) {
     const moduleOptions = defu(
@@ -52,6 +53,13 @@ const module: NuxtModule<Partial<AnalyticsModuleParams>> = defineNuxtModule<Part
     }
 
     addPlugin({ src: resolve('./runtime/plugin'), mode: 'server' })
+
+    if (nuxt.options.nitro.preset === 'node-cluster') {
+      nuxt.hook('nitro:config', (nitroConfig) => {
+        nitroConfig.plugins = nitroConfig.plugins || []
+        nitroConfig.plugins.push(resolve('./runtime/nitro-plugin'))
+      })
+    }
   },
 })
 
