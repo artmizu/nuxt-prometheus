@@ -5,6 +5,7 @@ export default defineNuxtConfig({
 
   prometheus: {
     prefix: 'playground_',
+    verbose: true,
     // clusterPort: 9100,
   },
   // nitro: {
