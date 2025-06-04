@@ -7,6 +7,4 @@ export default defineNuxtConfig({
     prefix: 'playground_',
     verbose: true,
   },
-
-  compatibilityDate: '2024-11-07',
 })
