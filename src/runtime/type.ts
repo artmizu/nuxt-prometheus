@@ -37,4 +37,12 @@ export interface AnalyticsModuleParams {
    * @default no prefix
    */
   prefix?: string
+
+  /**
+   * Temporarily don't recommend to turn it on,
+   * due to https://github.com/artmizu/nuxt-prometheus/issues/42
+   */
+  enableRequestTimeMeasure?: boolean
+
+  clusterPort?: number
 }

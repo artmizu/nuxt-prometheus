@@ -6,7 +6,14 @@ export default defineNuxtConfig({
   prometheus: {
     prefix: 'playground_',
     verbose: true,
+    // clusterPort: 9100,
   },
-
-  compatibilityDate: '2024-11-07',
+  // nitro: {
+  //   preset: 'node-cluster',
+  //   options: {
+  //     cluster: {
+  //       workers: '1' // or a specific number
+  //     }
+  //   }
+  // }
 })
