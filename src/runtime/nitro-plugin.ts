@@ -9,6 +9,10 @@ const aggregatorRegistry = new AggregatorRegistry()
 let server: http.Server | null = null
 
 export default defineNitroPlugin((nitroApp) => {
+
+  if (process.env.NITRO_PRESET !== 'node-cluster') {
+    return;
+  }
   const config = useRuntimeConfig()
   const prometheusConfig = config.public.prometheus
 

@@ -54,12 +54,11 @@ const module: NuxtModule<Partial<AnalyticsModuleParams>> = defineNuxtModule<Part
 
     addPlugin({ src: resolve('./runtime/plugin'), mode: 'server' })
 
-    if (nuxt.options.nitro.preset === 'node-cluster') {
-      nuxt.hook('nitro:config', (nitroConfig) => {
-        nitroConfig.plugins = nitroConfig.plugins || []
-        nitroConfig.plugins.push(resolve('./runtime/nitro-plugin'))
-      })
-    }
+    nuxt.hook('nitro:config', (nitroConfig) => {
+      nitroConfig.plugins = nitroConfig.plugins || []
+      nitroConfig.plugins.push(resolve('./runtime/nitro-plugin'))
+    })
+
   },
 })
 
