@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.5.1](https://github.com/artmizu/nuxt-prometheus/compare/v2.5.0...v2.5.1) (2025-07-29)
+
+
+### Bug Fixes
+
+* memory leak ([46fc9fc](https://github.com/artmizu/nuxt-prometheus/commit/46fc9fca5f7b5d0daad0cbd63a9de06002405c32))
+
 ## [2.5.0](https://github.com/artmizu/nuxt-prometheus/compare/v2.4.2...v2.5.0) (2025-04-10)
 
 
