@@ -31,8 +31,10 @@
   "scripts": {
     "prepack": "nuxt-module-build build",
     "dev": "nuxi dev playground --inspect --host",
-    "dev:build": "nuxi build playground",
+    "start": "node ./playground/.output/server/index.mjs",
+    "start:debug": "cross-env NODE_OPTIONS='--max-http-header-size=65384' NITRO_PORT=3000 node --inspect ./playground/.output/server/index.mjs",
     "dev:prepare": "nuxt-module-build prepare && nuxt-module-build build && nuxi prepare playground",
+    "build:prepare": "nuxt-module-build prepare && nuxt-module-build build && nuxi build playground",
     "test": "pnpm exec playwright-core install && vitest --dir ./test",
     "test:type": "vitest --typecheck.only --typecheck.ignoreSourceErrors --dir ./test",
     "lint": "eslint .",

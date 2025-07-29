@@ -61,7 +61,7 @@ export default defineNuxtPlugin((ctx) => {
   interceptor.on('request', onRequest)
   interceptor.on('response', onResponse)
 
-  ctx.hook('app:rendered', () => {
+  ctx.hooks.hookOnce('app:rendered', () => {
     interceptor.off('request', onRequest)
     interceptor.off('response', onResponse)
 
