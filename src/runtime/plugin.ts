@@ -17,11 +17,12 @@ const interceptor = new BatchInterceptor({
   ],
 })
 
-interceptor.apply()
-
 export default defineNuxtPlugin((ctx) => {
   const params = useRuntimeConfig().public.prometheus
   const router = useRouter()
+
+  if (!params.disableRequestInterceptor)
+    interceptor.apply()
 
   initMetrics(params)
 
@@ -53,9 +54,14 @@ export default defineNuxtPlugin((ctx) => {
       consola.info(`[nuxt-prometheus] request: ${request.url}, ${new Date().toISOString()}`)
   }
 
-  function onResponse({ response }: { response: Response }) {
-    if (state.requests[response.url])
-      state.requests[response.url].end = Date.now()
+  function onResponse({ request, response }: { request: Request; response: Response }) {
+    const url = request.url || response.url
+
+    if (state.requests[url])
+      state.requests[url].end = Date.now()
+
+    if (params.verbose)
+      consola.info(`[nuxt-prometheus] response: ${url}, ${new Date().toISOString()}`)
   }
 
   interceptor.on('request', onRequest)
