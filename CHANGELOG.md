@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.5.2](https://github.com/artmizu/nuxt-prometheus/compare/v2.5.1...v2.5.2) (2025-07-31)
+
+
+### Bug Fixes
+
+* additional param for disabling requests interception ([c7c3ea4](https://github.com/artmizu/nuxt-prometheus/commit/c7c3ea42a0c8569da2ddfdb8fc662be507ca4511))
+
 ## [2.5.1](https://github.com/artmizu/nuxt-prometheus/compare/v2.5.0...v2.5.1) (2025-07-29)
 
 
