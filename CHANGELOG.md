@@ -1,5 +1,26 @@
 # Changelog
 
+## [2.5.2](https://github.com/artmizu/nuxt-prometheus/compare/v2.5.1...v2.5.2) (2025-07-31)
+
+
+### Bug Fixes
+
+* additional param for disabling requests interception ([c7c3ea4](https://github.com/artmizu/nuxt-prometheus/commit/c7c3ea42a0c8569da2ddfdb8fc662be507ca4511))
+
+## [2.5.1](https://github.com/artmizu/nuxt-prometheus/compare/v2.5.0...v2.5.1) (2025-07-29)
+
+
+### Bug Fixes
+
+* memory leak ([46fc9fc](https://github.com/artmizu/nuxt-prometheus/commit/46fc9fca5f7b5d0daad0cbd63a9de06002405c32))
+
+## [2.5.0](https://github.com/artmizu/nuxt-prometheus/compare/v2.4.2...v2.5.0) (2025-04-10)
+
+
+### Features
+
+* Additional metrics collection with Summary type, allows to see more precise data in additional percentiles ([8dd735d](https://github.com/artmizu/nuxt-prometheus/commit/8dd735de1b6f4ba1b8ea9517c4c7ffa56964ed89))
+
 ## [2.4.2](https://github.com/artmizu/nuxt-prometheus/compare/v2.4.1...v2.4.2) (2025-04-10)
 
 

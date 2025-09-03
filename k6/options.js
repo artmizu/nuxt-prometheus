@@ -1,4 +1,4 @@
 export default {
-  vus: 10,
-  duration: '20s',
+  vus: 20,
+  duration: '30s',
 }

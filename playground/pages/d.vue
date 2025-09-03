@@ -11,7 +11,7 @@ const response = await test('/todos')
 <template>
   <div>
     <div id="response">
-      {{ response.data }}
+      {{ response }}
     </div>
   </div>
 </template>

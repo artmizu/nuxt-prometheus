@@ -34,4 +34,10 @@ export interface AnalyticsModuleParams {
    * @default no prefix
    */
   prefix?: string
+
+  /**
+   * Disable request interception
+   * @default false
+   */
+  disableRequestInterceptor?: boolean
 }
