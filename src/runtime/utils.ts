@@ -1,6 +1,6 @@
-import type { AnalyticsModuleState } from './type'
+import type { NuxtPrometheusState } from './type'
 
-export function calculateTime(data: AnalyticsModuleState) {
+export function calculateTime(data: NuxtPrometheusState) {
   const result: { start: number; end: number }[] = []
   const list = Object.values(data.requests).reduce((reducer, current) => {
     const last = reducer[reducer.length - 1]
