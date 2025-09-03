@@ -39,7 +39,8 @@
     "test:type": "vitest --typecheck.only --typecheck.ignoreSourceErrors --dir ./test",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "prepare": "husky"
+    "prepare": "husky",
+    "k6": "k6 run ./k6/load.test.js"
   },
   "dependencies": {
     "@mswjs/interceptors": "^0.36.10",

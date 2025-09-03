@@ -1,5 +1,5 @@
 import { defu } from 'defu'
-import { addPlugin, addServerHandler, createResolver, defineNuxtModule } from '@nuxt/kit'
+import { addPlugin, addServerHandler, addServerPlugin, createResolver, defineNuxtModule } from '@nuxt/kit'
 import type { NuxtModule } from '@nuxt/schema'
 import { name, version } from '../package.json'
 import type { AnalyticsModuleParams } from './runtime/type'
@@ -16,7 +16,7 @@ const module: NuxtModule<Partial<AnalyticsModuleParams>> = defineNuxtModule<Part
     version,
     configKey: 'prometheus',
     compatibility: {
-      nuxt: '>=3.0.0 || ^2.16.0',
+      nuxt: '>=3.0.0 || ^2.16.0 || >=4.0.0',
       bridge: true,
     },
   },
@@ -36,6 +36,8 @@ const module: NuxtModule<Partial<AnalyticsModuleParams>> = defineNuxtModule<Part
 
     const { resolve } = createResolver(import.meta.url)
     nuxt.options.build.transpile.push(resolve('runtime'))
+
+    addServerPlugin(resolve('./runtime/nitro'))
 
     addServerHandler({
       route: options.prometheusPath,

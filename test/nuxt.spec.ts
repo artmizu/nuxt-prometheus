@@ -32,17 +32,17 @@ describe('module tests', async () => {
     await page.goto(`${ctx.url}metrics`)
     const content = await page.innerText('body')
 
-    expect(content).toMatch(/page_render_time\{path=\"index: \/\"}\ \d+/gm)
-    expect(content).toMatch(/page_render_time\{path=\"a: \/a\"}\ \d+/gm)
-    expect(content).toMatch(/page_render_time\{path=\"b: \/b\"}\ \d+/gm)
+    expect(content).toMatch(/page_render_time\{path=\"\/\"}\ \d+/gm)
+    expect(content).toMatch(/page_render_time\{path=\"\/a\"}\ \d+/gm)
+    expect(content).toMatch(/page_render_time\{path=\"\/b\"}\ \d+/gm)
 
-    expect(content).toMatch(/page_request_time\{path=\"index: \/\"}\ \d+/gm)
-    expect(content).toMatch(/page_request_time\{path=\"a: \/a\"}\ \d+/gm)
-    expect(content).toMatch(/page_request_time\{path=\"b: \/b\"}\ \d+/gm)
+    expect(content).toMatch(/page_request_time\{path=\"\/\"}\ \d+/gm)
+    expect(content).toMatch(/page_request_time\{path=\"\/a\"}\ \d+/gm)
+    expect(content).toMatch(/page_request_time\{path=\"\/b\"}\ \d+/gm)
 
-    expect(content).toMatch(/page_total_time\{path=\"index: \/\"}\ \d+/gm)
-    expect(content).toMatch(/page_total_time\{path=\"a: \/a\"}\ \d+/gm)
-    expect(content).toMatch(/page_total_time\{path=\"b: \/b\"}\ \d+/gm)
+    expect(content).toMatch(/page_total_time\{path=\"\/\"}\ \d+/gm)
+    expect(content).toMatch(/page_total_time\{path=\"\/a\"}\ \d+/gm)
+    expect(content).toMatch(/page_total_time\{path=\"\/b\"}\ \d+/gm)
   })
 
   it('check the useFetch measuring time on /b route', async () => {
@@ -52,7 +52,7 @@ describe('module tests', async () => {
     await page.goto(`${ctx.url}metrics`)
     const content = await page.innerText('body')
 
-    expect(content).toMatch(/page_request_time\{path=\"b: \/b\"}\ [1-9]+/gm)
+    expect(content).toMatch(/page_request_time\{path=\"\/b\"}\ [1-9]+/gm)
   })
 
   it('check the native fetch measuring time on /c route', async () => {
@@ -62,6 +62,36 @@ describe('module tests', async () => {
     await page.goto(`${ctx.url}metrics`)
     const content = await page.innerText('body')
 
-    expect(content).toMatch(/page_request_time\{path=\"c: \/c\"}\ [1-9]+/gm)
+    expect(content).toMatch(/page_request_time\{path=\"\/c\"}\ [1-9]+/gm)
+  })
+
+  it('check server route without external requests', async () => {
+    const ctx = useTestContext()
+    const page = await createPage('/')
+    await page.goto(`${ctx.url}api/plain`)
+    await page.goto(`${ctx.url}api/plain/sample`)
+    await page.goto(`${ctx.url}metrics`)
+    const content = await page.innerText('body')
+
+    expect(content).toMatch(/page_render_time\{path=\"\/api\/plain\"}\ \d+/gm)
+    expect(content).toMatch(/page_render_time\{path=\"\/api\/plain\/\:id\"}\ \d+/gm)
+  })
+
+  it('check server route with external requests', async () => {
+    const ctx = useTestContext()
+    const page = await createPage('/')
+    await page.goto(`${ctx.url}api/complex`)
+    await page.goto(`${ctx.url}api/complex/sample`)
+    await page.goto(`${ctx.url}metrics`)
+    const content = await page.innerText('body')
+
+    expect(content).toMatch(/page_render_time\{path=\"\/api\/complex\"}\ \d+/gm)
+    expect(content).toMatch(/page_render_time\{path=\"\/api\/complex\/\:id\"}\ \d+/gm)
+
+    expect(content).toMatch(/page_request_time\{path=\"\/api\/complex\"}\ \d+/gm)
+    expect(content).toMatch(/page_request_time\{path=\"\/api\/complex\/\:id\"}\ \d+/gm)
+
+    expect(content).toMatch(/page_total_time\{path=\"\/api\/complex\"}\ \d+/gm)
+    expect(content).toMatch(/page_total_time\{path=\"\/api\/complex\/\:id\"}\ \d+/gm)
   })
 })
