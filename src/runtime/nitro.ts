@@ -50,8 +50,8 @@ export default defineNitroPlugin((nitroApp) => {
       },
     }
 
-    interceptor.on('request', event.context.prometheus.onRequest)
-    interceptor.on('response', event.context.prometheus.onResponse)
+    interceptor.on('request', event.context.prometheus.onRequest!)
+    interceptor.on('response', event.context.prometheus.onResponse!)
   })
 
   /**
@@ -59,8 +59,8 @@ export default defineNitroPlugin((nitroApp) => {
    * and to avoid blocking the request
    */
   nitroApp.hooks.hook('afterResponse', (event) => {
-    interceptor.off('request', event.context.prometheus.onRequest)
-    interceptor.off('response', event.context.prometheus.onResponse)
+    interceptor.off('request', event.context.prometheus.onRequest!)
+    interceptor.off('response', event.context.prometheus.onResponse!)
 
     const path = event.context.matchedRoute?.path === '/**' ? event.context?.prometheus?.path : event.context.matchedRoute?.path
     if (!path)
