@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.6.0](https://github.com/artmizu/nuxt-prometheus/compare/v2.5.2...v2.6.0) (2025-09-03)
+
+
+### Features
+
+* Nuxt 4 support, handling metrics measure via Nitro ([fb29d4b](https://github.com/artmizu/nuxt-prometheus/commit/fb29d4b3523c621d2bdea0ddc784157a48d3c981))
+
 ## [2.5.2](https://github.com/artmizu/nuxt-prometheus/compare/v2.5.1...v2.5.2) (2025-07-31)
 
 
