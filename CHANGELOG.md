@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.7.0](https://github.com/artmizu/nuxt-prometheus/compare/v2.6.0...v2.7.0) (2025-09-21)
+
+
+### Features
+
+* prom-client update and bun support ([02a36f8](https://github.com/artmizu/nuxt-prometheus/commit/02a36f8ab9cf42d007de8da61bbb110771842784))
+
 ## [2.6.0](https://github.com/artmizu/nuxt-prometheus/compare/v2.5.2...v2.6.0) (2025-09-03)
 
 
