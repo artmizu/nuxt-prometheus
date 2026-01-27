@@ -35,6 +35,7 @@ reports
 coverage
 *.lcov
 .nyc_output
+tsconfig.vitest-temp.json
 
 # VSCode
 .vscode

@@ -21,11 +21,13 @@ const module: NuxtModule<Partial<AnalyticsModuleParams>> = defineNuxtModule<Part
     },
   },
   defaults: {
+    enabled: true,
     verbose: true,
     healthCheck: true,
     prometheusPath: '/metrics',
     healthCheckPath: '/health',
     disableRequestInterceptor: false,
+    metricsEndpoint: true,
   },
   async setup(options, nuxt) {
     const moduleOptions = defu(
@@ -45,13 +47,11 @@ const module: NuxtModule<Partial<AnalyticsModuleParams>> = defineNuxtModule<Part
       handler: resolve('./runtime/handler'),
     })
 
-    if (options.healthCheck) {
-      addServerHandler({
-        route: options.healthCheckPath,
-        method: 'get',
-        handler: resolve('./runtime/health'),
-      })
-    }
+    addServerHandler({
+      route: options.healthCheckPath,
+      method: 'get',
+      handler: resolve('./runtime/health'),
+    })
 
     addPlugin({ src: resolve('./runtime/plugin'), mode: 'server' })
   },
