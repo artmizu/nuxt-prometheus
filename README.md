@@ -44,6 +44,11 @@ Once the metrics have been collected by Prometheus, you will want to review them
 ## Options
 You can pass it through module options and the nuxt config property `prometheus`.
 
+### enabled
+- Type: `boolean`
+- Default: `true`
+- Description: Enables or disables Prometheus integration at runtime. When set to `false`, no metrics are collected and no hooks are registered. This allows you to build the app with the module but disable it in certain environments.
+
 ### verbose
 - Type: `boolean`
 - Default: `true`
@@ -68,3 +73,48 @@ You can pass it through module options and the nuxt config property `prometheus`
 - Type: `string`
 - Default: no prefix
 - Description: An optional prefix for metric names
+
+### metricsEndpoint
+- Type: `boolean`
+- Default: `true`
+- Description: Whether to expose the `/metrics` endpoint. When set to `false`, metrics are still collected internally but the endpoint is not registered. This allows you to access metrics programmatically via prom-client's `register` object and expose them on a separate internal port.
+
+## Runtime Environment Variables
+
+All options can be configured at runtime via environment variables following Nuxt's convention `NUXT_PUBLIC_PROMETHEUS_<OPTION_NAME>`:
+
+| Environment Variable | Option | Example |
+|---------------------|--------|---------|
+| `NUXT_PUBLIC_PROMETHEUS_ENABLED` | `enabled` | `false` |
+| `NUXT_PUBLIC_PROMETHEUS_VERBOSE` | `verbose` | `false` |
+| `NUXT_PUBLIC_PROMETHEUS_HEALTH_CHECK` | `healthCheck` | `false` |
+| `NUXT_PUBLIC_PROMETHEUS_METRICS_ENDPOINT` | `metricsEndpoint` | `false` |
+| `NUXT_PUBLIC_PROMETHEUS_PREFIX` | `prefix` | `myapp_` |
+| `NUXT_PUBLIC_PROMETHEUS_DISABLE_REQUEST_INTERCEPTOR` | `disableRequestInterceptor` | `true` |
+
+Example usage:
+```bash
+# Disable metrics endpoint in production while keeping collection active
+NUXT_PUBLIC_PROMETHEUS_METRICS_ENDPOINT=false node .output/server/index.mjs
+
+# Use custom prefix
+NUXT_PUBLIC_PROMETHEUS_PREFIX=myapp_ node .output/server/index.mjs
+```
+
+## Development
+
+```bash
+# Install dependencies
+pnpm install
+
+# Prepare the module (build types and module)
+pnpm run dev:prepare
+
+# Start development server with playground
+pnpm run dev
+
+# Run tests
+pnpm test
+```
+
+**Important:** After making changes to the module source code, you must run `pnpm run dev:prepare` to rebuild the module before testing.

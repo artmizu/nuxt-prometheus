@@ -19,6 +19,9 @@ const interceptor = new BatchInterceptor({
 export default defineNitroPlugin((nitroApp) => {
   const params = useRuntimeConfig().public.prometheus
 
+  if (!params.enabled)
+    return
+
   if (!params.disableRequestInterceptor)
     interceptor.apply()
 

@@ -8,6 +8,12 @@ export interface NuxtPrometheusState {
 
 export interface AnalyticsModuleParams {
   /**
+   * Enables or disables Prometheus integration at runtime.
+   * When false, no metrics are collected and no hooks are registered.
+   * @default true
+   */
+  enabled?: boolean
+  /**
    * stdout logs about external requests and render time of the page
    * @default true
    */
@@ -40,4 +46,12 @@ export interface AnalyticsModuleParams {
    * @default false
    */
   disableRequestInterceptor?: boolean
+
+  /**
+   * Whether to expose the metrics endpoint.
+   * When false, metrics are still collected but the endpoint is not registered.
+   * This allows you to access metrics programmatically via prom-client's register.
+   * @default true
+   */
+  metricsEndpoint?: boolean
 }
