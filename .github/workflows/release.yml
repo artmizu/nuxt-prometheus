@@ -5,6 +5,7 @@ on:
 
 permissions:
   id-token: write
+  contents: write
 
 name: release-please
 jobs:
