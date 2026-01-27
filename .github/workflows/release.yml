@@ -6,6 +6,7 @@ on:
 permissions:
   id-token: write
   contents: write
+  pull-requests: write
 
 name: release-please
 jobs:
