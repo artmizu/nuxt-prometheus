@@ -1,5 +1,17 @@
 # Changelog
 
+## [3.0.0](https://github.com/artmizu/nuxt-prometheus/compare/v2.7.0...v3.0.0) (2026-01-27)
+
+
+### ⚠ BREAKING CHANGES
+
+* This release requires Nuxt 4.x. Nuxt 3.x is no longer supported.
+
+### Features
+
+* add runtime env variable support and metricsEndpoint option ([64f042a](https://github.com/artmizu/nuxt-prometheus/commit/64f042ae91d3349f0aaf371c22bcfd04576fe763))
+* upgrade to Nuxt 4 and update all dependencies ([3e1b671](https://github.com/artmizu/nuxt-prometheus/commit/3e1b671dedfb0b563050698918c08e2b2085c47f))
+
 ## [2.8.0](https://github.com/artmizu/nuxt-prometheus/compare/v2.7.0...v2.8.0) (2026-01-27)
 
 
