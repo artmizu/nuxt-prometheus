@@ -1,9 +1,9 @@
-import { defineNitroPlugin, useRuntimeConfig } from 'nitropack/runtime'
 import { BatchInterceptor } from '@mswjs/interceptors'
 import { ClientRequestInterceptor } from '@mswjs/interceptors/ClientRequest'
-import { XMLHttpRequestInterceptor } from '@mswjs/interceptors/XMLHttpRequest'
 import { FetchInterceptor } from '@mswjs/interceptors/fetch'
+import { XMLHttpRequestInterceptor } from '@mswjs/interceptors/XMLHttpRequest'
 import consola from 'consola'
+import { defineNitroPlugin, useRuntimeConfig } from 'nitropack/runtime'
 import { initMetrics, metrics } from './registry'
 import { calculateTime } from './utils'
 
@@ -50,8 +50,9 @@ export default defineNitroPlugin((nitroApp) => {
           consola.info(`[nuxt-prometheus] request: ${request.url}, ${new Date().toISOString()}`)
       },
       onResponse({ response }: { response: Response }) {
-        if (event.context.prometheus.requests[response.url])
-          event.context.prometheus.requests[response.url].end = Date.now()
+        const data = event.context.prometheus.requests[response.url]
+        if (data)
+          data.end = Date.now()
       },
     }
 

@@ -1,6 +1,6 @@
-import { expectTypeOf, test } from 'vitest'
 import type { NuxtConfig } from 'nuxt/config'
 import type { AnalyticsModuleParams } from '../src/runtime/type'
+import { expectTypeOf, test } from 'vitest'
 
 test('module types match NuxtConfig', () => {
   expectTypeOf<Partial<AnalyticsModuleParams>>().toMatchTypeOf<NuxtConfig['prometheus']>()

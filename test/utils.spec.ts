@@ -34,4 +34,3 @@ it('calculateTime check', () => {
 
   expect(time).toEqual({ request: 310, render: 190, total: 500 })
 })
-

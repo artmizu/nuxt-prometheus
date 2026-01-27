@@ -1,6 +1,6 @@
 import { fileURLToPath } from 'node:url'
-import { describe, expect, it } from 'vitest'
 import { createPage, setup, useTestContext } from '@nuxt/test-utils/e2e'
+import { describe, expect, it } from 'vitest'
 
 describe('disable metrics endpoint test', async () => {
   await setup({
@@ -17,7 +17,7 @@ describe('disable metrics endpoint test', async () => {
     const page = await createPage('/')
     await page.goto(`${ctx.url}metrics`)
 
-    expect(await page.innerText('body')).toContain('404')
+    expect(await page.textContent('body')).toContain('404')
   })
 
   it('health endpoint should still work', async () => {
@@ -25,6 +25,6 @@ describe('disable metrics endpoint test', async () => {
     const page = await createPage('/')
     await page.goto(`${ctx.url}health`)
 
-    expect(await page.innerText('body')).toContain('ok')
+    expect(await page.textContent('body')).toContain('ok')
   })
 })

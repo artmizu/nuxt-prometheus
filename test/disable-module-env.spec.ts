@@ -1,6 +1,6 @@
 import { fileURLToPath } from 'node:url'
-import { describe, expect, it } from 'vitest'
 import { createPage, setup, useTestContext } from '@nuxt/test-utils/e2e'
+import { describe, expect, it } from 'vitest'
 
 describe('disabled module via env variable test', async () => {
   await setup({
@@ -20,7 +20,7 @@ describe('disabled module via env variable test', async () => {
     await page.goto(`${ctx.url}a`)
     await page.goto(`${ctx.url}metrics`)
 
-    const content = await page.innerText('body')
+    const content = await page.textContent('body')
 
     // Default Node.js metrics should not be present when module is disabled
     expect(content).not.toMatch(/process_cpu_user_seconds_total/)
@@ -36,6 +36,6 @@ describe('disabled module via env variable test', async () => {
     const page = await createPage('/')
     await page.goto(`${ctx.url}health`)
 
-    expect(await page.innerText('body')).toContain('ok')
+    expect(await page.textContent('body')).toContain('ok')
   })
 })

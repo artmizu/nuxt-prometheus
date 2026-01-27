@@ -2,7 +2,7 @@
   "name": "@artmizu/nuxt-prometheus",
   "type": "module",
   "version": "2.8.0",
-  "packageManager": "pnpm@9.1.1",
+  "packageManager": "pnpm@10.28.2",
   "description": "Allows you to better understand what's going on with your application and how to optimize performance and other things in production",
   "license": "MIT",
   "repository": "artmizu/nuxt-prometheus",
@@ -16,15 +16,6 @@
     }
   },
   "main": "./dist/module.mjs",
-  "types": "./dist/types.d.ts",
-  "typesVersions": {
-    "*": {
-      "*": [
-        "./dist/*",
-        "./*"
-      ]
-    }
-  },
   "files": [
     "dist"
   ],
@@ -43,29 +34,29 @@
     "k6": "k6 run ./k6/load.test.js"
   },
   "dependencies": {
-    "@mswjs/interceptors": "^0.36.10",
-    "consola": "^3.2.3",
-    "defu": "^6.1.2",
-    "h3": "^1.7.1",
+    "@mswjs/interceptors": "^0.40.0",
+    "consola": "^3.4.2",
+    "defu": "^6.1.4",
+    "h3": "^1.15.5",
     "prom-client": "^15.1.3"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^0.30.1",
-    "@nuxt/kit": "^3.16.0",
-    "@nuxt/module-builder": "^0.8.4",
-    "@nuxt/schema": "^3.16.0",
-    "@nuxt/test-utils": "^3.16.0",
-    "@types/node": "^18.11.15",
+    "@antfu/eslint-config": "^7.2.0",
+    "@nuxt/kit": "^4.3.0",
+    "@nuxt/module-builder": "^1.0.2",
+    "@nuxt/schema": "^4.3.0",
+    "@nuxt/test-utils": "^3.23.0",
+    "@types/node": "^24.0.10",
     "@vue/test-utils": "^2.4.6",
     "cross-env": "^7.0.3",
-    "eslint": "^8.29.0",
-    "happy-dom": "^14.10.1",
-    "husky": "^8.0.3",
-    "nuxt": "^3.16.0",
-    "playwright-core": "^1.44.0",
-    "typescript": "5.6.3",
-    "vitest": "^1.6.0",
-    "vue": "^3.5.13",
-    "vue-router": "^4.2.4"
+    "eslint": "^9.39.2",
+    "happy-dom": "^20.3.9",
+    "husky": "^9.1.7",
+    "nuxt": "^4.3.0",
+    "playwright-core": "^1.58.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18",
+    "vue": "^3.5.27",
+    "vue-router": "^4.6.4"
   }
 }
