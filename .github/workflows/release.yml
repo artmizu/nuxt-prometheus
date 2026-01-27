@@ -2,6 +2,10 @@ on:
   push:
     branches:
       - main
+
+permissions:
+  id-token: write 
+
 name: release-please
 jobs:
   release:
@@ -38,6 +42,4 @@ jobs:
         if: ${{ steps.release.outputs.release_created }}
 
       - run: pnpm publish
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
         if: ${{ steps.release.outputs.release_created }}
