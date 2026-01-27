@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.8.0](https://github.com/artmizu/nuxt-prometheus/compare/v2.7.0...v2.8.0) (2026-01-27)
+
+
+### Features
+
+* add runtime env variable support and metricsEndpoint option ([64f042a](https://github.com/artmizu/nuxt-prometheus/commit/64f042ae91d3349f0aaf371c22bcfd04576fe763))
+
 ## [2.7.0](https://github.com/artmizu/nuxt-prometheus/compare/v2.6.0...v2.7.0) (2025-09-21)
 
 
