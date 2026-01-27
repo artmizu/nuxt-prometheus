@@ -1,6 +1,6 @@
 import { fileURLToPath } from 'node:url'
-import { describe, expect, it } from 'vitest'
 import { createPage, setup, useTestContext } from '@nuxt/test-utils/e2e'
+import { describe, expect, it } from 'vitest'
 
 describe('custom module params test', async () => {
   await setup({
@@ -17,6 +17,6 @@ describe('custom module params test', async () => {
     const page = await createPage('/')
     await page.goto(`${ctx.url}health`)
 
-    expect(await page.innerText('body')).toContain('404')
+    expect(await page.textContent('body')).toContain('404')
   })
 })

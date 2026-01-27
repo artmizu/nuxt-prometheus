@@ -1,12 +1,12 @@
 import { fileURLToPath } from 'node:url'
-import { describe, expect, it } from 'vitest'
 import { createPage, setup, useTestContext } from '@nuxt/test-utils/e2e'
+import { describe, expect, it } from 'vitest'
 
 /**
  * Test: NUXT_PUBLIC_PROMETHEUS_PREFIX env variable
  * Verifies that the metric prefix can be overridden via environment variable.
  */
-describe('NUXT_PUBLIC_PROMETHEUS_PREFIX env variable', async () => {
+describe('check NUXT_PUBLIC_PROMETHEUS_PREFIX env variable', async () => {
   await setup({
     rootDir: fileURLToPath(new URL('../playground', import.meta.url)),
     env: {
@@ -21,7 +21,7 @@ describe('NUXT_PUBLIC_PROMETHEUS_PREFIX env variable', async () => {
     await page.goto(`${ctx.url}`)
     await page.goto(`${ctx.url}metrics`)
 
-    const content = await page.innerText('body')
+    const content = await page.textContent('body')
 
     // Metrics should have the custom prefix from env variable
     // This overrides the playground's default 'playground_' prefix

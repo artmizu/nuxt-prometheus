@@ -9,15 +9,15 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
 
       - name: Set node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v6
         with:
-          node-version: 20.x
+          node-version: 24.x
           cache: pnpm
 
       - name: Install dependencies
@@ -32,15 +32,15 @@ jobs:
   typecheck:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
 
       - name: Set node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v6
         with:
-          node-version: 20.x
+          node-version: 24.x
           cache: pnpm
 
       - name: Install dependencies
@@ -55,15 +55,15 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
 
       - name: Set node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v6
         with:
-          node-version: 20.x
+          node-version: 24.x
           cache: pnpm
 
       - name: Install dependencies

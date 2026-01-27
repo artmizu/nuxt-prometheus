@@ -1,5 +1,5 @@
-import http from 'k6/http'
 import { check, sleep } from 'k6'
+import http from 'k6/http'
 import globalOptions from './options.js'
 
 export const options = globalOptions

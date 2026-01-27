@@ -1,12 +1,12 @@
 import { fileURLToPath } from 'node:url'
-import { describe, expect, it } from 'vitest'
 import { createPage, setup, useTestContext } from '@nuxt/test-utils/e2e'
+import { describe, expect, it } from 'vitest'
 
 /**
  * Test: NUXT_PUBLIC_PROMETHEUS_HEALTH_CHECK env variable
  * Verifies that the health check endpoint can be disabled via environment variable.
  */
-describe('NUXT_PUBLIC_PROMETHEUS_HEALTH_CHECK env variable', async () => {
+describe('check NUXT_PUBLIC_PROMETHEUS_HEALTH_CHECK env variable', async () => {
   await setup({
     rootDir: fileURLToPath(new URL('../playground', import.meta.url)),
     env: {
@@ -19,7 +19,7 @@ describe('NUXT_PUBLIC_PROMETHEUS_HEALTH_CHECK env variable', async () => {
     const page = await createPage('/')
     await page.goto(`${ctx.url}health`)
 
-    expect(await page.innerText('body')).toContain('404')
+    expect(await page.textContent('body')).toContain('404')
   })
 
   it('metrics endpoint should still work when health check is disabled', async () => {
@@ -27,7 +27,7 @@ describe('NUXT_PUBLIC_PROMETHEUS_HEALTH_CHECK env variable', async () => {
     const page = await createPage('/')
     await page.goto(`${ctx.url}metrics`)
 
-    const content = await page.innerText('body')
+    const content = await page.textContent('body')
     expect(content).toMatch(/process_cpu_user_seconds_total/)
   })
 })

@@ -1,12 +1,12 @@
 import { fileURLToPath } from 'node:url'
-import { describe, expect, it } from 'vitest'
 import { createPage, setup, useTestContext } from '@nuxt/test-utils/e2e'
+import { describe, expect, it } from 'vitest'
 
 /**
  * Test: NUXT_PUBLIC_PROMETHEUS_DISABLE_REQUEST_INTERCEPTOR env variable
  * Verifies that request interception can be disabled via environment variable.
  */
-describe('NUXT_PUBLIC_PROMETHEUS_DISABLE_REQUEST_INTERCEPTOR env variable', async () => {
+describe('check NUXT_PUBLIC_PROMETHEUS_DISABLE_REQUEST_INTERCEPTOR env variable', async () => {
   await setup({
     rootDir: fileURLToPath(new URL('../playground', import.meta.url)),
     env: {
@@ -22,7 +22,7 @@ describe('NUXT_PUBLIC_PROMETHEUS_DISABLE_REQUEST_INTERCEPTOR env variable', asyn
     await page.goto(`${ctx.url}b`)
     await page.goto(`${ctx.url}metrics`)
 
-    const content = await page.innerText('body')
+    const content = await page.textContent('body')
 
     // page_request_time should be 0 when interceptor is disabled
     // (the metric exists but external requests are not tracked)

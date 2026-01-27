@@ -1,4 +1,4 @@
-import { createError, defineEventHandler } from 'h3'
+import { createError, defineEventHandler, setResponseHeader, setResponseStatus } from 'h3'
 import { useRuntimeConfig } from 'nitropack/runtime'
 import { register } from 'prom-client'
 
@@ -14,11 +14,11 @@ export default defineEventHandler(async (event) => {
 
   try {
     const data = await register.metrics()
-    event.res.setHeader('Content-Type', register.contentType)
-    event.res.end(data)
+    setResponseHeader(event, 'Content-Type', register.contentType)
+    return data
   }
   catch (e) {
-    event.res.statusCode = 500
-    event.res.end(e)
+    setResponseStatus(event, 500)
+    return e
   }
 })

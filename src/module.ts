@@ -1,8 +1,8 @@
-import { defu } from 'defu'
-import { addPlugin, addServerHandler, addServerPlugin, createResolver, defineNuxtModule } from '@nuxt/kit'
 import type { NuxtModule } from '@nuxt/schema'
-import { name, version } from '../package.json'
 import type { AnalyticsModuleParams } from './runtime/type'
+import { addPlugin, addServerHandler, addServerPlugin, createResolver, defineNuxtModule } from '@nuxt/kit'
+import { defu } from 'defu'
+import { name, version } from '../package.json'
 
 export interface ModuleOptions extends AnalyticsModuleParams { }
 export interface ModulePublicRuntimeConfig {
@@ -16,8 +16,7 @@ const module: NuxtModule<Partial<AnalyticsModuleParams>> = defineNuxtModule<Part
     version,
     configKey: 'prometheus',
     compatibility: {
-      nuxt: '>=3.0.0 || ^2.16.0 || >=4.0.0',
-      bridge: true,
+      nuxt: '>=3.0.0 || >=4.0.0',
     },
   },
   defaults: {

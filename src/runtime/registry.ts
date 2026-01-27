@@ -1,5 +1,5 @@
-import { Gauge, Summary, collectDefaultMetrics, register } from 'prom-client'
 import type { AnalyticsModuleParams } from './type'
+import { collectDefaultMetrics, Gauge, register, Summary } from 'prom-client'
 
 export const metrics = {
   /** If `true`, metrics was initialized with `initMetrics` */
@@ -16,7 +16,7 @@ export const metrics = {
   totalTimeSummary: null as Summary | null,
 }
 
-export const initMetrics = (p: Partial<AnalyticsModuleParams>) => {
+export function initMetrics(p: Partial<AnalyticsModuleParams>) {
   if (metrics.isInitialized)
     return
 
@@ -65,4 +65,3 @@ export const initMetrics = (p: Partial<AnalyticsModuleParams>) => {
 
   metrics.isInitialized = true
 }
-
