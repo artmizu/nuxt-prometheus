@@ -4,7 +4,7 @@ on:
       - main
 
 permissions:
-  id-token: write 
+  id-token: write
 
 name: release-please
 jobs:
