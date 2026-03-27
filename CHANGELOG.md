@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.1](https://github.com/artmizu/nuxt-prometheus/compare/v3.0.0...v3.0.1) (2026-03-27)
+
+
+### Bug Fixes
+
+* observe summary metrics in afterResponse hook ([a3894ee](https://github.com/artmizu/nuxt-prometheus/commit/a3894eef9f47fd3eb5f7604ef2cba9e7330429ec)), closes [#74](https://github.com/artmizu/nuxt-prometheus/issues/74)
+
 ## [3.0.0](https://github.com/artmizu/nuxt-prometheus/compare/v2.7.0...v3.0.0) (2026-01-27)
 
 
