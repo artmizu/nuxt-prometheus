@@ -78,6 +78,10 @@ export default defineNitroPlugin((nitroApp) => {
     metrics.requestTime?.labels(path).set(time.request)
     metrics.totalTime?.labels(path).set(time.total)
 
+    metrics.renderTimeSummary?.labels(path).observe(time.render)
+    metrics.requestTimeSummary?.labels(path).observe(time.request)
+    metrics.totalTimeSummary?.labels(path).observe(time.total)
+
     if (params.verbose) {
       consola.info(`[nuxt-prometheus] «${path}» api request time:`, time.request)
       consola.info(`[nuxt-prometheus] «${path}» render time:`, time.render)

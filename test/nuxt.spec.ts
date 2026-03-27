@@ -43,6 +43,19 @@ describe('module tests', async () => {
     expect(content).toMatch(/page_total_time\{path="\/"\} \d+/g)
     expect(content).toMatch(/page_total_time\{path="\/a"\} \d+/g)
     expect(content).toMatch(/page_total_time\{path="\/b"\} \d+/g)
+
+    // Summary metrics
+    expect(content).toMatch(/page_render_time_summary_count\{path="\/"\} [1-9]\d*/g)
+    expect(content).toMatch(/page_render_time_summary_count\{path="\/a"\} [1-9]\d*/g)
+    expect(content).toMatch(/page_render_time_summary_count\{path="\/b"\} [1-9]\d*/g)
+
+    expect(content).toMatch(/page_request_time_summary_count\{path="\/"\} [1-9]\d*/g)
+    expect(content).toMatch(/page_request_time_summary_count\{path="\/a"\} [1-9]\d*/g)
+    expect(content).toMatch(/page_request_time_summary_count\{path="\/b"\} [1-9]\d*/g)
+
+    expect(content).toMatch(/page_total_time_summary_count\{path="\/"\} [1-9]\d*/g)
+    expect(content).toMatch(/page_total_time_summary_count\{path="\/a"\} [1-9]\d*/g)
+    expect(content).toMatch(/page_total_time_summary_count\{path="\/b"\} [1-9]\d*/g)
   })
 
   it('check the useFetch measuring time on /b route', async () => {
