@@ -41,6 +41,21 @@ export default {
 Once the metrics have been collected by Prometheus, you will want to review them. I use Grafana for this purpose, and my metrics setup looks something like this:
 ![Cover](https://raw.githubusercontent.com/artmizu/nuxt-prometheus/main/.github/grafana.jpg)
 
+## Collected Metrics
+
+In addition to the [default Node.js metrics](https://github.com/siimon/prom-client#default-metrics) provided by `prom-client`, this module collects the following custom metrics:
+
+| Metric | Type | Labels | Description |
+|--------|------|--------|-------------|
+| `page_render_time` | Gauge | `path` | Time spent rendering a page (total minus external request time), in ms |
+| `page_request_time` | Gauge | `path` | Time spent on external API requests during page processing, in ms |
+| `page_total_time` | Gauge | `path` | Total time to complete a request, in ms |
+| `page_render_time_summary` | Summary | `path` | Distribution of page render times, in ms |
+| `page_request_time_summary` | Summary | `path` | Distribution of external API request times, in ms |
+| `page_total_time_summary` | Summary | `path` | Distribution of total request times, in ms |
+
+All custom metric names can be prefixed using the `prefix` option (e.g., `myapp_page_render_time`).
+
 ## Options
 You can pass it through module options and the nuxt config property `prometheus`.
 
