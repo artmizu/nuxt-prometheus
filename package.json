@@ -34,7 +34,7 @@
     "k6": "k6 run ./k6/load.test.js"
   },
   "dependencies": {
-    "@mswjs/interceptors": "^0.40.0",
+    "@mswjs/interceptors": "^0.41.9",
     "consola": "^3.4.2",
     "defu": "^6.1.4",
     "h3": "^1.15.5",
