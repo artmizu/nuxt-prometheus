@@ -1,5 +1,14 @@
 # Changelog
 
+## [3.0.2](https://github.com/artmizu/nuxt-prometheus/compare/v3.0.1...v3.0.2) (2026-05-23)
+
+
+### Bug Fixes
+
+* bump @mswjs/interceptors to 0.41.9 ([c41def4](https://github.com/artmizu/nuxt-prometheus/commit/c41def440b429004fb1699bf1589cdb0d7418087))
+* bump @mswjs/interceptors to 0.41.9 ([b046f61](https://github.com/artmizu/nuxt-prometheus/commit/b046f6149b525a24d3dfda33b7996ecded3b073d))
+* sync lockfile with interceptors bump ([204512a](https://github.com/artmizu/nuxt-prometheus/commit/204512a0708c25478adee6835587934f5efc6ec0))
+
 ## [3.0.1](https://github.com/artmizu/nuxt-prometheus/compare/v3.0.0...v3.0.1) (2026-03-27)
 
 
