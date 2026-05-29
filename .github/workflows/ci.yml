@@ -1,5 +1,8 @@
 name: CI
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 on:
   pull_request:
     branches:
@@ -17,7 +20,7 @@ jobs:
       - name: Set node
         uses: actions/setup-node@v6
         with:
-          node-version: 24.x
+          node-version-file: .node-version
           cache: pnpm
 
       - name: Install dependencies
@@ -40,7 +43,7 @@ jobs:
       - name: Set node
         uses: actions/setup-node@v6
         with:
-          node-version: 24.x
+          node-version-file: .node-version
           cache: pnpm
 
       - name: Install dependencies
@@ -63,13 +66,14 @@ jobs:
       - name: Set node
         uses: actions/setup-node@v6
         with:
-          node-version: 24.x
+          node-version-file: .node-version
           cache: pnpm
 
       - name: Install dependencies
-        run: |
-          pnpm install
-          pnpm exec playwright-core install
+        run: pnpm install
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install chromium --with-deps --only-shell
 
       - name: Prepare is needed, because it generate types
         run: pnpm dev:prepare
