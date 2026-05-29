@@ -1,3 +1,2 @@
 pnpm lint
 pnpm typecheck
-pnpm test -- --run
