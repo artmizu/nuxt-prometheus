@@ -1,6 +1,7 @@
 ## Build And Verification
 
 - After changing files under `src/`, rebuild before validating behavior.
+- Run `pnpm prepack` before test verification when changes need fresh `dist` output.
 - Use `pnpm run dev:prepare` after `src` changes when you need the playground or browser verification to reflect them.
 
 ## Metrics Verification

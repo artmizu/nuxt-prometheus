@@ -79,7 +79,7 @@ jobs:
         run: pnpm dev:prepare
 
       - name: Run tests
-        run: pnpm vitest run --dir ./test
+        run: pnpm vitest run --dir ./test --no-file-parallelism
 
       - name: Run type tests
         run: pnpm vitest --dir ./test --typecheck.only --typecheck.ignoreSourceErrors
