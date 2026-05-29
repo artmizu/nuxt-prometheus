@@ -78,6 +78,20 @@ describe('module tests', async () => {
     expect(content).toMatch(/page_request_time\{path="\/c"\} [1-9]+/g)
   })
 
+  it('check nested page routes use the most specific matched route', async () => {
+    const ctx = useTestContext()
+    const page = await createPage('/')
+    await page.goto(`${ctx.url}posts`)
+    await page.goto(`${ctx.url}posts/sample`)
+    await page.goto(`${ctx.url}posts/sample/share`)
+    await page.goto(`${ctx.url}metrics`)
+    const content = await page.textContent('body')
+
+    expect(content).toMatch(/page_render_time\{path="\/posts"\} \d+/g)
+    expect(content).toMatch(/page_render_time\{path="\/posts\/:id\(\)"\} \d+/g)
+    expect(content).toMatch(/page_render_time\{path="\/posts\/:id\(\)\/share"\} \d+/g)
+  })
+
   it('check server route without external requests', async () => {
     const ctx = useTestContext()
     const page = await createPage('/')
