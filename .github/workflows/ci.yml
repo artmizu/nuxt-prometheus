@@ -73,7 +73,7 @@ jobs:
         run: pnpm install
 
       - name: Install Playwright browsers
-        run: pnpm exec playwright-core install
+        run: pnpm exec playwright install chromium --with-deps
 
       - name: Prepare is needed, because it generate types
         run: pnpm dev:prepare
