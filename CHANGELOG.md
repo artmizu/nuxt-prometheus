@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.0.3](https://github.com/artmizu/nuxt-prometheus/compare/v3.0.2...v3.0.3) (2026-05-29)
+
+
+### Bug Fixes
+
+* select most specific route for prometheus event ([e6bb14e](https://github.com/artmizu/nuxt-prometheus/commit/e6bb14ea25d01cb82f1941453c0efe615ca09147))
+* select most specific route for prometheus event ([f33acb0](https://github.com/artmizu/nuxt-prometheus/commit/f33acb05bf114f2bb375890bcd16877ffff93b1d))
+
 ## [3.0.2](https://github.com/artmizu/nuxt-prometheus/compare/v3.0.1...v3.0.2) (2026-05-23)
 
 
