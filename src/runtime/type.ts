@@ -2,8 +2,6 @@ export interface NuxtPrometheusState {
   path?: string
   start: number
   requests: Record<string, { start: number, end: number }>
-  onRequest?: (event: { request: Request }) => void
-  onResponse?: (event: { response: Response }) => void
 }
 
 export interface AnalyticsModuleParams {
