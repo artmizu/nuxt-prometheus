@@ -38,6 +38,14 @@ const module: NuxtModule<Partial<AnalyticsModuleParams>> = defineNuxtModule<Part
     const { resolve } = createResolver(import.meta.url)
     nuxt.options.build.transpile.push(resolve('runtime'))
 
+    // Needed to attribute outbound requests made during SSR render to the
+    // request being handled. A user's explicit setting is preserved by defu.
+    nuxt.options.nitro = defu(nuxt.options.nitro, {
+      experimental: {
+        asyncContext: true,
+      },
+    })
+
     addServerPlugin(resolve('./runtime/nitro'))
 
     addServerHandler({
