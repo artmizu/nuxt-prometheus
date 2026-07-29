@@ -12,11 +12,11 @@ describe('custom module params test', async () => {
     },
   })
 
-  it('health page check', async () => {
+  it('allows an app health page when disabled by nuxt config', async () => {
     const ctx = useTestContext()
     const page = await createPage('/')
     await page.goto(`${ctx.url}health`)
 
-    expect(await page.textContent('body')).toContain('404')
+    expect(await page.textContent('body')).toContain('Nuxt render health OK')
   })
 })
