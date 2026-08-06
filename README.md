@@ -53,6 +53,7 @@ In addition to the [default Node.js metrics](https://github.com/siimon/prom-clie
 | `page_render_time_summary` | Summary | `path` | Distribution of page render times, in ms |
 | `page_request_time_summary` | Summary | `path` | Distribution of external API request times, in ms |
 | `page_total_time_summary` | Summary | `path` | Distribution of total request times, in ms |
+| `page_total_requests` | Counter | `path` | Number of requests received per each page |
 
 All custom metric names can be prefixed using the `prefix` option (e.g., `myapp_page_render_time`).
 

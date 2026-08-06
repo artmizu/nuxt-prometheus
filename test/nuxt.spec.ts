@@ -56,6 +56,11 @@ describe('module tests', async () => {
     expect(content).toMatch(/page_total_time_summary_count\{path="\/"\} [1-9]\d*/g)
     expect(content).toMatch(/page_total_time_summary_count\{path="\/a"\} [1-9]\d*/g)
     expect(content).toMatch(/page_total_time_summary_count\{path="\/b"\} [1-9]\d*/g)
+
+    // Counter metrics
+    expect(content).toMatch(/page_total_requests\{path="\/"\} [1-9]\d*/g)
+    expect(content).toMatch(/page_total_requests\{path="\/a"\} [1-9]\d*/g)
+    expect(content).toMatch(/page_total_requests\{path="\/b"\} [1-9]\d*/g)
   })
 
   it('check the useFetch measuring time on /b route', async () => {
@@ -107,6 +112,7 @@ describe('module tests', async () => {
   it('check server route with external requests', async () => {
     const ctx = useTestContext()
     const page = await createPage('/')
+
     await page.goto(`${ctx.url}api/complex`)
     await page.goto(`${ctx.url}api/complex/sample`)
     await page.goto(`${ctx.url}metrics`)

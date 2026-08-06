@@ -1,5 +1,5 @@
 import type { AnalyticsModuleParams } from './type'
-import { collectDefaultMetrics, Gauge, register, Summary } from 'prom-client'
+import { collectDefaultMetrics, Counter, Gauge, register, Summary } from 'prom-client'
 
 export const metrics = {
   /** If `true`, metrics was initialized with `initMetrics` */
@@ -14,6 +14,9 @@ export const metrics = {
   renderTimeSummary: null as Summary | null,
   requestTimeSummary: null as Summary | null,
   totalTimeSummary: null as Summary | null,
+
+  // Counter
+  totalRequests: null as Counter | null,
 }
 
 export function initMetrics(p: Partial<AnalyticsModuleParams>) {
@@ -60,6 +63,12 @@ export function initMetrics(p: Partial<AnalyticsModuleParams>) {
   metrics.totalTimeSummary = new Summary({
     name: `${prefix}page_total_time_summary`,
     help: 'Total time it took to complete a request',
+    labelNames: ['path'],
+  })
+
+  metrics.totalRequests = new Counter({
+    name: `${prefix}page_total_requests`,
+    help: 'Number of requests received per each page',
     labelNames: ['path'],
   })
 
