@@ -3,7 +3,7 @@ import { ClientRequestInterceptor } from '@mswjs/interceptors/ClientRequest'
 import { FetchInterceptor } from '@mswjs/interceptors/fetch'
 import { XMLHttpRequestInterceptor } from '@mswjs/interceptors/XMLHttpRequest'
 import consola from 'consola'
-import { defineNitroPlugin, useRuntimeConfig } from 'nitropack/runtime'
+import { defineNitroPlugin, useEvent, useRuntimeConfig } from 'nitropack/runtime'
 import { initMetrics, metrics } from './registry'
 import { calculateTime } from './utils'
 
@@ -16,48 +16,58 @@ const interceptor = new BatchInterceptor({
   ],
 })
 
-export default defineNitroPlugin((nitroApp) => {
-  const params = useRuntimeConfig().public.prometheus
+let runtimeParams: ReturnType<typeof useRuntimeConfig>['public']['prometheus']
 
-  if (!params.enabled)
+function onRequest({ request }: { request: Request }) {
+  const event = useEvent()
+  const ctx = event.context.prometheus
+  if (!ctx)
     return
 
-  if (!params.disableRequestInterceptor)
+  const url = new URL(request.url)
+  const isNuxtRequest = /^\/__/.test(url.pathname)
+  if (isNuxtRequest)
+    return
+
+  ctx.requests[request.url] = {
+    start: Date.now(),
+    end: Date.now(),
+  }
+
+  if (runtimeParams?.verbose)
+    consola.info(`[nuxt-prometheus] request: ${request.url}, ${new Date().toISOString()}`)
+}
+
+function onResponse({ response }: { response: Response }) {
+  const event = useEvent()
+  const ctx = event.context.prometheus
+  if (!ctx)
+    return
+
+  const data = ctx.requests[response.url]
+  if (data)
+    data.end = Date.now()
+}
+
+export default defineNitroPlugin((nitroApp) => {
+  runtimeParams = useRuntimeConfig().public.prometheus
+
+  if (!runtimeParams.enabled)
+    return
+
+  if (!runtimeParams.disableRequestInterceptor)
     interceptor.apply()
 
-  initMetrics(params)
+  initMetrics(runtimeParams)
+
+  interceptor.on('request', onRequest)
+  interceptor.on('response', onResponse)
 
   nitroApp.hooks.hook('request', (event) => {
     event.context.prometheus = {
       start: Date.now(),
       requests: {},
-      onRequest({ request }: { request: Request }) {
-        const url = new URL(request.url)
-
-        /**
-         * Exclude Nuxt requests to parts of the application, it's not about business-logic
-         */
-        const isNuxtRequest = /^\/__/.test(url.pathname)
-        if (isNuxtRequest)
-          return
-
-        event.context.prometheus.requests[request.url] = {
-          start: Date.now(),
-          end: Date.now(),
-        }
-
-        if (params.verbose)
-          consola.info(`[nuxt-prometheus] request: ${request.url}, ${new Date().toISOString()}`)
-      },
-      onResponse({ response }: { response: Response }) {
-        const data = event.context.prometheus.requests[response.url]
-        if (data)
-          data.end = Date.now()
-      },
     }
-
-    interceptor.on('request', event.context.prometheus.onRequest!)
-    interceptor.on('response', event.context.prometheus.onResponse!)
   })
 
   /**
@@ -65,11 +75,8 @@ export default defineNitroPlugin((nitroApp) => {
    * and to avoid blocking the request
    */
   nitroApp.hooks.hook('afterResponse', (event) => {
-    interceptor.off('request', event.context.prometheus.onRequest!)
-    interceptor.off('response', event.context.prometheus.onResponse!)
-
     const path = event.context.matchedRoute?.path === '/**' ? event.context?.prometheus?.path : event.context.matchedRoute?.path
-    if (!path)
+    if (!path || !event.context.prometheus)
       return
 
     const time = calculateTime(event.context.prometheus)
@@ -82,20 +89,12 @@ export default defineNitroPlugin((nitroApp) => {
     metrics.requestTimeSummary?.labels(path).observe(time.request)
     metrics.totalTimeSummary?.labels(path).observe(time.total)
 
-    if (params.verbose) {
+    if (runtimeParams?.verbose) {
       consola.info(`[nuxt-prometheus] «${path}» api request time:`, time.request)
       consola.info(`[nuxt-prometheus] «${path}» render time:`, time.render)
       consola.info(`[nuxt-prometheus] «${path}» total time:`, time.total)
     }
   })
 
-  nitroApp.hooks.hook('error', (error, { event }) => {
-    if (event?.context.prometheus.onRequest)
-      interceptor.off('request', event.context.prometheus.onRequest)
-
-    if (event?.context.prometheus.onResponse)
-      interceptor.off('response', event.context.prometheus.onResponse)
-
-    return error
-  })
+  nitroApp.hooks.hook('error', (error, _ctx) => error)
 })
