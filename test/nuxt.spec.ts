@@ -112,7 +112,6 @@ describe('module tests', async () => {
   it('check server route with external requests', async () => {
     const ctx = useTestContext()
     const page = await createPage('/')
-
     await page.goto(`${ctx.url}api/complex`)
     await page.goto(`${ctx.url}api/complex/sample`)
     await page.goto(`${ctx.url}metrics`)
