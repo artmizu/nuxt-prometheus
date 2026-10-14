@@ -46,11 +46,13 @@ const module: NuxtModule<Partial<AnalyticsModuleParams>> = defineNuxtModule<Part
       handler: resolve('./runtime/handler'),
     })
 
-    addServerHandler({
-      route: options.healthCheckPath,
-      method: 'get',
-      handler: resolve('./runtime/health'),
-    })
+    if (options.healthCheck) {
+      addServerHandler({
+        route: options.healthCheckPath,
+        method: 'get',
+        handler: resolve('./runtime/health'),
+      })
+    }
 
     addPlugin({ src: resolve('./runtime/plugin'), mode: 'server' })
   },

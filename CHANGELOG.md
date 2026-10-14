@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.0.4](https://github.com/artmizu/nuxt-prometheus/compare/v3.0.3...v3.0.4) (2026-07-29)
+
+
+### Bug Fixes
+
+* avoid registering disabled health check route ([73063cb](https://github.com/artmizu/nuxt-prometheus/commit/73063cb4672ae29e18fab5b519c969bb9eb293b2))
+* avoid registering disabled health check route ([e9a465c](https://github.com/artmizu/nuxt-prometheus/commit/e9a465c3c404d496a30de539d3d50a446cbd66ef))
+
 ## [3.0.3](https://github.com/artmizu/nuxt-prometheus/compare/v3.0.2...v3.0.3) (2026-05-29)
 
 
