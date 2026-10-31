@@ -158,7 +158,7 @@ try {
   await runLoad('warmup', 1000, baseURL)
   const metrics = await (await fetch(`${baseURL}/metrics`)).text()
   for (const path of ['/', '/api/memory-node']) {
-    const sum = metrics.match(new RegExp(`^page_request_time_summary_sum\\{path="${path}"\\} ([\\d.e+-]+)$`, 'm'))
+    const sum = metrics.match(new RegExp(`^page_request_time_histogram_sum\\{path="${path}"\\} ([\\d.e+-]+)$`, 'm'))
     if (!sum || !(Number(sum[1]) > 0))
       throw new Error(`Outbound request timings are not active for ${path}`)
   }

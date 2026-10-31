@@ -25,12 +25,14 @@ export default defineNuxtModule<Partial<AnalyticsModuleParams>>({
     healthCheckPath: '/health',
     disableRequestInterceptor: false,
     metricsEndpoint: true,
+    histogramBuckets: [],
   },
   async setup(options, nuxt) {
     const moduleOptions = defu(
       nuxt.options.runtimeConfig.public.prometheus,
       options,
     )
+    moduleOptions.histogramBuckets = nuxt.options.runtimeConfig.public.prometheus?.histogramBuckets ?? options.histogramBuckets
     nuxt.options.runtimeConfig.public.prometheus = moduleOptions
 
     const { resolve } = createResolver(import.meta.url)

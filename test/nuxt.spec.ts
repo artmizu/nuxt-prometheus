@@ -44,18 +44,12 @@ describe('module tests', async () => {
     expect(content).toMatch(/page_total_time\{path="\/a"\} \d+/g)
     expect(content).toMatch(/page_total_time\{path="\/b"\} \d+/g)
 
-    // Summary metrics
-    expect(content).toMatch(/page_render_time_summary_count\{path="\/"\} [1-9]\d*/g)
-    expect(content).toMatch(/page_render_time_summary_count\{path="\/a"\} [1-9]\d*/g)
-    expect(content).toMatch(/page_render_time_summary_count\{path="\/b"\} [1-9]\d*/g)
-
-    expect(content).toMatch(/page_request_time_summary_count\{path="\/"\} [1-9]\d*/g)
-    expect(content).toMatch(/page_request_time_summary_count\{path="\/a"\} [1-9]\d*/g)
-    expect(content).toMatch(/page_request_time_summary_count\{path="\/b"\} [1-9]\d*/g)
-
-    expect(content).toMatch(/page_total_time_summary_count\{path="\/"\} [1-9]\d*/g)
-    expect(content).toMatch(/page_total_time_summary_count\{path="\/a"\} [1-9]\d*/g)
-    expect(content).toMatch(/page_total_time_summary_count\{path="\/b"\} [1-9]\d*/g)
+    for (const metric of ['render', 'request', 'total']) {
+      expect(content).toContain(`page_${metric}_time_histogram histogram`)
+      for (const path of ['/', '/a', '/b'])
+        expect(content).toMatch(new RegExp(`page_${metric}_time_histogram_count\\{path="${path}"\\} [1-9]\\d*`))
+    }
+    expect(content).not.toMatch(/page_(?:render|request|total)_time_summary/)
   })
 
   it('check the useFetch measuring time on /b route', async () => {

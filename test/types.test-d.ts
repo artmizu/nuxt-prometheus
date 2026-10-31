@@ -13,6 +13,7 @@ test('AnalyticsModuleParams has correct property types', () => {
   expectTypeOf<AnalyticsModuleParams['healthCheck']>().toEqualTypeOf<boolean>()
   expectTypeOf<AnalyticsModuleParams['disableRequestInterceptor']>().toEqualTypeOf<boolean | undefined>()
   expectTypeOf<AnalyticsModuleParams['metricsEndpoint']>().toEqualTypeOf<boolean | undefined>()
+  expectTypeOf<AnalyticsModuleParams['histogramBuckets']>().toEqualTypeOf<number[] | undefined>()
 
   // String properties
   expectTypeOf<AnalyticsModuleParams['healthCheckPath']>().toEqualTypeOf<string>()
@@ -30,6 +31,7 @@ test('config is assignable with all options', () => {
     prefix: 'myapp_',
     disableRequestInterceptor: false,
     metricsEndpoint: true,
+    histogramBuckets: [10, 100, 1000],
   }
   expectTypeOf(config).toMatchTypeOf<Partial<AnalyticsModuleParams>>()
 })

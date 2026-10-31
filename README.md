@@ -46,6 +46,7 @@ export default {
    ```ts
    import { Counter, register } from '@prometheus-io/client'
    ```
+4. Update dashboard queries to use histograms. Use `histogram_quantile()` for percentiles.
 
 ## Grafana sample setup
 Once the metrics have been collected by Prometheus, you will want to review them. I use Grafana for this purpose, and my metrics setup looks something like this:
@@ -60,11 +61,18 @@ In addition to the [default Node.js metrics](https://github.com/prometheus/clien
 | `page_render_time` | Gauge | `path` | Time spent rendering a page (total minus external request time), in ms |
 | `page_request_time` | Gauge | `path` | Time spent on external API requests during page processing, in ms |
 | `page_total_time` | Gauge | `path` | Total time to complete a request, in ms |
-| `page_render_time_summary` | Summary | `path` | Distribution of page render times, in ms |
-| `page_request_time_summary` | Summary | `path` | Distribution of external API request times, in ms |
-| `page_total_time_summary` | Summary | `path` | Distribution of total request times, in ms |
+| `page_render_time_histogram` | Histogram | `path`, `le` on buckets | Distribution of page render times, in ms |
+| `page_request_time_histogram` | Histogram | `path`, `le` on buckets | Distribution of external API request times, in ms |
+| `page_total_time_histogram` | Histogram | `path`, `le` on buckets | Distribution of total request times, in ms |
 
 All custom metric names can be prefixed using the `prefix` option (e.g., `myapp_page_render_time`).
+
+Histograms export `_bucket`, `_sum`, and `_count` series. The `+Inf` bucket is automatic.
+For the p95 total duration across replicas, in milliseconds:
+
+```promql
+histogram_quantile(0.95, sum by (le, path) (rate(page_total_time_histogram_bucket[5m])))
+```
 
 ## Options
 You can pass it through module options and the nuxt config property `prometheus`.
@@ -99,6 +107,21 @@ You can pass it through module options and the nuxt config property `prometheus`
 - Default: no prefix
 - Description: An optional prefix for metric names
 
+### histogramBuckets
+- Type: `number[]`
+- Default: `[5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000]`
+
+A non-empty list replaces the default boundaries for all three timing histograms. An empty list uses the defaults.
+Use finite, non-negative numbers in strictly increasing order. Values are in milliseconds.
+
+```ts
+export default defineNuxtConfig({
+  prometheus: {
+    histogramBuckets: [10, 50, 100, 250, 500, 1000],
+  },
+})
+```
+
 ### disableRequestInterceptor
 - Type: `boolean`
 - Default: `false`
@@ -127,6 +150,7 @@ All options can be configured at runtime via environment variables following Nux
 | `NUXT_PUBLIC_PROMETHEUS_HEALTH_CHECK` | `healthCheck` | `false` |
 | `NUXT_PUBLIC_PROMETHEUS_METRICS_ENDPOINT` | `metricsEndpoint` | `false` |
 | `NUXT_PUBLIC_PROMETHEUS_PREFIX` | `prefix` | `myapp_` |
+| `NUXT_PUBLIC_PROMETHEUS_HISTOGRAM_BUCKETS` | `histogramBuckets` | `[10, 100, 1000]` |
 | `NUXT_PUBLIC_PROMETHEUS_DISABLE_REQUEST_INTERCEPTOR` | `disableRequestInterceptor` | `true` |
 
 Example usage:
