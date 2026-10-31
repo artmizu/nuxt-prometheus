@@ -84,18 +84,22 @@ export default defineNitroPlugin((nitroApp) => {
 
     const time = calculateTime(event.context.prometheus)
 
-    metrics.renderTime?.labels(path).set(time.render)
-    metrics.requestTime?.labels(path).set(time.request)
     metrics.totalTime?.labels(path).set(time.total)
-
-    metrics.renderTimeHistogram?.labels(path).observe(time.render)
-    metrics.requestTimeHistogram?.labels(path).observe(time.request)
     metrics.totalTimeHistogram?.labels(path).observe(time.total)
 
-    if (params.verbose) {
-      consola.info(`[nuxt-prometheus] «${path}» api request time:`, time.request)
-      consola.info(`[nuxt-prometheus] «${path}» render time:`, time.render)
-      consola.info(`[nuxt-prometheus] «${path}» total time:`, time.total)
+    if (!params.disableRequestInterceptor) {
+      metrics.renderTime?.labels(path).set(time.render)
+      metrics.requestTime?.labels(path).set(time.request)
+      metrics.renderTimeHistogram?.labels(path).observe(time.render)
+      metrics.requestTimeHistogram?.labels(path).observe(time.request)
+
+      if (params.verbose) {
+        consola.info(`[nuxt-prometheus] «${path}» api request time:`, time.request)
+        consola.info(`[nuxt-prometheus] «${path}» render time:`, time.render)
+      }
     }
+
+    if (params.verbose)
+      consola.info(`[nuxt-prometheus] «${path}» total time:`, time.total)
   })
 })

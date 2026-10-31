@@ -46,36 +46,10 @@ export function initMetrics(p: Partial<AnalyticsModuleParams>) {
 
   const prefix = p.prefix ?? ''
 
-  metrics.renderTime = new Gauge({
-    name: `${prefix}page_render_time`,
-    help: 'Time took to render a page',
-    labelNames: ['path'],
-  })
-
-  metrics.requestTime = new Gauge({
-    name: `${prefix}page_request_time`,
-    help: 'Time took to process a request, before rendering page',
-    labelNames: ['path'],
-  })
-
   metrics.totalTime = new Gauge({
     name: `${prefix}page_total_time`,
     help: 'Total time it took to complete a request',
     labelNames: ['path'],
-  })
-
-  metrics.renderTimeHistogram = new Histogram({
-    name: `${prefix}page_render_time_histogram`,
-    help: 'Time took to render a page',
-    labelNames: ['path'],
-    buckets: [...buckets],
-  })
-
-  metrics.requestTimeHistogram = new Histogram({
-    name: `${prefix}page_request_time_histogram`,
-    help: 'Time took to process a request, before rendering page',
-    labelNames: ['path'],
-    buckets: [...buckets],
   })
 
   metrics.totalTimeHistogram = new Histogram({
@@ -84,6 +58,34 @@ export function initMetrics(p: Partial<AnalyticsModuleParams>) {
     labelNames: ['path'],
     buckets: [...buckets],
   })
+
+  if (!p.disableRequestInterceptor) {
+    metrics.renderTime = new Gauge({
+      name: `${prefix}page_render_time`,
+      help: 'Time took to render a page',
+      labelNames: ['path'],
+    })
+
+    metrics.requestTime = new Gauge({
+      name: `${prefix}page_request_time`,
+      help: 'Time took to process a request, before rendering page',
+      labelNames: ['path'],
+    })
+
+    metrics.renderTimeHistogram = new Histogram({
+      name: `${prefix}page_render_time_histogram`,
+      help: 'Time took to render a page',
+      labelNames: ['path'],
+      buckets: [...buckets],
+    })
+
+    metrics.requestTimeHistogram = new Histogram({
+      name: `${prefix}page_request_time_histogram`,
+      help: 'Time took to process a request, before rendering page',
+      labelNames: ['path'],
+      buckets: [...buckets],
+    })
+  }
 
   metrics.isInitialized = true
 }

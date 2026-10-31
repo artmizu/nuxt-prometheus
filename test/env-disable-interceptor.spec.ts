@@ -14,7 +14,7 @@ describe('check NUXT_PUBLIC_PROMETHEUS_DISABLE_REQUEST_INTERCEPTOR env variable'
     },
   })
 
-  it('should not track external request time when interceptor is disabled via env', async () => {
+  it('omits unavailable timing metrics when interception is disabled via env', async () => {
     const ctx = useTestContext()
     const page = await createPage('/')
 
@@ -24,8 +24,13 @@ describe('check NUXT_PUBLIC_PROMETHEUS_DISABLE_REQUEST_INTERCEPTOR env variable'
 
     const content = await page.textContent('body')
 
-    // page_request_time should be 0 when interceptor is disabled
-    // (the metric exists but external requests are not tracked)
-    expect(content).toMatch(/playground_page_request_time\{path="\/b"\} 0/)
+    expect(content).not.toContain('playground_page_request_time')
+    expect(content).not.toContain('playground_page_render_time')
+    expect(content).toMatch(/playground_page_total_time\{path="\/b"\} [1-9]\d*/)
+    expect(content).toMatch(/playground_page_total_time_histogram_sum\{path="\/b"\} [1-9]\d*/)
+    expect(content).toMatch(/playground_page_total_time_histogram_count\{path="\/b"\} [1-9]\d*/)
+
+    await page.goto(`${ctx.url}health`)
+    expect(await page.textContent('body')).toContain('ok')
   })
 })
