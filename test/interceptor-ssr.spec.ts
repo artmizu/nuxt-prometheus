@@ -13,7 +13,9 @@ describe('interceptor SSR attribution', async () => {
     upstream.listen(0, '127.0.0.1', resolve)
   })
   afterAll(() => new Promise<void>((resolve, reject) => {
-    upstream.close(error => error ? reject(error) : resolve())
+    upstream.close(error => error
+      ? reject(error)
+      : resolve())
   }))
   const address = upstream.address()
   if (!address || typeof address === 'string')

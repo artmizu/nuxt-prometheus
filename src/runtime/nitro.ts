@@ -76,7 +76,9 @@ export default defineNitroPlugin((nitroApp) => {
     if (!event.context.prometheus)
       return
 
-    const path = event.context.matchedRoute?.path === '/**' ? event.context?.prometheus?.path : event.context.matchedRoute?.path
+    const path = event.context.matchedRoute?.path === '/**'
+      ? event.context?.prometheus?.path
+      : event.context.matchedRoute?.path
     if (!path)
       return
 

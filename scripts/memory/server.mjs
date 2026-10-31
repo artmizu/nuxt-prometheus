@@ -6,7 +6,9 @@ process.on('message', (message) => {
     if (message.type === 'sample') {
       globalThis.gc()
       globalThis.gc()
-      process.send({ memory: process.memoryUsage() })
+      process.send({
+        memory: process.memoryUsage(),
+      })
     }
     else if (message.type === 'snapshot') {
       writeHeapSnapshot(message.path)

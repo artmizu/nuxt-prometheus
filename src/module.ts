@@ -57,6 +57,9 @@ export default defineNuxtModule<Partial<AnalyticsModuleParams>>({
       })
     }
 
-    addPlugin({ src: resolve('./runtime/plugin'), mode: 'server' })
+    addPlugin({
+      src: resolve('./runtime/plugin'),
+      mode: 'server',
+    })
   },
 })

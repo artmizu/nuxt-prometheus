@@ -39,19 +39,13 @@ export default {
 
 ## Upgrading to 4.0.0
 
-Version 4 supports Node.js 22 (22.22.3 or newer), 24 (24.15.0 or newer), and 26 or newer.
-Development and CI use Node.js 26.13.0 LTS.
+1. Use Node.js 22 (22.22.3+), 24 (24.15.0+), or 26+.
+2. Update `@artmizu/nuxt-prometheus` to `4.0.0`.
+3. If you register custom metrics, replace `prom-client` with `@prometheus-io/client` in your dependencies and imports:
 
-The metrics client changed from `prom-client` to `@prometheus-io/client`.
-If you register custom metrics, update their imports to use the new package and its shared registry:
-
-```ts
-import { Counter, register } from '@prometheus-io/client'
-```
-
-Existing metric names, labels, and millisecond units remain unchanged.
-The endpoints return standard responses compatible with Nuxt's Nitro 2 runtime.
-The module uses H3 1, matching Nitro 2. Dependencies follow the latest stable versions compatible with this stack.
+   ```ts
+   import { Counter, register } from '@prometheus-io/client'
+   ```
 
 ## Grafana sample setup
 Once the metrics have been collected by Prometheus, you will want to review them. I use Grafana for this purpose, and my metrics setup looks something like this:
@@ -148,7 +142,6 @@ NUXT_PUBLIC_PROMETHEUS_PREFIX=myapp_ node .output/server/index.mjs
 
 The build uses TypeScript 5.9.3 because the current Nuxt module builder does not support the TypeScript 7 compiler API.
 The interceptor stays at 0.41.9 to preserve Nitro request context across reused connections.
-The project pins pnpm 12. Older pnpm versions cannot launch its standalone binary; use Corepack or install the current pnpm version.
 
 ```bash
 # Install dependencies

@@ -19,7 +19,9 @@ const runtime = await vi.hoisted(async () => {
 
 vi.mock('nitropack/runtime', () => ({
   defineNitroPlugin: (callback: unknown) => callback,
-  useRuntimeConfig: () => ({ public: { prometheus: runtime.params } }),
+  useRuntimeConfig: () => ({
+    public: { prometheus: runtime.params },
+  }),
   useEvent: () => {
     const event = runtime.context.getStore()
     if (!event)
