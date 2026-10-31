@@ -89,6 +89,18 @@ You can pass it through module options and the nuxt config property `prometheus`
 - Default: no prefix
 - Description: An optional prefix for metric names
 
+### disableRequestInterceptor
+- Type: `boolean`
+- Default: `false`
+- Description: Disables interception of outbound HTTP requests.
+
+When interception is active, the module enables Nitro's experimental async context by default.
+This context keeps outbound request timings separate for concurrent server requests, including SSR.
+Background requests without a Nitro request context do not contribute to page timings.
+
+An explicit `nitro.experimental.asyncContext: false` remains unchanged, but outbound request timings require this feature.
+See the [Nitro async context documentation](https://v2.nitro.build/guide/utils#async-context-experimental) for runtime support and limitations.
+
 ### metricsEndpoint
 - Type: `boolean`
 - Default: `true`

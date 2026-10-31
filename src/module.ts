@@ -38,6 +38,11 @@ const module: NuxtModule<Partial<AnalyticsModuleParams>> = defineNuxtModule<Part
     const { resolve } = createResolver(import.meta.url)
     nuxt.options.build.transpile.push(resolve('runtime'))
 
+    if (moduleOptions.enabled && !moduleOptions.disableRequestInterceptor) {
+      nuxt.options.nitro.experimental ??= {}
+      nuxt.options.nitro.experimental.asyncContext ??= true
+    }
+
     addServerPlugin(resolve('./runtime/nitro'))
 
     addServerHandler({
