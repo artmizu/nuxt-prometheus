@@ -1,6 +1,6 @@
 ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/artmizu/nuxt-prometheus/release.yml?branch=main)
 
-![Cover](https://raw.githubusercontent.com/artmizu/nuxt-prometheus/main/.github/cover.jpg)
+![Nuxt Prometheus Grafana dashboard](https://raw.githubusercontent.com/artmizu/nuxt-prometheus/main/examples/grafana/dashboard.png)
 
 # Prometheus integration for Nuxt
 Allows you to better understand what's going on with your application and how to optimize performance and other things in production. **Nuxt 2** users can use [this version](https://github.com/artmizu/analytics-nuxt-2).
@@ -51,8 +51,6 @@ export default {
 ## Grafana dashboard
 
 A ready-to-use dashboard lives in [examples/grafana](./examples/grafana), together with a Docker Compose stack that starts Prometheus and Grafana with the dashboard already provisioned.
-
-![Nuxt Prometheus dashboard](./examples/grafana/dashboard.png)
 
 See [examples/grafana/README.md](./examples/grafana/README.md) for the import steps, the queries behind each panel, and how to point Prometheus at your app.
 
