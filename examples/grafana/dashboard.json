@@ -2,14 +2,20 @@
   "uid": "nuxt-prometheus",
   "title": "Nuxt Prometheus",
   "description": "Page timings and Node.js runtime metrics exported by @artmizu/nuxt-prometheus.",
-  "tags": ["nuxt", "prometheus"],
+  "tags": [
+    "nuxt",
+    "prometheus"
+  ],
   "timezone": "browser",
   "schemaVersion": 40,
   "version": 1,
   "refresh": "10s",
   "editable": true,
   "graphTooltip": 1,
-  "time": { "from": "now-30m", "to": "now" },
+  "time": {
+    "from": "now-30m",
+    "to": "now"
+  },
   "templating": {
     "list": [
       {
@@ -17,7 +23,11 @@
         "label": "Data source",
         "type": "datasource",
         "query": "prometheus",
-        "current": { "selected": false, "text": "Prometheus", "value": "prometheus" },
+        "current": {
+          "selected": false,
+          "text": "Prometheus",
+          "value": "prometheus"
+        },
         "hide": 0,
         "includeAll": false,
         "multi": false,
@@ -31,8 +41,18 @@
         "description": "Value of the prometheus.prefix option. Leave empty when no prefix is set.",
         "type": "textbox",
         "query": "",
-        "current": { "selected": false, "text": "", "value": "" },
-        "options": [{ "selected": true, "text": "", "value": "" }],
+        "current": {
+          "selected": false,
+          "text": "",
+          "value": ""
+        },
+        "options": [
+          {
+            "selected": true,
+            "text": "",
+            "value": ""
+          }
+        ],
         "hide": 0,
         "skipUrlSync": false
       }
@@ -43,19 +63,43 @@
       "id": 1,
       "type": "stat",
       "title": "Requests per second",
-      "gridPos": { "h": 5, "w": 6, "x": 0, "y": 0 },
-      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 0,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
       "fieldConfig": {
         "defaults": {
           "unit": "reqps",
           "decimals": 2,
-          "color": { "mode": "thresholds" },
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
         },
         "overrides": []
       },
       "options": {
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
         "graphMode": "area",
         "colorMode": "value",
         "textMode": "auto"
@@ -63,7 +107,10 @@
       "targets": [
         {
           "refId": "A",
-          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
           "expr": "sum(rate(${prefix}page_total_time_histogram_count[$__rate_interval]))",
           "legendFormat": "requests",
           "instant": false,
@@ -75,26 +122,51 @@
       "id": 2,
       "type": "stat",
       "title": "Total time p95",
-      "gridPos": { "h": 5, "w": 6, "x": 6, "y": 0 },
-      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 6,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
       "fieldConfig": {
         "defaults": {
           "unit": "ms",
           "decimals": 1,
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "green", "value": null },
-              { "color": "orange", "value": 250 },
-              { "color": "red", "value": 1000 }
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 250
+              },
+              {
+                "color": "red",
+                "value": 1000
+              }
             ]
           }
         },
         "overrides": []
       },
       "options": {
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
         "graphMode": "area",
         "colorMode": "value",
         "textMode": "auto"
@@ -102,7 +174,10 @@
       "targets": [
         {
           "refId": "A",
-          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
           "expr": "histogram_quantile(0.95, sum by (le) (rate(${prefix}page_total_time_histogram_bucket[$__rate_interval])))",
           "legendFormat": "p95",
           "instant": false,
@@ -113,20 +188,112 @@
     {
       "id": 3,
       "type": "stat",
-      "title": "Routes tracked",
-      "gridPos": { "h": 5, "w": 6, "x": 12, "y": 0 },
-      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "title": "Non-2xx share",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 12,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Share of requests answered with a status outside 2xx, from the status_code label.",
       "fieldConfig": {
         "defaults": {
-          "unit": "short",
-          "decimals": 0,
-          "color": { "mode": "thresholds" },
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "blue", "value": null }] }
+          "unit": "percentunit",
+          "decimals": 2,
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 0.01
+              },
+              {
+                "color": "red",
+                "value": 0.05
+              }
+            ]
+          }
         },
         "overrides": []
       },
       "options": {
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "graphMode": "area",
+        "colorMode": "value",
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "(sum(rate(${prefix}page_total_time_histogram_count{status_code!~\"2..\"}[$__rate_interval])) / sum(rate(${prefix}page_total_time_histogram_count[$__rate_interval]))) or vector(0)",
+          "legendFormat": "non-2xx",
+          "instant": false,
+          "range": true
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Routes tracked",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 18,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
         "graphMode": "none",
         "colorMode": "value",
         "textMode": "auto"
@@ -134,7 +301,10 @@
       "targets": [
         {
           "refId": "A",
-          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
           "expr": "count(count by (path) (${prefix}page_total_time))",
           "legendFormat": "routes",
           "instant": true,
@@ -143,60 +313,63 @@
       ]
     },
     {
-      "id": 4,
-      "type": "stat",
-      "title": "Heap used",
-      "gridPos": { "h": 5, "w": 6, "x": 18, "y": 0 },
-      "datasource": { "type": "prometheus", "uid": "${datasource}" },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "bytes",
-          "decimals": 1,
-          "color": { "mode": "thresholds" },
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }
-        },
-        "overrides": []
+      "id": 5,
+      "type": "row",
+      "title": "Timing by route",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 5
       },
-      "options": {
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
-        "graphMode": "area",
-        "colorMode": "value",
-        "textMode": "auto"
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "${prefix}nodejs_heap_size_used_bytes",
-          "legendFormat": "heap used",
-          "instant": false,
-          "range": true
-        }
-      ]
+      "panels": []
     },
     {
-      "id": 10,
+      "id": 6,
       "type": "timeseries",
-      "title": "Requests per second by route",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 5 },
-      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "title": "Total time p95 by route",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 6
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
       "fieldConfig": {
         "defaults": {
-          "unit": "reqps",
-          "decimals": 2,
-          "custom": { "lineWidth": 2, "fillOpacity": 10, "showPoints": "never" }
+          "unit": "ms",
+          "decimals": 1,
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 0,
+            "showPoints": "never"
+          }
         },
         "overrides": []
       },
       "options": {
-        "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "max"] },
-        "tooltip": { "mode": "multi", "sort": "desc" }
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
       },
       "targets": [
         {
           "refId": "A",
-          "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "sum by (path) (rate(${prefix}page_total_time_histogram_count[$__rate_interval]))",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "histogram_quantile(0.95, sum by (le, path) (rate(${prefix}page_total_time_histogram_bucket[$__rate_interval])))",
           "legendFormat": "{{path}}",
           "instant": false,
           "range": true
@@ -204,28 +377,240 @@
       ]
     },
     {
-      "id": 11,
+      "id": 7,
       "type": "timeseries",
-      "title": "Total time p95 by route",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 5 },
-      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "title": "Request time p95 by route",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 6
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Time spent in outbound requests during SSR. Requires the request interceptor.",
       "fieldConfig": {
         "defaults": {
           "unit": "ms",
           "decimals": 1,
-          "custom": { "lineWidth": 2, "fillOpacity": 10, "showPoints": "never" }
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 0,
+            "showPoints": "never"
+          }
         },
         "overrides": []
       },
       "options": {
-        "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "max"] },
-        "tooltip": { "mode": "multi", "sort": "desc" }
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
       },
       "targets": [
         {
           "refId": "A",
-          "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "histogram_quantile(0.95, sum by (le, path) (rate(${prefix}page_total_time_histogram_bucket[$__rate_interval])))",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "histogram_quantile(0.95, sum by (le, path) (rate(${prefix}page_request_time_histogram_bucket[$__rate_interval])))",
+          "legendFormat": "{{path}}",
+          "instant": false,
+          "range": true
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "Render time p95 by route",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 14
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Total time minus outbound request time. Requires the request interceptor.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "decimals": 1,
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 0,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "histogram_quantile(0.95, sum by (le, path) (rate(${prefix}page_render_time_histogram_bucket[$__rate_interval])))",
+          "legendFormat": "{{path}}",
+          "instant": false,
+          "range": true
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "type": "timeseries",
+      "title": "Total time percentiles",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 14
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "decimals": 1,
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 0,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "histogram_quantile(0.50, sum by (le) (rate(${prefix}page_total_time_histogram_bucket[$__rate_interval])))",
+          "legendFormat": "p50",
+          "instant": false,
+          "range": true
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "histogram_quantile(0.90, sum by (le) (rate(${prefix}page_total_time_histogram_bucket[$__rate_interval])))",
+          "legendFormat": "p90",
+          "instant": false,
+          "range": true
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "histogram_quantile(0.99, sum by (le) (rate(${prefix}page_total_time_histogram_bucket[$__rate_interval])))",
+          "legendFormat": "p99",
+          "instant": false,
+          "range": true
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "type": "row",
+      "title": "Throughput and status",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 22
+      },
+      "panels": []
+    },
+    {
+      "id": 11,
+      "type": "timeseries",
+      "title": "Requests per second by route",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 23
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "decimals": 2,
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (path) (rate(${prefix}page_total_time_histogram_count[$__rate_interval]))",
           "legendFormat": "{{path}}",
           "instant": false,
           "range": true
@@ -235,43 +620,49 @@
     {
       "id": 12,
       "type": "timeseries",
-      "title": "Total time percentiles",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 13 },
-      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "title": "Requests per second by status code",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 23
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
       "fieldConfig": {
         "defaults": {
-          "unit": "ms",
-          "decimals": 1,
-          "custom": { "lineWidth": 2, "fillOpacity": 0, "showPoints": "never" }
+          "unit": "reqps",
+          "decimals": 2,
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "showPoints": "never"
+          }
         },
         "overrides": []
       },
       "options": {
-        "legend": { "displayMode": "list", "placement": "bottom" },
-        "tooltip": { "mode": "multi", "sort": "desc" }
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
       },
       "targets": [
         {
           "refId": "A",
-          "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "histogram_quantile(0.50, sum by (le) (rate(${prefix}page_total_time_histogram_bucket[$__rate_interval])))",
-          "legendFormat": "p50",
-          "instant": false,
-          "range": true
-        },
-        {
-          "refId": "B",
-          "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "histogram_quantile(0.90, sum by (le) (rate(${prefix}page_total_time_histogram_bucket[$__rate_interval])))",
-          "legendFormat": "p90",
-          "instant": false,
-          "range": true
-        },
-        {
-          "refId": "C",
-          "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "histogram_quantile(0.99, sum by (le) (rate(${prefix}page_total_time_histogram_bucket[$__rate_interval])))",
-          "legendFormat": "p99",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (status_code) (rate(${prefix}page_total_time_histogram_count[$__rate_interval]))",
+          "legendFormat": "{{status_code}}",
           "instant": false,
           "range": true
         }
@@ -279,56 +670,36 @@
     },
     {
       "id": 13,
-      "type": "timeseries",
-      "title": "Request and render time (mean)",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 13 },
-      "datasource": { "type": "prometheus", "uid": "${datasource}" },
-      "description": "Request time requires the request interceptor. When it is disabled, only total time is recorded.",
-      "fieldConfig": {
-        "defaults": {
-          "unit": "ms",
-          "decimals": 1,
-          "custom": { "lineWidth": 2, "fillOpacity": 10, "showPoints": "never" }
-        },
-        "overrides": []
-      },
-      "options": {
-        "legend": { "displayMode": "list", "placement": "bottom" },
-        "tooltip": { "mode": "multi", "sort": "desc" }
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "sum(rate(${prefix}page_request_time_histogram_sum[$__rate_interval])) / sum(rate(${prefix}page_request_time_histogram_count[$__rate_interval]))",
-          "legendFormat": "request",
-          "instant": false,
-          "range": true
-        },
-        {
-          "refId": "B",
-          "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "sum(rate(${prefix}page_render_time_histogram_sum[$__rate_interval])) / sum(rate(${prefix}page_render_time_histogram_count[$__rate_interval]))",
-          "legendFormat": "render",
-          "instant": false,
-          "range": true
-        }
-      ]
-    },
-    {
-      "id": 14,
       "type": "bargauge",
       "title": "Slowest routes",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 21 },
-      "datasource": { "type": "prometheus", "uid": "${datasource}" },
-      "description": "Last recorded total time per route. The gauge keeps the most recent request, the histogram holds the distribution.",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 31
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Last recorded total time per route and status code. The gauge keeps the most recent request, the histogram holds the distribution.",
       "fieldConfig": {
         "defaults": {
           "unit": "ms",
           "decimals": 1,
           "min": 0,
-          "color": { "mode": "continuous-GrYlRd" },
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }
+          "color": {
+            "mode": "continuous-GrYlRd"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
         },
         "overrides": []
       },
@@ -336,120 +707,217 @@
         "orientation": "horizontal",
         "displayMode": "gradient",
         "showUnfilled": true,
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
-        "legend": { "displayMode": "list", "placement": "bottom" }
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
       },
       "targets": [
         {
           "refId": "A",
-          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
           "expr": "topk(10, ${prefix}page_total_time)",
-          "legendFormat": "{{path}}",
+          "legendFormat": "{{path}} {{status_code}}",
           "instant": true,
           "range": false
         }
       ]
     },
     {
-      "id": 15,
-      "type": "timeseries",
-      "title": "Event loop lag p99",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 21 },
-      "datasource": { "type": "prometheus", "uid": "${datasource}" },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "s",
-          "decimals": 3,
-          "custom": { "lineWidth": 2, "fillOpacity": 10, "showPoints": "never" }
-        },
-        "overrides": []
+      "id": 14,
+      "type": "row",
+      "title": "Node.js runtime",
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 39
       },
-      "options": {
-        "legend": { "displayMode": "list", "placement": "bottom" },
-        "tooltip": { "mode": "single" }
-      },
-      "targets": [
+      "panels": [
         {
-          "refId": "A",
-          "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "${prefix}nodejs_eventloop_lag_p99_seconds",
-          "legendFormat": "p99",
-          "instant": false,
-          "range": true
-        }
-      ]
-    },
-    {
-      "id": 16,
-      "type": "timeseries",
-      "title": "Process CPU",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 29 },
-      "datasource": { "type": "prometheus", "uid": "${datasource}" },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "percentunit",
-          "decimals": 2,
-          "custom": { "lineWidth": 2, "fillOpacity": 10, "showPoints": "never" }
-        },
-        "overrides": []
-      },
-      "options": {
-        "legend": { "displayMode": "list", "placement": "bottom" },
-        "tooltip": { "mode": "single" }
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "rate(${prefix}process_cpu_seconds_total[$__rate_interval])",
-          "legendFormat": "cpu",
-          "instant": false,
-          "range": true
-        }
-      ]
-    },
-    {
-      "id": 17,
-      "type": "timeseries",
-      "title": "Memory",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 29 },
-      "datasource": { "type": "prometheus", "uid": "${datasource}" },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "bytes",
-          "decimals": 1,
-          "custom": { "lineWidth": 2, "fillOpacity": 10, "showPoints": "never" }
-        },
-        "overrides": []
-      },
-      "options": {
-        "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "max"] },
-        "tooltip": { "mode": "multi", "sort": "desc" }
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "${prefix}nodejs_heap_size_used_bytes",
-          "legendFormat": "heap used",
-          "instant": false,
-          "range": true
+          "id": 15,
+          "type": "timeseries",
+          "title": "Event loop lag p99",
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 40
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s",
+              "decimals": 3,
+              "custom": {
+                "lineWidth": 2,
+                "fillOpacity": 10,
+                "showPoints": "never"
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom"
+            },
+            "tooltip": {
+              "mode": "single"
+            }
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${datasource}"
+              },
+              "expr": "${prefix}nodejs_eventloop_lag_p99_seconds",
+              "legendFormat": "p99",
+              "instant": false,
+              "range": true
+            }
+          ]
         },
         {
-          "refId": "B",
-          "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "${prefix}nodejs_heap_size_total_bytes",
-          "legendFormat": "heap total",
-          "instant": false,
-          "range": true
+          "id": 16,
+          "type": "timeseries",
+          "title": "Process CPU",
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 40
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percentunit",
+              "decimals": 2,
+              "custom": {
+                "lineWidth": 2,
+                "fillOpacity": 10,
+                "showPoints": "never"
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom"
+            },
+            "tooltip": {
+              "mode": "single"
+            }
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${datasource}"
+              },
+              "expr": "rate(${prefix}process_cpu_seconds_total[$__rate_interval])",
+              "legendFormat": "cpu",
+              "instant": false,
+              "range": true
+            }
+          ]
         },
         {
-          "refId": "C",
-          "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "${prefix}process_resident_memory_bytes",
-          "legendFormat": "resident",
-          "instant": false,
-          "range": true
+          "id": 17,
+          "type": "timeseries",
+          "title": "Memory",
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 48
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "bytes",
+              "decimals": 1,
+              "custom": {
+                "lineWidth": 2,
+                "fillOpacity": 10,
+                "showPoints": "never"
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "displayMode": "table",
+              "placement": "bottom",
+              "calcs": [
+                "lastNotNull",
+                "max"
+              ]
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${datasource}"
+              },
+              "expr": "${prefix}nodejs_heap_size_used_bytes",
+              "legendFormat": "heap used",
+              "instant": false,
+              "range": true
+            },
+            {
+              "refId": "B",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${datasource}"
+              },
+              "expr": "${prefix}nodejs_heap_size_total_bytes",
+              "legendFormat": "heap total",
+              "instant": false,
+              "range": true
+            },
+            {
+              "refId": "C",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${datasource}"
+              },
+              "expr": "${prefix}process_resident_memory_bytes",
+              "legendFormat": "resident",
+              "instant": false,
+              "range": true
+            }
+          ]
         }
       ]
     }
