@@ -48,7 +48,6 @@ export interface AnalyticsModuleParams {
   /**
    * Whether to expose the metrics endpoint.
    * When false, metrics are still collected but the endpoint is not registered.
-   * This allows you to access metrics programmatically via prom-client's register.
    * @default true
    */
   metricsEndpoint?: boolean

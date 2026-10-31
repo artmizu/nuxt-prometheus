@@ -1,3 +1,4 @@
+import type { NuxtPrometheusState } from './type'
 import { BatchInterceptor } from '@mswjs/interceptors'
 import { ClientRequestInterceptor } from '@mswjs/interceptors/ClientRequest'
 import { FetchInterceptor } from '@mswjs/interceptors/fetch'
@@ -16,7 +17,7 @@ const interceptor = new BatchInterceptor({
   ],
 })
 
-function getRequestState() {
+function getRequestState(): NuxtPrometheusState | undefined {
   try {
     return useEvent().context.prometheus
   }
@@ -75,7 +76,9 @@ export default defineNitroPlugin((nitroApp) => {
     if (!event.context.prometheus)
       return
 
-    const path = event.context.matchedRoute?.path === '/**' ? event.context?.prometheus?.path : event.context.matchedRoute?.path
+    const path = event.context.matchedRoute?.path === '/**'
+      ? event.context?.prometheus?.path
+      : event.context.matchedRoute?.path
     if (!path)
       return
 

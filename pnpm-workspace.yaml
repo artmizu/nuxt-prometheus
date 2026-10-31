@@ -1,12 +1,19 @@
-shellEmulator: true
+minimumReleaseAgeExcludePrune: true
+minimumReleaseAgeExclude:
+  - eslint@10.14.0
 
 trustPolicy: no-downgrade
-
 trustPolicyExclude:
   - chokidar@4.0.3
+
+shamefullyHoist: true
+shellEmulator: true
 
 packages:
   - playground
 
-onlyBuiltDependencies:
-  - esbuild
+overrides:
+  semver@6: 7.8.5
+
+allowBuilds:
+  esbuild: true

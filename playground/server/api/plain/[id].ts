@@ -1,9 +1,9 @@
-import { defineEventHandler, getRouterParams } from 'h3'
+import { getRouterParams } from 'h3'
 
-export default defineEventHandler((event) => {
+export default function plainIdHandler(event: Parameters<typeof getRouterParams>[0]) {
   const params = getRouterParams(event)
 
   return {
     id: params.id,
   }
-})
+}

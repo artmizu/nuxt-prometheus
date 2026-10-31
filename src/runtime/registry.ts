@@ -1,5 +1,5 @@
 import type { AnalyticsModuleParams } from './type'
-import { collectDefaultMetrics, Gauge, register, Summary } from 'prom-client'
+import { collectDefaultMetrics, Gauge, register, Summary } from '@prometheus-io/client'
 
 export const metrics = {
   /** If `true`, metrics was initialized with `initMetrics` */

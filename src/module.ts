@@ -1,4 +1,3 @@
-import type { NuxtModule } from '@nuxt/schema'
 import type { AnalyticsModuleParams } from './runtime/type'
 import { addPlugin, addServerHandler, addServerPlugin, createResolver, defineNuxtModule } from '@nuxt/kit'
 import { defu } from 'defu'
@@ -9,8 +8,7 @@ export interface ModulePublicRuntimeConfig {
   prometheus: Partial<AnalyticsModuleParams>
 }
 
-// immediate return via export default brings the build errors
-const module: NuxtModule<Partial<AnalyticsModuleParams>> = defineNuxtModule<Partial<AnalyticsModuleParams>>({
+export default defineNuxtModule<Partial<AnalyticsModuleParams>>({
   meta: {
     name,
     version,
@@ -59,8 +57,9 @@ const module: NuxtModule<Partial<AnalyticsModuleParams>> = defineNuxtModule<Part
       })
     }
 
-    addPlugin({ src: resolve('./runtime/plugin'), mode: 'server' })
+    addPlugin({
+      src: resolve('./runtime/plugin'),
+      mode: 'server',
+    })
   },
 })
-
-export default module

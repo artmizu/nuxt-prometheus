@@ -1,15 +1,10 @@
-import { createError, defineEventHandler } from 'h3'
 import { useRuntimeConfig } from 'nitropack/runtime'
 
-export default defineEventHandler(() => {
+export default function healthHandler() {
   const params = useRuntimeConfig().public.prometheus
 
-  if (!params.healthCheck) {
-    throw createError({
-      statusCode: 404,
-      statusMessage: 'Not Found',
-    })
-  }
+  if (!params.healthCheck)
+    return new Response('Not Found', { status: 404 })
 
   return 'ok'
-})
+}

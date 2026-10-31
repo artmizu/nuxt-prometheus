@@ -15,9 +15,9 @@ describe('disable metrics endpoint test', async () => {
   it('metrics endpoint should return 404 when disabled', async () => {
     const ctx = useTestContext()
     const page = await createPage('/')
-    await page.goto(`${ctx.url}metrics`)
+    const response = await page.goto(`${ctx.url}metrics`)
 
-    expect(await page.textContent('body')).toContain('404')
+    expect(response?.status()).toBe(404)
   })
 
   it('health endpoint should still work', async () => {

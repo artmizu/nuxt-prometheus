@@ -32,7 +32,9 @@ export default function () {
       timeout: '5ms',
       tags: { kind: 'aborted' },
     })
-    check(response, { 'stream request timed out': result => result.error_code === 1050 })
+    check(response, {
+      'stream request timed out': result => result.error_code === 1050,
+    })
     return
   }
 

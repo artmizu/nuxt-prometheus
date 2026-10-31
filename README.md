@@ -2,7 +2,7 @@
 
 ![Cover](https://raw.githubusercontent.com/artmizu/nuxt-prometheus/main/.github/cover.jpg)
 
-# 📊 Prometheus integration for Nuxt 3
+# Prometheus integration for Nuxt
 Allows you to better understand what's going on with your application and how to optimize performance and other things in production. **Nuxt 2** users can use [this version](https://github.com/artmizu/analytics-nuxt-2).
 
 ## Features
@@ -37,13 +37,23 @@ export default {
 }
 ```
 
+## Upgrading to 4.0.0
+
+1. Use Node.js 22 (22.22.3+), 24 (24.15.0+), or 26+.
+2. Update `@artmizu/nuxt-prometheus` to `4.0.0`.
+3. If you register custom metrics, replace `prom-client` with `@prometheus-io/client` in your dependencies and imports:
+
+   ```ts
+   import { Counter, register } from '@prometheus-io/client'
+   ```
+
 ## Grafana sample setup
 Once the metrics have been collected by Prometheus, you will want to review them. I use Grafana for this purpose, and my metrics setup looks something like this:
 ![Cover](https://raw.githubusercontent.com/artmizu/nuxt-prometheus/main/.github/grafana.jpg)
 
 ## Collected Metrics
 
-In addition to the [default Node.js metrics](https://github.com/siimon/prom-client#default-metrics) provided by `prom-client`, this module collects the following custom metrics:
+In addition to the [default Node.js metrics](https://github.com/prometheus/client_js#default-metrics) provided by `@prometheus-io/client`, this module collects the following custom metrics:
 
 | Metric | Type | Labels | Description |
 |--------|------|--------|-------------|
@@ -104,7 +114,7 @@ See the [Nitro async context documentation](https://v2.nitro.build/guide/utils#a
 ### metricsEndpoint
 - Type: `boolean`
 - Default: `true`
-- Description: Whether to expose the `/metrics` endpoint. When set to `false`, metrics are still collected internally but the endpoint is not registered. This allows you to access metrics programmatically via prom-client's `register` object and expose them on a separate internal port.
+- Description: Whether to expose the `/metrics` endpoint. When set to `false`, metrics are still collected internally but the endpoint is not registered. This allows you to access metrics programmatically via the `register` object from `@prometheus-io/client` and expose them on a separate internal port.
 
 ## Runtime Environment Variables
 
@@ -129,6 +139,9 @@ NUXT_PUBLIC_PROMETHEUS_PREFIX=myapp_ node .output/server/index.mjs
 ```
 
 ## Development
+
+The build uses TypeScript 5.9.3 because the current Nuxt module builder does not support the TypeScript 7 compiler API.
+The interceptor stays at 0.41.9 to preserve Nitro request context across reused connections.
 
 ```bash
 # Install dependencies

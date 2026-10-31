@@ -43,7 +43,9 @@ async function freePort() {
   probe.listen(0, '127.0.0.1')
   await once(probe, 'listening')
   const port = probe.address().port
-  await new Promise((resolve, reject) => probe.close(error => error ? reject(error) : resolve()))
+  await new Promise((resolve, reject) => probe.close(error => error
+    ? reject(error)
+    : resolve()))
   return port
 }
 
@@ -53,7 +55,9 @@ async function waitForServer(url) {
     if (server.exitCode !== null || server.signalCode !== null)
       throw new Error('Fixture server exited before it became ready')
     try {
-      const response = await fetch(`${url}/health`, { signal: AbortSignal.timeout(1000) })
+      const response = await fetch(`${url}/health`, {
+        signal: AbortSignal.timeout(1000),
+      })
       await response.text()
       if (response.ok)
         return
@@ -67,9 +71,20 @@ async function waitForServer(url) {
 async function runLoad(label, count, baseURL) {
   const log = openSync(resolve(output, `${label}.log`), 'w')
   try {
-    load = spawn('k6', ['run', '--quiet', '--summary-export', resolve(output, `${label}-k6.json`), 'k6/memory.test.js'], {
+    load = spawn('k6', [
+      'run',
+      '--quiet',
+      '--summary-export',
+      resolve(output, `${label}-k6.json`),
+      'k6/memory.test.js',
+    ], {
       cwd: root,
-      env: { ...process.env, MEMORY_BASE_URL: baseURL, MEMORY_ITERATIONS: String(count), K6_NO_USAGE_REPORT: 'true' },
+      env: {
+        ...process.env,
+        MEMORY_BASE_URL: baseURL,
+        MEMORY_ITERATIONS: String(count),
+        K6_NO_USAGE_REPORT: 'true',
+      },
       stdio: ['ignore', log, log],
     })
     const [code, signal] = await once(load, 'exit')
@@ -87,7 +102,9 @@ function command(message) {
 
   return new Promise((resolve, reject) => {
     let timer
-    const onMessage = reply => finish(reply.error ? new Error(reply.error) : null, reply)
+    const onMessage = reply => finish(reply.error
+      ? new Error(reply.error)
+      : null, reply)
     const onExit = () => finish(new Error('Fixture server exited during memory collection'))
     const onError = error => finish(error)
 
@@ -146,7 +163,10 @@ try {
       throw new Error(`Outbound request timings are not active for ${path}`)
   }
   await sample('baseline')
-  await command({ type: 'snapshot', path: resolve(output, 'baseline.heapsnapshot') })
+  await command({
+    type: 'snapshot',
+    path: resolve(output, 'baseline.heapsnapshot'),
+  })
 
   for (let round = 1; round <= rounds; round++) {
     await runLoad(`round-${round}`, iterations, baseURL)
@@ -164,7 +184,10 @@ catch (error) {
   failure = error
   if (server?.connected) {
     try {
-      await command({ type: 'snapshot', path: resolve(output, 'failure.heapsnapshot') })
+      await command({
+        type: 'snapshot',
+        path: resolve(output, 'failure.heapsnapshot'),
+      })
     }
     catch (snapshotError) {
       process.stderr.write(`Failure snapshot unavailable: ${snapshotError.message}\n`)

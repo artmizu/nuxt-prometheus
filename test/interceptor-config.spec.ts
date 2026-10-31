@@ -7,17 +7,25 @@ describe('interceptor async context config', () => {
   it.each<{ name: string, config: NuxtConfig, expected: boolean | undefined }>([
     {
       name: 'preserves an explicit opt-out',
-      config: { nitro: { experimental: { asyncContext: false } } },
+      config: {
+        nitro: {
+          experimental: { asyncContext: false },
+        },
+      },
       expected: false,
     },
     {
       name: 'does not enable context when interception is disabled',
-      config: { prometheus: { disableRequestInterceptor: true } },
+      config: {
+        prometheus: { disableRequestInterceptor: true },
+      },
       expected: undefined,
     },
     {
       name: 'does not enable context when the module is disabled',
-      config: { prometheus: { enabled: false } },
+      config: {
+        prometheus: { enabled: false },
+      },
       expected: undefined,
     },
   ])('$name', async ({ config, expected }) => {
