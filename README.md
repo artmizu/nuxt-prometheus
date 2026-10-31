@@ -89,6 +89,18 @@ You can pass it through module options and the nuxt config property `prometheus`
 - Default: no prefix
 - Description: An optional prefix for metric names
 
+### disableRequestInterceptor
+- Type: `boolean`
+- Default: `false`
+- Description: Disables interception of outbound HTTP requests.
+
+When interception is active, the module enables Nitro's experimental async context by default.
+This context keeps outbound request timings separate for concurrent server requests, including SSR.
+Background requests without a Nitro request context do not contribute to page timings.
+
+An explicit `nitro.experimental.asyncContext: false` remains unchanged, but outbound request timings require this feature.
+See the [Nitro async context documentation](https://v2.nitro.build/guide/utils#async-context-experimental) for runtime support and limitations.
+
 ### metricsEndpoint
 - Type: `boolean`
 - Default: `true`
@@ -133,3 +145,17 @@ pnpm test
 ```
 
 **Important:** After making changes to the module source code, you must run `pnpm run dev:prepare` to rebuild the module before testing.
+
+### Memory regression check
+
+With [k6 installed](https://grafana.com/docs/k6/latest/set-up/install-k6/), run:
+
+```bash
+pnpm test:memory
+```
+
+The PR check uses a local fixture and fails if post-GC heap growth exceeds 8 MiB after warm-up.
+Logs, measurements, and a baseline heap snapshot are saved in `reports/memory`; failures also include a snapshot for comparison.
+CI uploads these files as the `memory-regression` artifact.
+
+This short check cannot detect every slow leak. The listener-count regression test separately checks the original interceptor leak.

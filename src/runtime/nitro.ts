@@ -3,7 +3,7 @@ import { ClientRequestInterceptor } from '@mswjs/interceptors/ClientRequest'
 import { FetchInterceptor } from '@mswjs/interceptors/fetch'
 import { XMLHttpRequestInterceptor } from '@mswjs/interceptors/XMLHttpRequest'
 import consola from 'consola'
-import { defineNitroPlugin, useRuntimeConfig } from 'nitropack/runtime'
+import { defineNitroPlugin, useEvent, useRuntimeConfig } from 'nitropack/runtime'
 import { initMetrics, metrics } from './registry'
 import { calculateTime } from './utils'
 
@@ -16,14 +16,47 @@ const interceptor = new BatchInterceptor({
   ],
 })
 
+function getRequestState() {
+  try {
+    return useEvent().context.prometheus
+  }
+  catch {
+    return undefined
+  }
+}
+
 export default defineNitroPlugin((nitroApp) => {
   const params = useRuntimeConfig().public.prometheus
 
   if (!params.enabled)
     return
 
-  if (!params.disableRequestInterceptor)
+  if (!params.disableRequestInterceptor) {
     interceptor.apply()
+
+    interceptor.on('request', ({ request }) => {
+      const state = getRequestState()
+      if (!state || /^\/__/.test(new URL(request.url).pathname))
+        return
+
+      const now = Date.now()
+      state.requests[request.url] = { start: now, end: now }
+
+      if (params.verbose)
+        consola.info(`[nuxt-prometheus] request: ${request.url}, ${new Date(now).toISOString()}`)
+    })
+
+    interceptor.on('response', ({ request }) => {
+      const data = getRequestState()?.requests[request.url]
+      if (data)
+        data.end = Date.now()
+    })
+
+    nitroApp.hooks.hook('close', () => {
+      interceptor.removeAllListeners()
+      interceptor.dispose()
+    })
+  }
 
   initMetrics(params)
 
@@ -31,33 +64,7 @@ export default defineNitroPlugin((nitroApp) => {
     event.context.prometheus = {
       start: Date.now(),
       requests: {},
-      onRequest({ request }: { request: Request }) {
-        const url = new URL(request.url)
-
-        /**
-         * Exclude Nuxt requests to parts of the application, it's not about business-logic
-         */
-        const isNuxtRequest = /^\/__/.test(url.pathname)
-        if (isNuxtRequest)
-          return
-
-        event.context.prometheus.requests[request.url] = {
-          start: Date.now(),
-          end: Date.now(),
-        }
-
-        if (params.verbose)
-          consola.info(`[nuxt-prometheus] request: ${request.url}, ${new Date().toISOString()}`)
-      },
-      onResponse({ response }: { response: Response }) {
-        const data = event.context.prometheus.requests[response.url]
-        if (data)
-          data.end = Date.now()
-      },
     }
-
-    interceptor.on('request', event.context.prometheus.onRequest!)
-    interceptor.on('response', event.context.prometheus.onResponse!)
   })
 
   /**
@@ -65,8 +72,8 @@ export default defineNitroPlugin((nitroApp) => {
    * and to avoid blocking the request
    */
   nitroApp.hooks.hook('afterResponse', (event) => {
-    interceptor.off('request', event.context.prometheus.onRequest!)
-    interceptor.off('response', event.context.prometheus.onResponse!)
+    if (!event.context.prometheus)
+      return
 
     const path = event.context.matchedRoute?.path === '/**' ? event.context?.prometheus?.path : event.context.matchedRoute?.path
     if (!path)
@@ -87,15 +94,5 @@ export default defineNitroPlugin((nitroApp) => {
       consola.info(`[nuxt-prometheus] «${path}» render time:`, time.render)
       consola.info(`[nuxt-prometheus] «${path}» total time:`, time.total)
     }
-  })
-
-  nitroApp.hooks.hook('error', (error, { event }) => {
-    if (event?.context.prometheus.onRequest)
-      interceptor.off('request', event.context.prometheus.onRequest)
-
-    if (event?.context.prometheus.onResponse)
-      interceptor.off('response', event.context.prometheus.onResponse)
-
-    return error
   })
 })

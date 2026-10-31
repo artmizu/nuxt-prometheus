@@ -27,6 +27,7 @@
     "dev:prepare": "nuxt-module-build prepare && nuxt-module-build build && nuxi prepare playground",
     "build:prepare": "nuxt-module-build prepare && nuxt-module-build build && nuxi build playground",
     "test": "pnpm prepack && pnpm exec playwright install chromium --only-shell && vitest --dir ./test --no-file-parallelism",
+    "test:memory": "nuxt-module-build prepare && pnpm prepack && nuxi build test/fixtures/interceptor && node scripts/memory/run.mjs",
     "test:type": "vitest --typecheck.only --typecheck.ignoreSourceErrors --dir ./test",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
