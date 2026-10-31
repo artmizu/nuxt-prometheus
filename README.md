@@ -48,9 +48,13 @@ export default {
    ```
 4. Update dashboard queries to use histograms. Use `histogram_quantile()` for percentiles.
 
-## Grafana sample setup
-Once the metrics have been collected by Prometheus, you will want to review them. I use Grafana for this purpose, and my metrics setup looks something like this:
-![Cover](https://raw.githubusercontent.com/artmizu/nuxt-prometheus/main/.github/grafana.jpg)
+## Grafana dashboard
+
+A ready-to-use dashboard lives in [examples/grafana](./examples/grafana), together with a Docker Compose stack that starts Prometheus and Grafana with the dashboard already provisioned.
+
+![Nuxt Prometheus dashboard](./examples/grafana/dashboard.png)
+
+See [examples/grafana/README.md](./examples/grafana/README.md) for the import steps, the queries behind each panel, and how to point Prometheus at your app.
 
 ## Collected Metrics
 

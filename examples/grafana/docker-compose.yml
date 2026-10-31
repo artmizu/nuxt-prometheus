@@ -1,0 +1,25 @@
+services:
+  prometheus:
+    image: prom/prometheus:v3.15.1
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+    ports:
+      - '9090:9090'
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    extra_hosts:
+      - host.docker.internal:host-gateway
+
+  grafana:
+    image: grafana/grafana:13.3.0
+    depends_on:
+      - prometheus
+    ports:
+      - '3001:3000'
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: 'true'
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+      GF_AUTH_DISABLE_LOGIN_FORM: 'true'
+    volumes:
+      - ./provisioning:/etc/grafana/provisioning:ro
+      - ./dashboard.json:/var/lib/grafana/dashboards/nuxt-prometheus.json:ro
