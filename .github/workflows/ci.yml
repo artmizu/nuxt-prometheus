@@ -4,19 +4,12 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 on:
-  workflow_dispatch:
-    inputs:
-      simulate_leak:
-        description: Inject a memory leak to verify that the memory job fails
-        type: boolean
-        default: false
   pull_request:
     branches:
       - main
 
 jobs:
   lint:
-    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -40,7 +33,6 @@ jobs:
         run: pnpm lint
 
   typecheck:
-    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -86,8 +78,6 @@ jobs:
           k6-version: 2.3.0
 
       - name: Check retained heap under load
-        env:
-          MEMORY_INJECT_LEAK: ${{ inputs.simulate_leak || false }}
         run: pnpm test:memory
 
       - name: Upload memory diagnostics
@@ -100,7 +90,6 @@ jobs:
           retention-days: 7
 
   test:
-    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6

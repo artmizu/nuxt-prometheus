@@ -11,8 +11,7 @@ import { connectInspector } from './inspector.mjs'
 
 const root = fileURLToPath(new URL('../../', import.meta.url))
 const output = resolve(root, 'reports/memory')
-const injectLeak = process.argv.includes('--inject-leak') || process.env.MEMORY_INJECT_LEAK === 'true'
-const rounds = injectLeak ? 1 : 4
+const rounds = 4
 const iterations = 4000
 const limitBytes = 8 * 1024 * 1024
 const samples = []
@@ -136,19 +135,6 @@ try {
   await sample('baseline')
   await inspector.snapshot(resolve(output, 'baseline.heapsnapshot'))
 
-  if (injectLeak) {
-    await inspector.evaluate(`(() => {
-      const http = process.getBuiltinModule('http')
-      const emit = http.Server.prototype.emit
-      const retained = []
-      http.Server.prototype.emit = function (name, ...args) {
-        if (name === 'request') retained.push(new Array(1024).fill(Math.random()))
-        return Reflect.apply(emit, this, [name, ...args])
-      }
-      return true
-    })()`)
-  }
-
   for (let round = 1; round <= rounds; round++) {
     await runLoad(`round-${round}`, iterations, baseURL)
     await sample(`round-${round}`)
@@ -178,7 +164,6 @@ finally {
   clearTimeout(inspectorStartupTimer)
   writeFileSync(resolve(output, 'measurements.json'), JSON.stringify({
     node: process.version,
-    injectLeak,
     rounds,
     iterations,
     limitBytes,

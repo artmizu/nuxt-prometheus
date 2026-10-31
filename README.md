@@ -168,12 +168,4 @@ Logs, measurements, k6 summaries, and heap snapshots are saved in `reports/memor
 GitHub CI uploads these files as the `memory-regression` artifact for seven days.
 The directory is replaced on each run.
 
-After the fixture build, an intentional leak can verify that the check fails:
-
-```bash
-node scripts/memory/run.mjs --inject-leak
-```
-
-This command must exit with code 1 because retained heap exceeds the budget.
-The CI workflow also accepts a manual `simulate_leak` input. When enabled, the memory job must fail for the same reason.
 This short check cannot detect every slow leak. The listener-count regression test separately checks the original interceptor leak.

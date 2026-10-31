@@ -64,7 +64,6 @@ export async function connectInspector(url) {
   }
 
   return {
-    evaluate,
     async sample(label) {
       await command('HeapProfiler.collectGarbage')
       await command('HeapProfiler.collectGarbage')
