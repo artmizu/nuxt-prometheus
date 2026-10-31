@@ -47,6 +47,16 @@ export default {
    import { Counter, register } from '@prometheus-io/client'
    ```
 4. Update dashboard queries to use histograms. Use `histogram_quantile()` for percentiles.
+5. Add `status_code` to all page timing metric queries and dashboards. All six page metrics now include a `status_code` label:
+
+   ```promql
+   sum by (path) (
+     rate(page_total_time_histogram_count{status_code=~"5.."}[5m])
+   ) /
+   sum by (path) (
+     rate(page_total_time_histogram_count[5m])
+   )
+   ```
 
 ## Grafana sample setup
 Once the metrics have been collected by Prometheus, you will want to review them. I use Grafana for this purpose, and my metrics setup looks something like this:
@@ -58,16 +68,21 @@ In addition to the [default Node.js metrics](https://github.com/prometheus/clien
 
 | Metric | Type | Labels | Description |
 |--------|------|--------|-------------|
-| `page_render_time` | Gauge | `path` | Time spent rendering a page (total minus external request time), in ms |
-| `page_request_time` | Gauge | `path` | Time spent on external API requests during page processing, in ms |
-| `page_total_time` | Gauge | `path` | Total time to complete a request, in ms |
-| `page_render_time_histogram` | Histogram | `path`, `le` on buckets | Distribution of page render times, in ms |
-| `page_request_time_histogram` | Histogram | `path`, `le` on buckets | Distribution of external API request times, in ms |
-| `page_total_time_histogram` | Histogram | `path`, `le` on buckets | Distribution of total request times, in ms |
+| `page_render_time` | Gauge | `path`, `status_code` | Time spent rendering a page (total minus external request time), in ms |
+| `page_request_time` | Gauge | `path`, `status_code` | Time spent on external API requests during page processing, in ms |
+| `page_total_time` | Gauge | `path`, `status_code` | Total time to complete a request, in ms |
+| `page_render_time_histogram` | Histogram | `path`, `status_code`, `le` on buckets | Distribution of page render times, in ms |
+| `page_request_time_histogram` | Histogram | `path`, `status_code`, `le` on buckets | Distribution of external API request times, in ms |
+| `page_total_time_histogram` | Histogram | `path`, `status_code`, `le` on buckets | Distribution of total request times, in ms |
 
 All custom metric names can be prefixed using the `prefix` option (e.g., `myapp_page_render_time`).
 
 Histograms export `_bucket`, `_sum`, and `_count` series. The `+Inf` bucket is automatic.
+
+The gauge variants keep the last observed value per `(path, status_code)` pair and never expire, so a path that rarely returns an error can appear to have a stale sample; use the histograms for aggregation and dashboards.
+
+SSR error renders and unmatched-route 404s are attributed to the synthetic `/__nuxt_error` path with their real status code, so per-page error rates cannot be derived from `path`. A path with no 5xx samples is absent from an error-ratio query rather than showing 0.
+
 For the p95 total duration across replicas, in milliseconds:
 
 ```promql

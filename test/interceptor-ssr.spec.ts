@@ -39,8 +39,8 @@ describe('interceptor SSR attribution', async () => {
       expect(requests).toBeGreaterThan(before)
       const metrics = await $fetch<string>('/metrics')
 
-      expect(metrics).toMatch(/page_request_time\{path="\/"\} [1-9]\d*/)
-      expect(metrics).toMatch(/page_request_time_histogram_count\{path="\/"\} [1-9]\d*/)
+      expect(metrics).toMatch(/page_request_time\{path="\/",status_code="200"\} [1-9]\d*/)
+      expect(metrics).toMatch(/page_request_time_histogram_count\{path="\/",status_code="200"\} [1-9]\d*/)
     }
   })
 })

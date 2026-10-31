@@ -6,7 +6,7 @@ import { XMLHttpRequestInterceptor } from '@mswjs/interceptors/XMLHttpRequest'
 import consola from 'consola'
 import { defineNitroPlugin, useEvent, useRuntimeConfig } from 'nitropack/runtime'
 import { initMetrics, metrics } from './registry'
-import { calculateTime } from './utils'
+import { calculateTime, resolveResponseStatus } from './utils'
 
 const interceptor = new BatchInterceptor({
   name: 'nuxt-prometheus',
@@ -93,15 +93,16 @@ export default defineNitroPlugin((nitroApp) => {
       return
 
     const time = calculateTime(event.context.prometheus)
+    const statusCode = resolveResponseStatus(event, path)
 
-    metrics.totalTime?.labels(path).set(time.total)
-    metrics.totalTimeHistogram?.labels(path).observe(time.total)
+    metrics.totalTime?.labels(path, statusCode).set(time.total)
+    metrics.totalTimeHistogram?.labels(path, statusCode).observe(time.total)
 
     if (!params.disableRequestInterceptor) {
-      metrics.renderTime?.labels(path).set(time.render)
-      metrics.requestTime?.labels(path).set(time.request)
-      metrics.renderTimeHistogram?.labels(path).observe(time.render)
-      metrics.requestTimeHistogram?.labels(path).observe(time.request)
+      metrics.renderTime?.labels(path, statusCode).set(time.render)
+      metrics.requestTime?.labels(path, statusCode).set(time.request)
+      metrics.renderTimeHistogram?.labels(path, statusCode).observe(time.render)
+      metrics.requestTimeHistogram?.labels(path, statusCode).observe(time.request)
 
       if (params.verbose) {
         consola.info(`[nuxt-prometheus] «${path}» api request time:`, time.request)
