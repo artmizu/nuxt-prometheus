@@ -2,10 +2,13 @@ import type { ClientRequestInterceptor } from '@mswjs/interceptors/ClientRequest
 import type { FetchInterceptor } from '@mswjs/interceptors/fetch'
 import type { XMLHttpRequestInterceptor } from '@mswjs/interceptors/XMLHttpRequest'
 import type { NitroApp, NitroRuntimeHooks } from 'nitropack/types'
+import type { AddressInfo } from 'node:net'
+import http, { createServer } from 'node:http'
 import { BatchInterceptor } from '@mswjs/interceptors'
 import { createHooks } from 'hookable'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import plugin from '../src/runtime/nitro'
+import { calculateTime } from '../src/runtime/utils'
 
 type RequestEvent = Parameters<NitroRuntimeHooks['request']>[0]
 
@@ -39,18 +42,39 @@ function event() {
   return { context: {} } as RequestEvent
 }
 
+let raceCount = 0
+const upstream = createServer((request, response) => {
+  if (request.url === '/race') {
+    return raceCount++ === 0
+      ? setTimeout(() => response.end('slow'), 150)
+      : setTimeout(() => response.end('fast'), 15)
+  }
+
+  response.end('ok')
+})
+upstream.on('checkContinue', (request, response) => {
+  response.writeContinue()
+  setTimeout(() => response.end('continued'), 80)
+})
+await new Promise<void>(resolve => upstream.listen(0, '127.0.0.1', resolve))
+
+function upstreamPort() {
+  return (upstream.address() as AddressInfo).port
+}
+
 function listenerCounts() {
-  const children = (interceptor as unknown as {
-    interceptors: { emitter: { listenerCount: (name: string) => number } }[]
-  }).interceptors
+  const { emitter } = interceptor as unknown as {
+    emitter: { listenerCount: (name: string) => number }
+  }
   return {
-    request: children.reduce((count, child) => count + child.emitter.listenerCount('request'), 0),
-    response: children.reduce((count, child) => count + child.emitter.listenerCount('response'), 0),
+    request: emitter.listenerCount('request'),
+    response: emitter.listenerCount('response'),
   }
 }
 
 beforeEach(() => {
   apply = vi.spyOn(BatchInterceptor.prototype, 'apply')
+  raceCount = 0
   runtime.params.disableRequestInterceptor = false
   hooks = createHooks<NitroRuntimeHooks>()
   plugin({ hooks } as unknown as NitroApp)
@@ -62,6 +86,11 @@ afterEach(async () => {
   vi.restoreAllMocks()
 })
 
+afterAll(() => new Promise<void>((resolve) => {
+  upstream.closeAllConnections()
+  upstream.close(() => resolve())
+}))
+
 describe('interceptor request lifecycle', () => {
   it('keeps listener counts constant when requests never reach cleanup hooks', async () => {
     const initial = listenerCounts()
@@ -71,7 +100,7 @@ describe('interceptor request lifecycle', () => {
     }
 
     expect(listenerCounts()).toEqual(initial)
-    expect(initial).toEqual({ request: 3, response: 3 })
+    expect(initial).toEqual({ request: 1, response: 1 })
   })
 
   it('isolates outbound request and response timings between concurrent requests', async () => {
@@ -91,12 +120,49 @@ describe('interceptor request lifecycle', () => {
       })
     }))
 
-    events.forEach((current, i) => {
-      const url = `http://api.test/request-${i}`
-      expect(Object.keys(current.context.prometheus.requests)).toEqual([url])
-      const timing = current.context.prometheus.requests[url]!
-      expect(timing.end).toBeGreaterThan(timing.start)
+    events.forEach((current) => {
+      expect(Object.keys(current.context.prometheus.requests)).toHaveLength(1)
+      const [timing] = Object.values(current.context.prometheus.requests)
+      expect(timing!.end).toBeGreaterThan(timing!.start)
     })
+  })
+
+  it('does not finish timing on informational responses', async () => {
+    const current = event()
+    await runtime.context.run(current, async () => {
+      await hooks.callHook('request', current)
+      await new Promise<void>((resolve, reject) => {
+        const request = http.request({
+          host: '127.0.0.1',
+          port: upstreamPort(),
+          path: '/continue',
+          method: 'POST',
+          headers: { 'Expect': '100-continue', 'content-length': 1 },
+        }, (response) => {
+          response.resume()
+          response.on('end', resolve)
+        })
+        request.on('error', reject)
+        request.end('x')
+      })
+    })
+
+    expect(calculateTime(current.context.prometheus).request).toBeGreaterThanOrEqual(60)
+  })
+
+  it('keeps both timings for concurrent calls to the same url', async () => {
+    const current = event()
+    await runtime.context.run(current, async () => {
+      await hooks.callHook('request', current)
+      const url = `http://127.0.0.1:${upstreamPort()}/race`
+      await Promise.all([
+        fetch(url),
+        fetch(url),
+      ])
+    })
+
+    expect(Object.values(current.context.prometheus.requests)).toHaveLength(2)
+    expect(calculateTime(current.context.prometheus).request).toBeGreaterThanOrEqual(130)
   })
 
   it('does not break background calls or calls before metrics state exists', async () => {
