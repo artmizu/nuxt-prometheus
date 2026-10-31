@@ -4,12 +4,19 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 on:
+  workflow_dispatch:
+    inputs:
+      simulate_leak:
+        description: Inject a memory leak to verify that the memory job fails
+        type: boolean
+        default: false
   pull_request:
     branches:
       - main
 
 jobs:
   lint:
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -33,6 +40,7 @@ jobs:
         run: pnpm lint
 
   typecheck:
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -55,7 +63,44 @@ jobs:
       - name: Typecheck
         run: pnpm typecheck
 
+  memory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - uses: grafana/setup-k6-action@v1.2.2
+        with:
+          k6-version: 2.3.0
+
+      - name: Check retained heap under load
+        env:
+          MEMORY_INJECT_LEAK: ${{ inputs.simulate_leak || false }}
+        run: pnpm test:memory
+
+      - name: Upload memory diagnostics
+        if: always()
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: memory-regression
+          path: reports/memory
+          if-no-files-found: ignore
+          retention-days: 7
+
   test:
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6

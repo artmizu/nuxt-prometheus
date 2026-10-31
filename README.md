@@ -145,3 +145,35 @@ pnpm test
 ```
 
 **Important:** After making changes to the module source code, you must run `pnpm run dev:prepare` to rebuild the module before testing.
+
+### Memory regression check
+
+The PR workflow runs a self-contained k6 test against a production build of the test fixture.
+The workload includes SSR, outbound Node HTTP calls, streamed responses, and aborted connections.
+It uses a local upstream server and random free ports.
+
+After warm-up, the test runs four batches of 4,000 requests.
+Node's inspector forces garbage collection before each heap measurement.
+The check fails if retained heap growth exceeds 8 MiB from the warmed baseline.
+RSS is recorded but does not determine the result.
+Each load batch has a 30-second limit, plus five seconds for shutdown.
+
+With [k6 installed](https://grafana.com/docs/k6/latest/set-up/install-k6/), run:
+
+```bash
+pnpm test:memory
+```
+
+Logs, measurements, k6 summaries, and heap snapshots are saved in `reports/memory`.
+GitHub CI uploads these files as the `memory-regression` artifact for seven days.
+The directory is replaced on each run.
+
+After the fixture build, an intentional leak can verify that the check fails:
+
+```bash
+node scripts/memory/run.mjs --inject-leak
+```
+
+This command must exit with code 1 because retained heap exceeds the budget.
+The CI workflow also accepts a manual `simulate_leak` input. When enabled, the memory job must fail for the same reason.
+This short check cannot detect every slow leak. The listener-count regression test separately checks the original interceptor leak.

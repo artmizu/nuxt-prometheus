@@ -8,4 +8,9 @@ export default antfu({
     'dist',
     'node_modules',
   ],
+}, {
+  files: ['k6/**/*.js'],
+  languageOptions: {
+    globals: { __ENV: 'readonly' },
+  },
 })
