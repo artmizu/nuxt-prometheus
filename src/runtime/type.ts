@@ -45,6 +45,8 @@ export interface AnalyticsModuleParams {
    */
   disableRequestInterceptor?: boolean
 
+  histogramBuckets?: number[]
+
   /**
    * Whether to expose the metrics endpoint.
    * When false, metrics are still collected but the endpoint is not registered.

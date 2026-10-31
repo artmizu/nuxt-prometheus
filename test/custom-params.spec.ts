@@ -9,6 +9,7 @@ describe('custom module params test', async () => {
       prometheus: {
         healthCheckPath: '/h',
         prometheusPath: '/p',
+        histogramBuckets: [10, 100, 1000],
       },
     },
   })
@@ -21,12 +22,18 @@ describe('custom module params test', async () => {
     expect(await page.textContent('body')).toContain('ok')
   })
 
-  it('node metrics check', async () => {
+  it('metrics use the custom endpoint and buckets', async () => {
     const ctx = useTestContext()
     const page = await createPage('/')
     await page.goto(`${ctx.url}p`)
 
     const content = await page.textContent('body')
     expect(content).toMatch(/^playground_process_start_time_seconds \d+/gm)
+    for (const metric of ['render', 'request', 'total']) {
+      const matches = content!.matchAll(new RegExp(`page_${metric}_time_histogram_bucket\\{[^}]*le="([^"]+)"`, 'g'))
+      expect([
+        ...new Set([...matches].map(match => match[1])),
+      ]).toEqual(['10', '100', '1000', '+Inf'])
+    }
   })
 })

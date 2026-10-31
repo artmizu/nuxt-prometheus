@@ -11,10 +11,11 @@ describe('check NUXT_PUBLIC_PROMETHEUS_PREFIX env variable', async () => {
     rootDir: fileURLToPath(new URL('../playground', import.meta.url)),
     env: {
       NUXT_PUBLIC_PROMETHEUS_PREFIX: 'env_prefix_',
+      NUXT_PUBLIC_PROMETHEUS_HISTOGRAM_BUCKETS: '[20,200,2000]',
     },
   })
 
-  it('should use custom prefix from env variable', async () => {
+  it('uses the custom prefix and histogram buckets from env', async () => {
     const ctx = useTestContext()
     const page = await createPage('/')
 
@@ -27,5 +28,11 @@ describe('check NUXT_PUBLIC_PROMETHEUS_PREFIX env variable', async () => {
     // This overrides the playground's default 'playground_' prefix
     expect(content).toMatch(/env_prefix_process_cpu_user_seconds_total/)
     expect(content).toMatch(/env_prefix_page_render_time/)
+    const buckets = [
+      ...content!.matchAll(/env_prefix_page_total_time_histogram_bucket\{[^}]*le="([^"]+)"/g),
+    ].map(match => match[1])
+    expect([
+      ...new Set(buckets),
+    ]).toEqual(['20', '200', '2000', '+Inf'])
   })
 })

@@ -32,6 +32,8 @@ export default defineNitroPlugin((nitroApp) => {
   if (!params.enabled)
     return
 
+  initMetrics(params)
+
   if (!params.disableRequestInterceptor) {
     interceptor.apply()
 
@@ -58,8 +60,6 @@ export default defineNitroPlugin((nitroApp) => {
       interceptor.dispose()
     })
   }
-
-  initMetrics(params)
 
   nitroApp.hooks.hook('request', (event) => {
     event.context.prometheus = {
@@ -88,9 +88,9 @@ export default defineNitroPlugin((nitroApp) => {
     metrics.requestTime?.labels(path).set(time.request)
     metrics.totalTime?.labels(path).set(time.total)
 
-    metrics.renderTimeSummary?.labels(path).observe(time.render)
-    metrics.requestTimeSummary?.labels(path).observe(time.request)
-    metrics.totalTimeSummary?.labels(path).observe(time.total)
+    metrics.renderTimeHistogram?.labels(path).observe(time.render)
+    metrics.requestTimeHistogram?.labels(path).observe(time.request)
+    metrics.totalTimeHistogram?.labels(path).observe(time.total)
 
     if (params.verbose) {
       consola.info(`[nuxt-prometheus] «${path}» api request time:`, time.request)
