@@ -1,5 +1,25 @@
 # Changelog
 
+## [4.0.0](https://github.com/artmizu/nuxt-prometheus/compare/v3.0.5...v4.0.0) (2026-10-31)
+
+
+### ⚠ BREAKING CHANGES
+
+* page timing distributions now export histogram bucket, sum, and count series instead of precomputed quantiles.
+* require supported modern Node releases and use @prometheus-io/client for custom metrics registered with the module.
+
+### Features
+
+* add status_code label to page timing metrics ([#108](https://github.com/artmizu/nuxt-prometheus/issues/108)) ([ce3ca4b](https://github.com/artmizu/nuxt-prometheus/commit/ce3ca4b344f9deddae05ae3490a4141a771a7658))
+* replace page timing summaries with configurable histograms ([#105](https://github.com/artmizu/nuxt-prometheus/issues/105)) ([95a7640](https://github.com/artmizu/nuxt-prometheus/commit/95a7640dd8a06ca38c4f250331f58a7e4484d94c))
+* update to the latest compatible runtime for v4.0.0 ([#103](https://github.com/artmizu/nuxt-prometheus/issues/103)) ([25619f0](https://github.com/artmizu/nuxt-prometheus/commit/25619f02d660d53732c58f67e418c96848ef859d))
+
+
+### Bug Fixes
+
+* omit unavailable timings when interception is disabled ([#106](https://github.com/artmizu/nuxt-prometheus/issues/106)) ([dc49fff](https://github.com/artmizu/nuxt-prometheus/commit/dc49fffa1f8919d0f10fc4da582dc7d027564a59))
+* preserve caller argument shape for patches installed before the interceptor ([566df38](https://github.com/artmizu/nuxt-prometheus/commit/566df385e66c72065af2952e5e85eab46c6933fc)), closes [#98](https://github.com/artmizu/nuxt-prometheus/issues/98)
+
 ## [3.0.5](https://github.com/artmizu/nuxt-prometheus/compare/v3.0.4...v3.0.5) (2026-10-31)
 
 
