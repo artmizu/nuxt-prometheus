@@ -37,7 +37,8 @@ describe('module tests', async () => {
     expect(content).toMatch(/page_render_time\{path="\/b"\} \d+/g)
 
     expect(content).toMatch(/page_request_time\{path="\/"\} \d+/g)
-    expect(content).toMatch(/page_request_time\{path="\/a"\} \d+/g)
+    expect(content).toMatch(/page_request_time\{path="\/a"\} 0$/m)
+    expect(content).toMatch(/page_request_time_histogram_sum\{path="\/a"\} 0$/m)
     expect(content).toMatch(/page_request_time\{path="\/b"\} \d+/g)
 
     expect(content).toMatch(/page_total_time\{path="\/"\} \d+/g)

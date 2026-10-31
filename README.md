@@ -127,6 +127,10 @@ export default defineNuxtConfig({
 - Default: `false`
 - Description: Disables interception of outbound HTTP requests.
 
+When disabled, only total page timing metrics remain available.
+Request and render timing gauges and histograms are omitted because their values are unavailable.
+Default Node.js metrics, `/metrics`, and `/health` remain available.
+
 When interception is active, the module enables Nitro's experimental async context by default.
 This context keeps outbound request timings separate for concurrent server requests, including SSR.
 Background requests without a Nitro request context do not contribute to page timings.

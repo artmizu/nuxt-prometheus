@@ -1,35 +1,45 @@
+import { createServer } from 'node:http'
 import { fileURLToPath } from 'node:url'
-import { createPage, setup, useTestContext } from '@nuxt/test-utils/e2e'
-import { describe, expect, it } from 'vitest'
+import { $fetch, setup } from '@nuxt/test-utils/e2e'
+import { afterAll, describe, expect, it } from 'vitest'
 
 describe('interception is disabled', async () => {
+  let requests = 0
+  const upstream = createServer((_req, res) => {
+    requests++
+    setTimeout(() => res.end('local upstream response'), 25)
+  })
+  await new Promise<void>(resolve => upstream.listen(0, '127.0.0.1', resolve))
+  afterAll(() => new Promise<void>((resolve, reject) => {
+    upstream.close(error => error
+      ? reject(error)
+      : resolve())
+  }))
+  const address = upstream.address()
+  if (!address || typeof address === 'string')
+    throw new Error('Upstream did not bind a TCP port')
+
   await setup({
-    rootDir: fileURLToPath(new URL('../playground', import.meta.url)),
+    rootDir: fileURLToPath(new URL('./fixtures/interceptor', import.meta.url)),
+    browser: false,
     nuxtConfig: {
-      prometheus: {
-        disableRequestInterceptor: true,
-      },
+      prometheus: { disableRequestInterceptor: true },
+      runtimeConfig: { upstream: `http://127.0.0.1:${address.port}` },
     },
   })
 
-  it('requests are not intercepted', async () => {
-    const ctx = useTestContext()
-    const page = await createPage('/')
-    await page.goto(`${ctx.url}a`)
-    await page.goto(`${ctx.url}b`)
-    await page.goto(`${ctx.url}metrics`)
-    const content = await page.textContent('body')
+  it('exports total timing but omits unavailable request and render metrics', async () => {
+    const before = requests
+    expect(await $fetch<string>('/')).toContain('local upstream response')
+    expect(requests).toBeGreaterThan(before)
+    expect(await $fetch<string>('/health')).toBe('ok')
 
-    expect(content).toMatch(/page_render_time\{path="\/"\} \d+/g)
-    expect(content).toMatch(/page_render_time\{path="\/a"\} \d+/g)
-    expect(content).toMatch(/page_render_time\{path="\/b"\} \d+/g)
-
-    expect(content).toMatch(/page_request_time\{path="\/"\} 0/g)
-    expect(content).toMatch(/page_request_time\{path="\/a"\} 0/g)
-    expect(content).toMatch(/page_request_time\{path="\/b"\} 0/g)
-
-    expect(content).toMatch(/page_total_time\{path="\/"\} \d+/g)
-    expect(content).toMatch(/page_total_time\{path="\/a"\} \d+/g)
-    expect(content).toMatch(/page_total_time\{path="\/b"\} \d+/g)
+    const metrics = await $fetch<string>('/metrics')
+    expect(metrics).not.toContain('page_request_time')
+    expect(metrics).not.toContain('page_render_time')
+    expect(metrics).toMatch(/page_total_time\{path="\/"\} [1-9]\d*/)
+    expect(metrics).toMatch(/page_total_time_histogram_sum\{path="\/"\} [1-9]\d*/)
+    expect(metrics).toMatch(/page_total_time_histogram_count\{path="\/"\} [1-9]\d*/)
+    expect(metrics).toContain('process_cpu_user_seconds_total')
   })
 })

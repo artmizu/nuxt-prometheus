@@ -16,7 +16,7 @@ describe('page timing histograms', () => {
     initMetrics({ prefix: 'test_' })
 
     const pageMetrics = (await register.getMetricsAsJSON()).filter(metric => metric.name.startsWith('test_page_'))
-    expect(pageMetrics.filter(metric => metric.type === 'histogram').map(metric => metric.name)).toEqual([
+    expect(pageMetrics.filter(metric => metric.type === 'histogram').map(metric => metric.name).sort()).toEqual([
       'test_page_render_time_histogram',
       'test_page_request_time_histogram',
       'test_page_total_time_histogram',
@@ -36,6 +36,16 @@ describe('page timing histograms', () => {
     }))
     expect(histogram.values).toContainEqual(expect.objectContaining({ metricName: 'test_page_total_time_histogram_sum', value: 70 }))
     expect(histogram.values).toContainEqual(expect.objectContaining({ metricName: 'test_page_total_time_histogram_count', value: 1 }))
+  })
+
+  it('registers only total timing metrics when interception is disabled', async () => {
+    initMetrics({ prefix: 'test_', disableRequestInterceptor: true })
+
+    const pageMetrics = (await register.getMetricsAsJSON()).filter(metric => metric.name.startsWith('test_page_'))
+    expect(pageMetrics.map(metric => metric.name).sort()).toEqual([
+      'test_page_total_time',
+      'test_page_total_time_histogram',
+    ])
   })
 
   it('applies custom buckets to every histogram', async () => {
