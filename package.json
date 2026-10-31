@@ -38,7 +38,7 @@
     "k6": "k6 run ./k6/load.test.js"
   },
   "dependencies": {
-    "@mswjs/interceptors": "0.41.9",
+    "@mswjs/interceptors": "0.45.10",
     "@nuxt/kit": "^4.6.3",
     "@prometheus-io/client": "^0.16.1",
     "consola": "^3.4.2",
