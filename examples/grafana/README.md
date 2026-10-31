@@ -2,24 +2,30 @@
 
 ![Nuxt Prometheus dashboard](./dashboard.png)
 
-A dashboard for the metrics exported by `@artmizu/nuxt-prometheus`. It covers page timings, the request and render split, the slowest routes, and the default Node.js metrics.
+A dashboard for the metrics exported by `@artmizu/nuxt-prometheus` 4.x. It focuses on the module's own metrics: per-route request, render and total time, throughput, and status codes. The default Node.js metrics sit in a collapsed row at the bottom.
 
 ## Panels
 
-| Panel | Query |
-| --- | --- |
-| Requests per second | `sum(rate(<prefix>page_total_time_histogram_count[$__rate_interval]))` |
-| Total time p95 | `histogram_quantile(0.95, sum by (le) (rate(<prefix>page_total_time_histogram_bucket[$__rate_interval])))` |
-| Requests per second by route | `sum by (path) (rate(<prefix>page_total_time_histogram_count[$__rate_interval]))` |
-| Total time p95 by route | `histogram_quantile(0.95, sum by (le, path) (rate(<prefix>page_total_time_histogram_bucket[$__rate_interval])))` |
-| Total time percentiles | `histogram_quantile(0.50, 0.90, 0.99, ...)` on the total time buckets |
-| Request and render time | `rate(..._histogram_sum) / rate(..._histogram_count)` for the request and render histograms |
-| Slowest routes | `topk(10, <prefix>page_total_time)` |
-| Event loop lag | `<prefix>nodejs_eventloop_lag_p99_seconds` |
-| Process CPU | `rate(<prefix>process_cpu_seconds_total[$__rate_interval])` |
-| Memory | heap used, heap total, resident memory |
+| Row | Panel | Query |
+| --- | --- | --- |
+| | Requests per second | `sum(rate(<prefix>page_total_time_histogram_count[$__rate_interval]))` |
+| | Total time p95 | `histogram_quantile(0.95, sum by (le) (rate(<prefix>page_total_time_histogram_bucket[$__rate_interval])))` |
+| | Non-2xx share | `sum(rate(..._count{status_code!~"2.."}[...])) / sum(rate(..._count[...]))` |
+| | Routes tracked | `count(count by (path) (<prefix>page_total_time))` |
+| Timing by route | Total time p95 by route | `histogram_quantile(0.95, sum by (le, path) (rate(<prefix>page_total_time_histogram_bucket[$__rate_interval])))` |
+| Timing by route | Request time p95 by route | same, on `page_request_time_histogram_bucket` |
+| Timing by route | Render time p95 by route | same, on `page_render_time_histogram_bucket` |
+| Timing by route | Total time percentiles | p50, p90, p99 over the total time buckets |
+| Throughput and status | Requests per second by route | `sum by (path) (rate(...))` |
+| Throughput and status | Requests per second by status code | `sum by (status_code) (rate(...))` |
+| Throughput and status | Slowest routes | `topk(10, <prefix>page_total_time)` |
+| Node.js runtime | Event loop lag, CPU, memory | default metrics from `@prometheus-io/client` |
 
 `<prefix>` is the `prometheus.prefix` option, empty by default. Set it in the `Metric prefix` field at the top of the dashboard.
+
+The request and render panels need the request interceptor, which is enabled by default. When `disableRequestInterceptor` is on, those metrics are not exported and the panels stay empty; total time keeps working.
+
+SSR render errors and unmatched-route 404s are exported under the synthetic `/__nuxt_error` path with the real status code, so error traffic appears there rather than under the page you were on. The status panels read `status_code`, which requires 4.0.0 or later.
 
 ## Import into an existing Grafana
 
