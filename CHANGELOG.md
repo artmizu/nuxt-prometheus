@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.5](https://github.com/artmizu/nuxt-prometheus/compare/v3.0.4...v3.0.5) (2026-10-31)
+
+
+### Bug Fixes
+
+* prevent interceptor listener leaks with Nitro async context ([#101](https://github.com/artmizu/nuxt-prometheus/issues/101)) ([cd68557](https://github.com/artmizu/nuxt-prometheus/commit/cd6855726353c95980e240581f181fdb472a0bfb))
+
 ## [3.0.4](https://github.com/artmizu/nuxt-prometheus/compare/v3.0.3...v3.0.4) (2026-07-29)
 
 
