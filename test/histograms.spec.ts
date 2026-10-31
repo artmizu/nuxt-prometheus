@@ -24,14 +24,14 @@ describe('page timing histograms', () => {
     expect(pageMetrics.filter(metric => metric.type === 'summary')).toEqual([])
     expect(pageMetrics.filter(metric => metric.type === 'gauge')).toHaveLength(3)
 
-    metrics.totalTimeHistogram!.labels('/a').observe(70)
+    metrics.totalTimeHistogram!.labels('/a', '200').observe(70)
     const histogram = await metrics.totalTimeHistogram!.get()
     expect(histogram.values).toContainEqual(expect.objectContaining({
-      labels: { path: '/a', le: 50 },
+      labels: { path: '/a', status_code: '200', le: 50 },
       value: 0,
     }))
     expect(histogram.values).toContainEqual(expect.objectContaining({
-      labels: { path: '/a', le: 100 },
+      labels: { path: '/a', status_code: '200', le: 100 },
       value: 1,
     }))
     expect(histogram.values).toContainEqual(expect.objectContaining({ metricName: 'test_page_total_time_histogram_sum', value: 70 }))
@@ -53,7 +53,7 @@ describe('page timing histograms', () => {
     initMetrics({ histogramBuckets })
 
     for (const histogram of [metrics.renderTimeHistogram, metrics.requestTimeHistogram, metrics.totalTimeHistogram])
-      histogram!.labels('/a').observe(75)
+      histogram!.labels('/a', '200').observe(75)
 
     const histograms = (await register.getMetricsAsJSON()).filter(metric => metric.type === 'histogram' && metric.name.startsWith('page_'))
     expect(histograms).toHaveLength(3)

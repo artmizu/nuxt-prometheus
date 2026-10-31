@@ -1,4 +1,13 @@
+import type { H3Event } from 'h3'
 import type { NuxtPrometheusState } from './type'
+
+interface NuxtErrorRenderRequest {
+  __unenv__?: {
+    nuxt?: {
+      '~rendering-error'?: boolean
+    }
+  }
+}
 
 export function calculateTime(data: NuxtPrometheusState) {
   const list = Object.values(data.requests)
@@ -27,4 +36,14 @@ export function calculateTime(data: NuxtPrometheusState) {
 
   time.render = time.total - time.request
   return time
+}
+
+export function resolveResponseStatus(event: H3Event, path: string): string {
+  const fetchedContext = (event.node.req as NuxtErrorRenderRequest).__unenv__?.nuxt
+  if (path === '/__nuxt_error' && fetchedContext?.['~rendering-error']) {
+    const status = new URL(event.path, 'http://localhost').searchParams.get('statusCode')
+    if (status && /^[1-5]\d\d$/.test(status))
+      return status
+  }
+  return String(event.node.res.statusCode)
 }

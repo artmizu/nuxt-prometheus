@@ -6,13 +6,13 @@ export const metrics = {
   isInitialized: false,
 
   // Gauge
-  renderTime: null as Gauge | null,
-  requestTime: null as Gauge | null,
-  totalTime: null as Gauge | null,
+  renderTime: null as Gauge<'path' | 'status_code'> | null,
+  requestTime: null as Gauge<'path' | 'status_code'> | null,
+  totalTime: null as Gauge<'path' | 'status_code'> | null,
 
-  renderTimeHistogram: null as Histogram<'path'> | null,
-  requestTimeHistogram: null as Histogram<'path'> | null,
-  totalTimeHistogram: null as Histogram<'path'> | null,
+  renderTimeHistogram: null as Histogram<'path' | 'status_code'> | null,
+  requestTimeHistogram: null as Histogram<'path' | 'status_code'> | null,
+  totalTimeHistogram: null as Histogram<'path' | 'status_code'> | null,
 }
 
 export function initMetrics(p: Partial<AnalyticsModuleParams>) {
@@ -49,13 +49,13 @@ export function initMetrics(p: Partial<AnalyticsModuleParams>) {
   metrics.totalTime = new Gauge({
     name: `${prefix}page_total_time`,
     help: 'Total time it took to complete a request',
-    labelNames: ['path'],
+    labelNames: ['path', 'status_code'],
   })
 
   metrics.totalTimeHistogram = new Histogram({
     name: `${prefix}page_total_time_histogram`,
     help: 'Total time it took to complete a request',
-    labelNames: ['path'],
+    labelNames: ['path', 'status_code'],
     buckets: [...buckets],
   })
 
@@ -63,26 +63,26 @@ export function initMetrics(p: Partial<AnalyticsModuleParams>) {
     metrics.renderTime = new Gauge({
       name: `${prefix}page_render_time`,
       help: 'Time took to render a page',
-      labelNames: ['path'],
+      labelNames: ['path', 'status_code'],
     })
 
     metrics.requestTime = new Gauge({
       name: `${prefix}page_request_time`,
       help: 'Time took to process a request, before rendering page',
-      labelNames: ['path'],
+      labelNames: ['path', 'status_code'],
     })
 
     metrics.renderTimeHistogram = new Histogram({
       name: `${prefix}page_render_time_histogram`,
       help: 'Time took to render a page',
-      labelNames: ['path'],
+      labelNames: ['path', 'status_code'],
       buckets: [...buckets],
     })
 
     metrics.requestTimeHistogram = new Histogram({
       name: `${prefix}page_request_time_histogram`,
       help: 'Time took to process a request, before rendering page',
-      labelNames: ['path'],
+      labelNames: ['path', 'status_code'],
       buckets: [...buckets],
     })
   }
