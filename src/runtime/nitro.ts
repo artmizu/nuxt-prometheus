@@ -1,3 +1,4 @@
+import type { NuxtPrometheusState } from './type'
 import { BatchInterceptor } from '@mswjs/interceptors'
 import { ClientRequestInterceptor } from '@mswjs/interceptors/ClientRequest'
 import { FetchInterceptor } from '@mswjs/interceptors/fetch'
@@ -16,7 +17,7 @@ const interceptor = new BatchInterceptor({
   ],
 })
 
-function getRequestState() {
+function getRequestState(): NuxtPrometheusState | undefined {
   try {
     return useEvent().context.prometheus
   }
@@ -32,6 +33,7 @@ export default defineNitroPlugin((nitroApp) => {
     return
 
   if (!params.disableRequestInterceptor) {
+    const requests = new WeakMap<Request, NuxtPrometheusState['requests'][string]>()
     interceptor.apply()
 
     interceptor.on('request', ({ request }) => {
@@ -40,16 +42,20 @@ export default defineNitroPlugin((nitroApp) => {
         return
 
       const now = Date.now()
-      state.requests[request.url] = { start: now, end: now }
+      const data = { start: now, end: now }
+      state.requests[request.url] = data
+      requests.set(request, data)
 
       if (params.verbose)
         consola.info(`[nuxt-prometheus] request: ${request.url}, ${new Date(now).toISOString()}`)
     })
 
     interceptor.on('response', ({ request }) => {
-      const data = getRequestState()?.requests[request.url]
-      if (data)
+      const data = requests.get(request)
+      if (data) {
         data.end = Date.now()
+        requests.delete(request)
+      }
     })
 
     nitroApp.hooks.hook('close', () => {

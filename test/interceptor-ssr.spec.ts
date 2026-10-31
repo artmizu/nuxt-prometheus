@@ -4,7 +4,9 @@ import { $fetch, setup, useTestContext } from '@nuxt/test-utils/e2e'
 import { afterAll, describe, expect, it } from 'vitest'
 
 describe('interceptor SSR attribution', async () => {
+  let requests = 0
   const upstream = createServer((_req, res) => {
+    requests++
     setTimeout(() => res.end('local upstream response'), 25)
   })
   await new Promise<void>((resolve) => {
@@ -25,14 +27,18 @@ describe('interceptor SSR attribution', async () => {
     },
   })
 
-  it('measures real outbound requests during SSR', async () => {
-    const response = await fetch(new URL('/', useTestContext().url!))
-    const content = await response.text()
-    expect(response.status, content).toBe(200)
-    expect(content).toContain('local upstream response')
-    const metrics = await $fetch<string>('/metrics')
+  it('measures outbound SSR requests across reused connections', async () => {
+    for (let i = 0; i < 2; i++) {
+      const before = requests
+      const response = await fetch(new URL('/', useTestContext().url!))
+      const content = await response.text()
+      expect(response.status, content).toBe(200)
+      expect(content).toContain('local upstream response')
+      expect(requests).toBeGreaterThan(before)
+      const metrics = await $fetch<string>('/metrics')
 
-    expect(metrics).toMatch(/page_request_time\{path="\/"\} [1-9]\d*/)
-    expect(metrics).toMatch(/page_request_time_summary_count\{path="\/"\} [1-9]\d*/)
+      expect(metrics).toMatch(/page_request_time\{path="\/"\} [1-9]\d*/)
+      expect(metrics).toMatch(/page_request_time_summary_count\{path="\/"\} [1-9]\d*/)
+    }
   })
 })

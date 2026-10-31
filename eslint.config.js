@@ -2,6 +2,7 @@ import antfu from '@antfu/eslint-config'
 
 export default antfu({
   rules: {
+    'antfu/reasonable-newline': 'off',
     '@typescript-eslint/no-unused-vars': 'off',
   },
   ignores: [

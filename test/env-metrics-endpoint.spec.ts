@@ -18,9 +18,9 @@ describe('check NUXT_PUBLIC_PROMETHEUS_METRICS_ENDPOINT env variable', async () 
   it('should return 404 when metrics endpoint is disabled via env', async () => {
     const ctx = useTestContext()
     const page = await createPage('/')
-    await page.goto(`${ctx.url}metrics`)
+    const response = await page.goto(`${ctx.url}metrics`)
 
-    expect(await page.textContent('body')).toContain('404')
+    expect(response?.status()).toBe(404)
   })
 
   it('health endpoint should still work when metrics endpoint is disabled', async () => {

@@ -1,24 +1,13 @@
-import { createError, defineEventHandler, setResponseHeader, setResponseStatus } from 'h3'
+import { register } from '@prometheus-io/client'
 import { useRuntimeConfig } from 'nitropack/runtime'
-import { register } from 'prom-client'
 
-export default defineEventHandler(async (event) => {
+export default async function metricsHandler() {
   const params = useRuntimeConfig().public.prometheus
 
-  if (!params.metricsEndpoint) {
-    throw createError({
-      statusCode: 404,
-      statusMessage: 'Not Found',
-    })
-  }
+  if (!params.metricsEndpoint)
+    return new Response('Not Found', { status: 404 })
 
-  try {
-    const data = await register.metrics()
-    setResponseHeader(event, 'Content-Type', register.contentType)
-    return data
-  }
-  catch (e) {
-    setResponseStatus(event, 500)
-    return e
-  }
-})
+  return new Response(await register.metrics(), {
+    headers: { 'Content-Type': register.contentType },
+  })
+}

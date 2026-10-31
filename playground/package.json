@@ -1,9 +1,10 @@
 {
   "name": "nuxt-prometheus-playground",
+  "type": "module",
   "private": true,
   "dependencies": {
     "@artmizu/nuxt-prometheus": "workspace:^",
-    "nuxt": "^4.3.0"
+    "nuxt": "^4.6.3"
   },
   "devDependencies": {
     "typescript": "^5.9.3"

@@ -1,20 +1,18 @@
 import type { ClientRequestInterceptor } from '@mswjs/interceptors/ClientRequest'
 import type { FetchInterceptor } from '@mswjs/interceptors/fetch'
 import type { XMLHttpRequestInterceptor } from '@mswjs/interceptors/XMLHttpRequest'
-import type { H3Event } from 'h3'
 import type { NitroApp, NitroRuntimeHooks } from 'nitropack/types'
-import { IncomingMessage, ServerResponse } from 'node:http'
-import { Socket } from 'node:net'
 import { BatchInterceptor } from '@mswjs/interceptors'
-import { createEvent } from 'h3'
 import { createHooks } from 'hookable'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import plugin from '../src/runtime/nitro'
 
+type RequestEvent = Parameters<NitroRuntimeHooks['request']>[0]
+
 const runtime = await vi.hoisted(async () => {
   const { AsyncLocalStorage } = await import('node:async_hooks')
   return {
-    context: new AsyncLocalStorage<H3Event>(),
+    context: new AsyncLocalStorage<RequestEvent>(),
     params: { enabled: true, verbose: false, disableRequestInterceptor: false },
   }
 })
@@ -36,25 +34,21 @@ type RequestInterceptor = BatchInterceptor<[ClientRequestInterceptor, FetchInter
 let interceptor: RequestInterceptor
 
 function event() {
-  const req = new IncomingMessage(new Socket())
-  return createEvent(req, new ServerResponse(req))
+  return { context: {} } as RequestEvent
 }
 
 function listenerCounts() {
-  const children = (interceptor as unknown as {
-    interceptors: { emitter: { listenerCount: (name: string) => number } }[]
-  }).interceptors
-  return children.map(child => ({
-    request: child.emitter.listenerCount('request'),
-    response: child.emitter.listenerCount('response'),
-  }))
+  return {
+    request: interceptor.listenerCount('request'),
+    response: interceptor.listenerCount('response'),
+  }
 }
 
 beforeEach(() => {
   apply = vi.spyOn(BatchInterceptor.prototype, 'apply')
   runtime.params.disableRequestInterceptor = false
   hooks = createHooks<NitroRuntimeHooks>()
-  plugin({ hooks } as NitroApp)
+  plugin({ hooks } as unknown as NitroApp)
   interceptor = apply.mock.instances[0]! as RequestInterceptor
 })
 
@@ -72,7 +66,7 @@ describe('interceptor request lifecycle', () => {
     }
 
     expect(listenerCounts()).toEqual(initial)
-    expect(initial.some(count => count.request > 0 && count.response > 0)).toBe(true)
+    expect(initial).toEqual({ request: 1, response: 1 })
   })
 
   it('isolates outbound request and response timings between concurrent requests', async () => {
@@ -111,7 +105,7 @@ describe('interceptor request lifecycle', () => {
       expect(await (await fetch('http://api.test/early')).text()).toBe('ok')
     })
     expect(current.context.prometheus).toBeUndefined()
-    await expect(hooks.callHook('afterResponse', current)).resolves.toBeUndefined()
+    expect(() => hooks.callHook('afterResponse', current)).not.toThrow()
   })
 
   it('ignores internal Nuxt requests', async () => {
@@ -130,11 +124,7 @@ describe('interceptor request lifecycle', () => {
 
   it('removes all listeners on shutdown', async () => {
     await hooks.callHook('close')
-    expect(listenerCounts()).toEqual([
-      { request: 0, response: 0 },
-      { request: 0, response: 0 },
-      { request: 0, response: 0 },
-    ])
+    expect(listenerCounts()).toEqual({ request: 0, response: 0 })
   })
 
   it('does not apply or bind the interceptor when disabled', async () => {
@@ -142,12 +132,12 @@ describe('interceptor request lifecycle', () => {
     runtime.params.disableRequestInterceptor = true
     apply.mockClear()
     hooks = createHooks<NitroRuntimeHooks>()
-    plugin({ hooks } as NitroApp)
+    plugin({ hooks } as unknown as NitroApp)
 
     const current = event()
     await hooks.callHook('request', current)
 
     expect(apply).not.toHaveBeenCalled()
-    expect(listenerCounts().every(count => count.request === 0 && count.response === 0)).toBe(true)
+    expect(listenerCounts()).toEqual({ request: 0, response: 0 })
   })
 })

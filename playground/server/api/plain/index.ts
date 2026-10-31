@@ -1,7 +1,5 @@
-import { defineEventHandler } from 'h3'
-
-export default defineEventHandler(() => {
+export default function plainHandler() {
   return {
     status: 'ok',
   }
-})
+}
