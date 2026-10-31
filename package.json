@@ -38,15 +38,15 @@
     "k6": "k6 run ./k6/load.test.js"
   },
   "dependencies": {
-    "@mswjs/interceptors": "^0.45.10",
+    "@mswjs/interceptors": "0.41.9",
+    "@nuxt/kit": "^4.6.3",
     "@prometheus-io/client": "^0.16.1",
     "consola": "^3.4.2",
     "defu": "^6.1.7",
-    "h3": "^2.0.8"
+    "h3": "^1.15.11"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^10.0.0",
-    "@nuxt/kit": "^4.6.3",
     "@nuxt/module-builder": "^1.0.3",
     "@nuxt/schema": "^4.6.3",
     "@nuxt/test-utils": "^4.3.4",

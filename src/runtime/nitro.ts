@@ -33,7 +33,6 @@ export default defineNitroPlugin((nitroApp) => {
     return
 
   if (!params.disableRequestInterceptor) {
-    const requests = new WeakMap<Request, NuxtPrometheusState['requests'][string]>()
     interceptor.apply()
 
     interceptor.on('request', ({ request }) => {
@@ -42,20 +41,16 @@ export default defineNitroPlugin((nitroApp) => {
         return
 
       const now = Date.now()
-      const data = { start: now, end: now }
-      state.requests[request.url] = data
-      requests.set(request, data)
+      state.requests[request.url] = { start: now, end: now }
 
       if (params.verbose)
         consola.info(`[nuxt-prometheus] request: ${request.url}, ${new Date(now).toISOString()}`)
     })
 
     interceptor.on('response', ({ request }) => {
-      const data = requests.get(request)
-      if (data) {
+      const data = getRequestState()?.requests[request.url]
+      if (data)
         data.end = Date.now()
-        requests.delete(request)
-      }
     })
 
     nitroApp.hooks.hook('close', () => {

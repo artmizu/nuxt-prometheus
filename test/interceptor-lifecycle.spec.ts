@@ -38,9 +38,12 @@ function event() {
 }
 
 function listenerCounts() {
+  const children = (interceptor as unknown as {
+    interceptors: { emitter: { listenerCount: (name: string) => number } }[]
+  }).interceptors
   return {
-    request: interceptor.listenerCount('request'),
-    response: interceptor.listenerCount('response'),
+    request: children.reduce((count, child) => count + child.emitter.listenerCount('request'), 0),
+    response: children.reduce((count, child) => count + child.emitter.listenerCount('response'), 0),
   }
 }
 
@@ -66,7 +69,7 @@ describe('interceptor request lifecycle', () => {
     }
 
     expect(listenerCounts()).toEqual(initial)
-    expect(initial).toEqual({ request: 1, response: 1 })
+    expect(initial).toEqual({ request: 3, response: 3 })
   })
 
   it('isolates outbound request and response timings between concurrent requests', async () => {

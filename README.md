@@ -51,7 +51,7 @@ import { Counter, register } from '@prometheus-io/client'
 
 Existing metric names, labels, and millisecond units remain unchanged.
 The endpoints return standard responses compatible with Nuxt's Nitro 2 runtime.
-Nitro still uses H3 1 internally; do not override its dependency with H3 2.
+The module uses H3 1, matching Nitro 2. Dependencies follow the latest stable versions compatible with this stack.
 
 ## Grafana sample setup
 Once the metrics have been collected by Prometheus, you will want to review them. I use Grafana for this purpose, and my metrics setup looks something like this:
@@ -147,6 +147,7 @@ NUXT_PUBLIC_PROMETHEUS_PREFIX=myapp_ node .output/server/index.mjs
 ## Development
 
 The build uses TypeScript 5.9.3 because the current Nuxt module builder does not support the TypeScript 7 compiler API.
+The interceptor stays at 0.41.9 to preserve Nitro request context across reused connections.
 The project pins pnpm 12. Older pnpm versions cannot launch its standalone binary; use Corepack or install the current pnpm version.
 
 ```bash
