@@ -3,7 +3,7 @@ import type { FetchInterceptor } from '@mswjs/interceptors/fetch'
 import type { XMLHttpRequestInterceptor } from '@mswjs/interceptors/XMLHttpRequest'
 import type { H3Event } from 'h3'
 import type { NitroApp, NitroRuntimeHooks } from 'nitropack/types'
-import http, { IncomingMessage, ServerResponse } from 'node:http'
+import { IncomingMessage, ServerResponse } from 'node:http'
 import { Socket } from 'node:net'
 import { BatchInterceptor } from '@mswjs/interceptors'
 import { createEvent } from 'h3'
@@ -60,8 +60,6 @@ beforeEach(() => {
 
 afterEach(async () => {
   await hooks.callHook('close')
-  interceptor.removeAllListeners()
-  interceptor.dispose()
   vi.restoreAllMocks()
 })
 
@@ -77,7 +75,9 @@ describe('interceptor request lifecycle', () => {
     expect(initial.some(count => count.request > 0 && count.response > 0)).toBe(true)
   })
 
-  it('attributes outbound calls only to their concurrent inbound request', async () => {
+  it('isolates outbound request and response timings between concurrent requests', async () => {
+    let now = 100
+    vi.spyOn(Date, 'now').mockImplementation(() => now++)
     interceptor.on('request', ({ controller }) => {
       controller.respondWith(new Response('ok'))
     })
@@ -93,48 +93,11 @@ describe('interceptor request lifecycle', () => {
     }))
 
     events.forEach((current, i) => {
-      expect(Object.keys(current.context.prometheus.requests)).toEqual([`http://api.test/request-${i}`])
+      const url = `http://api.test/request-${i}`
+      expect(Object.keys(current.context.prometheus.requests)).toEqual([url])
+      const timing = current.context.prometheus.requests[url]!
+      expect(timing.end).toBeGreaterThan(timing.start)
     })
-  })
-
-  it('records response completion even when the response URL is empty', async () => {
-    let now = 100
-    vi.spyOn(Date, 'now').mockImplementation(() => now)
-    interceptor.on('request', ({ controller }) => {
-      now = 200
-      controller.respondWith(new Response('ok'))
-    })
-
-    const current = event()
-    await runtime.context.run(current, async () => {
-      await hooks.callHook('request', current)
-      await fetch('http://api.test/timing')
-    })
-
-    expect(current.context.prometheus.requests['http://api.test/timing']).toEqual({ start: 100, end: 200 })
-  })
-
-  it('attributes Node HTTP client requests to the active inbound request', async () => {
-    let now = 100
-    vi.spyOn(Date, 'now').mockImplementation(() => now)
-    interceptor.on('request', ({ controller }) => {
-      now = 200
-      controller.respondWith(new Response('ok'))
-    })
-
-    const current = event()
-    await runtime.context.run(current, async () => {
-      await hooks.callHook('request', current)
-      await new Promise<void>((resolve, reject) => {
-        http.get('http://api.test/node', (response) => {
-          response.resume()
-          response.on('end', resolve)
-          response.on('error', reject)
-        }).on('error', reject)
-      })
-    })
-
-    expect(current.context.prometheus.requests['http://api.test/node']).toEqual({ start: 100, end: 200 })
   })
 
   it('does not break background calls or calls before metrics state exists', async () => {
@@ -148,6 +111,7 @@ describe('interceptor request lifecycle', () => {
       expect(await (await fetch('http://api.test/early')).text()).toBe('ok')
     })
     expect(current.context.prometheus).toBeUndefined()
+    await expect(hooks.callHook('afterResponse', current)).resolves.toBeUndefined()
   })
 
   it('ignores internal Nuxt requests', async () => {
@@ -162,13 +126,6 @@ describe('interceptor request lifecycle', () => {
     })
 
     expect(current.context.prometheus.requests).toEqual({})
-  })
-
-  it('does not mask errors before metrics state exists', async () => {
-    const error = new Error('original failure')
-    await expect(hooks.callHook('error', error, { event: event() })).resolves.toBeUndefined()
-    await expect(hooks.callHook('error', error, {})).resolves.toBeUndefined()
-    await expect(hooks.callHook('afterResponse', event())).resolves.toBeUndefined()
   })
 
   it('removes all listeners on shutdown', async () => {

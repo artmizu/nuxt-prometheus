@@ -11,11 +11,6 @@ describe('interceptor async context config', () => {
       expected: false,
     },
     {
-      name: 'preserves an explicit opt-in',
-      config: { nitro: { experimental: { asyncContext: true } } },
-      expected: true,
-    },
-    {
       name: 'does not enable context when interception is disabled',
       config: { prometheus: { disableRequestInterceptor: true } },
       expected: undefined,

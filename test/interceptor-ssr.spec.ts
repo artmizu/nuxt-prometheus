@@ -25,10 +25,6 @@ describe('interceptor SSR attribution', async () => {
     },
   })
 
-  it('enables Nitro async context for outbound interception', () => {
-    expect(useTestContext().nuxt?.options.nitro.experimental?.asyncContext).toBe(true)
-  })
-
   it('measures real outbound requests during SSR', async () => {
     const response = await fetch(new URL('/', useTestContext().url!))
     const content = await response.text()

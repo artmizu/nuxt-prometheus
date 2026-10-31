@@ -1,13 +1,11 @@
 import { spawn } from 'node:child_process'
 import { once } from 'node:events'
-import { closeSync, mkdirSync, openSync, rmSync, writeFileSync, writeSync } from 'node:fs'
+import { closeSync, mkdirSync, openSync, rmSync, writeFileSync } from 'node:fs'
 import { createServer } from 'node:http'
 import { resolve } from 'node:path'
 import process from 'node:process'
 import { setTimeout as delay } from 'node:timers/promises'
 import { fileURLToPath } from 'node:url'
-import { assessHeap } from './heap-budget.mjs'
-import { connectInspector } from './inspector.mjs'
 
 const root = fileURLToPath(new URL('../../', import.meta.url))
 const output = resolve(root, 'reports/memory')
@@ -21,10 +19,8 @@ mkdirSync(output, { recursive: true })
 
 const upstream = createServer((_req, res) => res.end('local upstream response'))
 let server
-let inspector
 let serverLog
 let load
-let inspectorStartupTimer
 let verdict
 let failure
 
@@ -85,9 +81,43 @@ async function runLoad(label, count, baseURL) {
   }
 }
 
+function command(message) {
+  if (!server?.connected)
+    return Promise.reject(new Error('Fixture server IPC is unavailable'))
+
+  return new Promise((resolve, reject) => {
+    let timer
+    const onMessage = reply => finish(reply.error ? new Error(reply.error) : null, reply)
+    const onExit = () => finish(new Error('Fixture server exited during memory collection'))
+    const onError = error => finish(error)
+
+    function finish(error, reply) {
+      clearTimeout(timer)
+      server.off('message', onMessage)
+      server.off('exit', onExit)
+      server.off('error', onError)
+      if (error)
+        reject(error)
+      else
+        resolve(reply)
+    }
+    timer = setTimeout(() => {
+      if (server.connected)
+        server.disconnect()
+      finish(new Error('Fixture memory collection timed out; failure snapshot unavailable'))
+    }, 60000)
+    server.once('message', onMessage)
+    server.once('exit', onExit)
+    server.once('error', onError)
+    server.send(message, error => error && finish(error))
+  })
+}
+
 async function sample(label) {
-  const memory = await inspector.sample(label)
-  samples.push(memory)
+  const { memory } = await command({ type: 'sample' })
+  if (!Number.isFinite(memory?.heapUsed) || memory.heapUsed <= 0)
+    throw new Error('Fixture returned an invalid heap measurement')
+  samples.push({ label, ...memory })
   process.stdout.write(`${label}: post-GC heap ${(memory.heapUsed / 1024 / 1024).toFixed(2)} MiB\n`)
 }
 
@@ -97,7 +127,7 @@ try {
   const port = await freePort()
   const baseURL = `http://127.0.0.1:${port}`
   serverLog = openSync(resolve(output, 'server.log'), 'w')
-  server = spawn(process.execPath, ['--inspect=127.0.0.1:0', 'test/fixtures/interceptor/.output/server/index.mjs'], {
+  server = spawn(process.execPath, ['--expose-gc', 'scripts/memory/server.mjs'], {
     cwd: root,
     env: {
       ...process.env,
@@ -105,25 +135,8 @@ try {
       NITRO_PORT: String(port),
       NUXT_UPSTREAM: `http://127.0.0.1:${upstream.address().port}`,
     },
-    stdio: ['ignore', 'pipe', 'pipe'],
+    stdio: ['ignore', serverLog, serverLog, 'ipc'],
   })
-  server.stdout.on('data', chunk => writeSync(serverLog, chunk))
-  const inspectorURL = new Promise((resolve, reject) => {
-    inspectorStartupTimer = setTimeout(() => reject(new Error('Inspector startup timed out')), 10000)
-    server.once('error', reject)
-    server.once('exit', () => reject(new Error('Fixture server exited during inspector startup')))
-    let stderr = ''
-    server.stderr.on('data', (chunk) => {
-      writeSync(serverLog, chunk)
-      stderr = (stderr + chunk).slice(-8192)
-      const match = stderr.match(/Debugger listening on (ws:\/\/\S+)/)
-      if (match) {
-        clearTimeout(inspectorStartupTimer)
-        resolve(match[1])
-      }
-    })
-  })
-  inspector = await connectInspector(await inspectorURL)
   await waitForServer(baseURL)
   await runLoad('warmup', 1000, baseURL)
   const metrics = await (await fetch(`${baseURL}/metrics`)).text()
@@ -133,25 +146,25 @@ try {
       throw new Error(`Outbound request timings are not active for ${path}`)
   }
   await sample('baseline')
-  await inspector.snapshot(resolve(output, 'baseline.heapsnapshot'))
+  await command({ type: 'snapshot', path: resolve(output, 'baseline.heapsnapshot') })
 
   for (let round = 1; round <= rounds; round++) {
     await runLoad(`round-${round}`, iterations, baseURL)
     await sample(`round-${round}`)
   }
 
-  verdict = assessHeap(samples, limitBytes)
+  const growthBytes = samples.at(-1).heapUsed - samples[0].heapUsed
+  verdict = { passed: growthBytes <= limitBytes, growthBytes }
   if (!verdict.passed)
     throw new Error(`Retained heap grew by ${(verdict.growthBytes / 1024 / 1024).toFixed(2)} MiB; budget is 8 MiB`)
 
-  await inspector.snapshot(resolve(output, 'final.heapsnapshot'))
   process.stdout.write(`Memory regression check passed: ${(verdict.growthBytes / 1024 / 1024).toFixed(2)} MiB retained growth\n`)
 }
 catch (error) {
   failure = error
-  if (inspector) {
+  if (server?.connected) {
     try {
-      await inspector.snapshot(resolve(output, 'failure.heapsnapshot'))
+      await command({ type: 'snapshot', path: resolve(output, 'failure.heapsnapshot') })
     }
     catch (snapshotError) {
       process.stderr.write(`Failure snapshot unavailable: ${snapshotError.message}\n`)
@@ -161,7 +174,6 @@ catch (error) {
   process.exitCode = 1
 }
 finally {
-  clearTimeout(inspectorStartupTimer)
   writeFileSync(resolve(output, 'measurements.json'), JSON.stringify({
     node: process.version,
     rounds,
@@ -173,7 +185,6 @@ finally {
     failure: failure?.message,
   }, null, 2))
   await stop(load)
-  inspector?.close()
   await stop(server)
   if (serverLog !== undefined)
     closeSync(serverLog)
