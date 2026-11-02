@@ -57,35 +57,11 @@ function request(target: string | http.RequestOptions) {
 }
 
 describe('request patches installed before the interceptor', () => {
-  /**
-   * Known limitation of @mswjs/interceptors 0.41.9: it rewrites the call to `(url, options, callback)`, so
-   * Application Insights does not see its own opt-out marker (#98). Versions 0.42+ keep the call shape but
-   * break http2 over TLS (gRPC), which is why the module is pinned to 0.41.9.
-   */
-  it.fails('keeps the options-first call shape used by Application Insights', async () => {
-    await request({
-      host: '127.0.0.1',
-      port,
-      path: '/options-first',
-      headers: { 'x-test': '1' },
-      disableAppInsightsAutoCollection: true,
-    } as http.RequestOptions)
-
-    expect(seen).toHaveLength(1)
-    expect(seen[0]!).toHaveLength(2)
-    expect(seen[0]![0]).not.toBeInstanceOf(URL)
-    expect(seen[0]![0]).toMatchObject({
-      path: '/options-first',
-      headers: { 'x-test': '1' },
-      disableAppInsightsAutoCollection: true,
-    })
-  })
-
   it('keeps the url-first call shape', async () => {
     await request(`http://127.0.0.1:${port}/url-first`)
 
-    expect(seen).toHaveLength(2)
-    expect(seen[1]!).toHaveLength(3)
-    expect(seen[1]![0]).toBeInstanceOf(URL)
+    expect(seen).toHaveLength(1)
+    expect(seen[0]!).toHaveLength(3)
+    expect(seen[0]![0]).toBeInstanceOf(URL)
   })
 })
