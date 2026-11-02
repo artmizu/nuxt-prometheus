@@ -62,13 +62,22 @@ function upstreamPort() {
   return (upstream.address() as AddressInfo).port
 }
 
+/**
+ * Counts listeners on the BatchInterceptor itself and on its nested interceptors: in @mswjs/interceptors
+ * 0.41.x `on()` forwards the listener to the nested interceptors, while 0.42+ keeps it on its own emitter.
+ */
 function listenerCounts() {
-  const { emitter } = interceptor as unknown as {
-    emitter: { listenerCount: (name: string) => number }
-  }
+  interface WithEmitter { emitter: { listenerCount: (name: string) => number } }
+  const batch = interceptor as unknown as WithEmitter & { interceptors?: WithEmitter[] }
+  const emitters = [
+    batch,
+    ...(batch.interceptors ?? []),
+  ].map(item => item.emitter)
+  const count = (name: string) => emitters.reduce((sum, emitter) => sum + emitter.listenerCount(name), 0)
+
   return {
-    request: emitter.listenerCount('request'),
-    response: emitter.listenerCount('response'),
+    request: count('request'),
+    response: count('response'),
   }
 }
 
@@ -100,7 +109,8 @@ describe('interceptor request lifecycle', () => {
     }
 
     expect(listenerCounts()).toEqual(initial)
-    expect(initial).toEqual({ request: 1, response: 1 })
+    expect(initial.request).toBeGreaterThan(0)
+    expect(initial.response).toBeGreaterThan(0)
   })
 
   it('isolates outbound request and response timings between concurrent requests', async () => {

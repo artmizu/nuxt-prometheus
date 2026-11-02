@@ -53,11 +53,16 @@ export default defineNitroPlugin((nitroApp) => {
         consola.info(`[nuxt-prometheus] request: ${request.url}, ${new Date(now).toISOString()}`)
     })
 
-    interceptor.on('response', ({ request, response }) => {
+    interceptor.on('response', ({ request, response, requestId }) => {
       if (response.status < 200 && response.status !== 101)
         return
 
-      const entry = pendingRequestTimes.get(request)
+      /**
+       * @mswjs/interceptors 0.41.x passes a clone of the Request to `response` for fetch, so a lookup by
+       * object misses the entry. The request id still matches, and the entry can be found in the state of
+       * the current Nitro event.
+       */
+      const entry = pendingRequestTimes.get(request) ?? getRequestState()?.requests[requestId]
       if (!entry)
         return
 
