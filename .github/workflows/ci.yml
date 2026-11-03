@@ -152,9 +152,13 @@ jobs:
       matrix:
         include:
           - runtime: bun
+            preset: bun
             command: bun run test/runtime/collector.runtime.mjs
+            playground: bun run test/runtime/playground.e2e.mjs
           - runtime: deno
+            preset: deno-server
             command: deno run -A test/runtime/collector.runtime.mjs
+            playground: deno run -A test/runtime/playground.e2e.mjs
     steps:
       - uses: actions/checkout@v7.0.1
 
@@ -181,5 +185,13 @@ jobs:
         if: matrix.runtime == 'deno'
         uses: denoland/setup-deno@v2.0.5
 
+      - name: Build the playground
+        env:
+          NITRO_PRESET: ${{ matrix.preset }}
+        run: pnpm --dir playground exec nuxt build
+
       - name: Run outbound collector tests
         run: ${{ matrix.command }}
+
+      - name: Run the playground end-to-end tests
+        run: ${{ matrix.playground }}
