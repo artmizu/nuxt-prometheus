@@ -55,7 +55,7 @@ function listenHttp() {
 
 function listenHttp2() {
   const server = http2.createServer()
-  server.on('stream', (stream) => {
+  server.on('stream', (stream: http2.ServerHttp2Stream) => {
     setTimeout(() => {
       stream.respond({ ':status': 200 })
       stream.end('http2 upstream')
