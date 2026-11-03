@@ -3,19 +3,42 @@
 ![Nuxt Prometheus Grafana dashboard](https://raw.githubusercontent.com/artmizu/nuxt-prometheus/main/examples/grafana/dashboard.png)
 
 # Prometheus integration for Nuxt
-Allows you to better understand what's going on with your application and how to optimize performance and other things in production. **Nuxt 2** users can use [this version](https://github.com/artmizu/analytics-nuxt-2).
 
-## Features
-* Default NodeJS metrics exported through the prometheus middleware
-* Custom metrics about pages render time and external request consumption time
-* Health check middleware
+Prometheus metrics for your Nuxt server. See how long each route takes, how much time goes to outbound calls, and which status code each route returns. Nuxt 2 users can use [this version](https://github.com/artmizu/analytics-nuxt-2).
 
-## Default routes that you can customise via the module options
-* `/metrics` - prometheus metrics
-* `/health` - health check
+## Why you want it
+
+* Route timings with a `status_code` label. You can separate slow responses from errors.
+* Histograms for request, render and total time. They work with `histogram_quantile()` in Grafana.
+* Outbound call timings without network interception. HTTP/2 and gRPC keep working and are still counted.
+* A Grafana dashboard with a Docker Compose stack.
+* A health check route for your load balancer.
+
+## Supported stack
+
+| Area | Support |
+|---|---|
+| Nuxt | 3.x and 4.x |
+| Node.js | 22.22.3+, 24.15.0+, 26+ |
+| Bun | 1.3.11 (tested) |
+| Deno | 2.8.3 (tested) |
+| Nitro presets | `node-server`, `bun`, `deno-server` |
+| Outbound calls counted | `fetch` and undici, `http` and `https`, HTTP/2, gRPC |
+| Outbound calls not counted | Raw TCP connections and database clients |
+| Grafana | [Example dashboard](./examples/grafana) |
+
+## Routes
+
+You can change both paths with the module options.
+
+| Route | Purpose |
+|---|---|
+| `/metrics` | Prometheus metrics |
+| `/health` | Health check |
 
 ## Installation
-Install package via a package manager:
+
+Install the package with a package manager:
 ```bash
 # using nuxi, it automatically appends the module in your nuxt.config
 npx nuxi@latest module add prometheus
@@ -30,7 +53,7 @@ yarn add @artmizu/nuxt-prometheus
 pnpm add @artmizu/nuxt-prometheus
 ```
 
-Add it to a modules section of your nuxt config:
+Add the module to the `modules` section of your Nuxt config:
 ```js
 export default {
   modules: ['@artmizu/nuxt-prometheus']
@@ -77,7 +100,9 @@ In addition to the [default Node.js metrics](https://github.com/prometheus/clien
 | `page_request_time_histogram` | Histogram | `path`, `status_code`, `le` on buckets | Distribution of external API request times, in ms |
 | `page_total_time_histogram` | Histogram | `path`, `status_code`, `le` on buckets | Distribution of total request times, in ms |
 
-All custom metric names can be prefixed using the `prefix` option (e.g., `myapp_page_render_time`).
+All custom metric names can be prefixed with the `prefix` option, for example `myapp_page_render_time`.
+
+The `page_request_time` metrics include outbound `fetch`, `http`, `https`, HTTP/2 and gRPC calls. They do not include raw TCP connections or database clients.
 
 Histograms export `_bucket`, `_sum`, and `_count` series. The `+Inf` bucket is automatic.
 
@@ -187,7 +212,7 @@ NUXT_PUBLIC_PROMETHEUS_PREFIX=myapp_ node .output/server/index.mjs
 
 The build uses TypeScript 5.9.3 because the current Nuxt module builder does not support the TypeScript 7 compiler API.
 
-Outbound request timings are collected by `src/runtime/collector`. On Node.js the collector subscribes to the `undici:request:*`, `http.client.*` and `http2.client.stream.*` diagnostics channels. On Bun and Deno it wraps `fetch`, `http`, `https` and `http2.connect`, because those channels are missing or incomplete there. Neither adapter intercepts connections, so HTTP/2 and gRPC traffic is never affected, and both are counted because gRPC rides on Node's HTTP/2 client.
+Outbound request timings are collected by `src/runtime/collector`. On Node.js the collector subscribes to the `undici:request:*`, `http.client.*` and `http2.client.stream.*` diagnostics channels. On Bun and Deno it wraps `fetch`, `http`, `https` and `http2.connect`, because those channels are missing or incomplete there. Neither adapter intercepts connections, so HTTP/2 and gRPC traffic works as before. Both are counted, because gRPC uses the Node.js HTTP/2 client.
 
 ```bash
 # Install dependencies
