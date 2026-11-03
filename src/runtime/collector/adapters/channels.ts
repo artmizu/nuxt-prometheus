@@ -1,6 +1,6 @@
 import type { OutboundCollector, OutboundCollectorOptions } from '../types'
 import diagnosticsChannel from 'node:diagnostics_channel'
-import { createRequestTracker } from '../tracker'
+import { createRequestTracker, isFinalStatus } from '../tracker'
 
 interface FetchRequestMessage {
   request: { origin?: string, path?: string }
@@ -20,12 +20,17 @@ interface HttpClientResponseMessage {
   response?: { statusCode?: number }
 }
 
+interface Http2StreamMessage {
+  stream: object
+  headers?: Record<string, string | number | undefined>
+}
+
 function httpRequestUrl(request: HttpClientRequestMessage['request']) {
   return `${request.protocol ?? 'http:'}//${request.host ?? 'localhost'}${request.path ?? ''}`
 }
 
-function isFinalStatus(statusCode: number | undefined) {
-  return (statusCode ?? 0) >= 200 || statusCode === 101
+function http2RequestUrl(headers: Http2StreamMessage['headers']) {
+  return `${headers?.[':scheme'] ?? 'http'}://${headers?.[':authority'] ?? 'localhost'}${headers?.[':path'] ?? ''}`
 }
 
 export function createChannelsCollector(options: OutboundCollectorOptions): OutboundCollector {
@@ -62,6 +67,25 @@ export function createChannelsCollector(options: OutboundCollectorOptions): Outb
     tracker.settle((message as HttpClientRequestMessage).request)
   }
 
+  const onHttp2Start = (message: unknown) => {
+    const { stream, headers } = message as Http2StreamMessage
+    tracker.begin(stream, http2RequestUrl(headers))
+  }
+
+  const onHttp2Finish = (message: unknown) => {
+    const { stream, headers } = message as Http2StreamMessage
+    if (isFinalStatus(Number(headers?.[':status'])))
+      tracker.settle(stream)
+  }
+
+  const onHttp2Error = (message: unknown) => {
+    tracker.settle((message as Http2StreamMessage).stream)
+  }
+
+  const onHttp2Close = (message: unknown) => {
+    tracker.settle((message as Http2StreamMessage).stream)
+  }
+
   const subscriptions = [
     ['undici:request:create', onFetchStart],
     ['undici:request:headers', onFetchHeaders],
@@ -69,6 +93,10 @@ export function createChannelsCollector(options: OutboundCollectorOptions): Outb
     ['http.client.request.created', onHttpStart],
     ['http.client.response.finish', onHttpFinish],
     ['http.client.request.error', onHttpError],
+    ['http2.client.stream.created', onHttp2Start],
+    ['http2.client.stream.finish', onHttp2Finish],
+    ['http2.client.stream.error', onHttp2Error],
+    ['http2.client.stream.close', onHttp2Close],
   ] as const
 
   return {

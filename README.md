@@ -187,7 +187,7 @@ NUXT_PUBLIC_PROMETHEUS_PREFIX=myapp_ node .output/server/index.mjs
 
 The build uses TypeScript 5.9.3 because the current Nuxt module builder does not support the TypeScript 7 compiler API.
 
-Outbound request timings are collected by `src/runtime/collector`. On Node.js the collector subscribes to the `undici:request:*` and `http.client.*` diagnostics channels. On Bun and Deno it wraps `fetch`, `http` and `https` instead, because those channels are missing or incomplete there. Neither adapter intercepts connections, so HTTP/2 and gRPC traffic is never affected; such calls are not counted either.
+Outbound request timings are collected by `src/runtime/collector`. On Node.js the collector subscribes to the `undici:request:*`, `http.client.*` and `http2.client.stream.*` diagnostics channels. On Bun and Deno it wraps `fetch`, `http`, `https` and `http2.connect`, because those channels are missing or incomplete there. Neither adapter intercepts connections, so HTTP/2 and gRPC traffic is never affected, and both are counted because gRPC rides on Node's HTTP/2 client.
 
 ```bash
 # Install dependencies

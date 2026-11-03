@@ -1,7 +1,8 @@
 import type { OutboundCollector, OutboundCollectorOptions } from '../types'
 import http from 'node:http'
+import http2 from 'node:http2'
 import https from 'node:https'
-import { createRequestTracker } from '../tracker'
+import { createRequestTracker, isFinalStatus } from '../tracker'
 
 type RequestFunction = (this: unknown, ...args: never[]) => unknown
 
@@ -42,9 +43,43 @@ function patchRequestModule<T extends RequestFunction>(
   }
 }
 
+interface Http2Headers {
+  [key: string]: string | number | undefined
+}
+
 export function createWrappersCollector(options: OutboundCollectorOptions): OutboundCollector {
   const tracker = createRequestTracker(options)
   let restore: (() => void) | undefined
+
+  const trackStream = (stream: http2.ClientHttp2Stream, headers: Http2Headers | undefined) => {
+    tracker.begin(stream, `${headers?.[':scheme'] ?? 'http'}://${headers?.[':authority'] ?? 'localhost'}${headers?.[':path'] ?? ''}`)
+    stream.once('response', (responseHeaders) => {
+      if (isFinalStatus(Number((responseHeaders as Http2Headers)[':status'])))
+        tracker.settle(stream)
+    })
+    stream.once('error', () => tracker.settle(stream))
+    stream.once('close', () => tracker.settle(stream))
+  }
+
+  const patchHttp2 = () => {
+    const originalConnect = http2.connect
+    const trackedConnect = function trackedConnect(this: unknown, ...args: unknown[]) {
+      const session = (originalConnect as unknown as (...connectArgs: unknown[]) => http2.ClientHttp2Session).apply(this, args)
+      const originalRequest = session.request
+      session.request = function trackedRequest(this: unknown, ...requestArgs: unknown[]) {
+        const stream = (originalRequest as unknown as (...streamArgs: unknown[]) => http2.ClientHttp2Stream).apply(this, requestArgs)
+        trackStream(stream, requestArgs[0] as Http2Headers | undefined)
+        return stream
+      } as typeof session.request
+      return session
+    } as unknown as typeof http2.connect
+
+    http2.connect = trackedConnect
+    return () => {
+      if (http2.connect === trackedConnect)
+        http2.connect = originalConnect
+    }
+  }
 
   const trackRequest = <T extends RequestFunction>(original: T): T => {
     const tracked = function trackedRequest(this: unknown, ...args: Parameters<T>) {
@@ -84,6 +119,7 @@ export function createWrappersCollector(options: OutboundCollectorOptions): Outb
       const restoreModules = [
         patchRequestModule(http, trackRequest),
         patchRequestModule(https, trackRequest),
+        patchHttp2(),
       ]
 
       restore = () => {

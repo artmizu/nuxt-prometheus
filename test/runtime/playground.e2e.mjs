@@ -116,6 +116,8 @@ async function main() {
     const metrics = await (await fetch(`${baseUrl}/metrics`)).text()
     assert.match(metrics, /playground_page_request_time\{path="\/api\/outbound\/fetch",status_code="200"\} [1-9]\d*/)
     assert.match(metrics, /playground_page_request_time\{path="\/api\/outbound\/http",status_code="200"\} [1-9]\d*/)
+    assert.match(metrics, /playground_page_request_time\{path="\/api\/outbound\/http2",status_code="200"\} [1-9]\d*/)
+    assert.match(metrics, /playground_page_request_time\{path="\/api\/outbound\/grpc",status_code="200"\} [1-9]\d*/)
 
     process.stdout.write(`playground e2e ok: ${runtime}\n`)
   }

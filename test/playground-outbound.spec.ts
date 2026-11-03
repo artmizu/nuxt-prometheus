@@ -79,10 +79,14 @@ describe('playground outbound cases', async () => {
   it('exports request timings for collected calls', async () => {
     await $fetch('/api/outbound/fetch')
     await $fetch('/api/outbound/http')
+    await $fetch('/api/outbound/http2')
+    await $fetch('/api/outbound/grpc')
 
     const metrics = await $fetch<string>('/metrics')
 
     expect(metrics).toMatch(/playground_page_request_time\{path="\/api\/outbound\/fetch",status_code="200"\} [1-9]\d*/)
     expect(metrics).toMatch(/playground_page_request_time\{path="\/api\/outbound\/http",status_code="200"\} [1-9]\d*/)
+    expect(metrics).toMatch(/playground_page_request_time\{path="\/api\/outbound\/http2",status_code="200"\} [1-9]\d*/)
+    expect(metrics).toMatch(/playground_page_request_time\{path="\/api\/outbound\/grpc",status_code="200"\} [1-9]\d*/)
   })
 })

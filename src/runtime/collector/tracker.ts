@@ -13,6 +13,10 @@ function isInternalUrl(url: string) {
   }
 }
 
+export function isFinalStatus(statusCode: number | undefined) {
+  return (statusCode ?? 0) >= 200 || statusCode === 101
+}
+
 export function createRequestTracker(options: OutboundCollectorOptions) {
   const pending = new WeakMap<object, OutboundRequestTiming>()
 

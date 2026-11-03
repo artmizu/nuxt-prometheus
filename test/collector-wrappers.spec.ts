@@ -2,7 +2,10 @@ import type { ClientRequest } from 'node:http'
 import type { AddressInfo } from 'node:net'
 import type { OutboundRequestsState } from '../src/runtime/collector/types'
 import { AsyncLocalStorage } from 'node:async_hooks'
+import { Buffer } from 'node:buffer'
 import http, { createServer } from 'node:http'
+import http2 from 'node:http2'
+import { credentials, makeGenericClientConstructor, Server, ServerCredentials } from '@grpc/grpc-js'
 import { afterAll, describe, expect, it } from 'vitest'
 import { createWrappersCollector } from '../src/runtime/collector/adapters/wrappers'
 
@@ -22,9 +25,81 @@ const resetting = createServer((request, response) => {
 await new Promise<void>(resolve => resetting.listen(0, '127.0.0.1', resolve))
 const resettingPort = (resetting.address() as AddressInfo).port
 
+const h2server = http2.createServer()
+h2server.on('stream', (stream: http2.ServerHttp2Stream) => {
+  setTimeout(() => {
+    stream.respond({ ':status': 200 })
+    stream.end('http2 ok')
+  }, 40)
+})
+await new Promise<void>(resolve => h2server.listen(0, '127.0.0.1', resolve))
+const h2port = (h2server.address() as AddressInfo).port
+
+const grpcService = {
+  Say: {
+    path: '/demo.Greeter/Say',
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: unknown) => Buffer.from(JSON.stringify(value)),
+    requestDeserialize: (buffer: Buffer) => JSON.parse(buffer.toString()),
+    responseSerialize: (value: unknown) => Buffer.from(JSON.stringify(value)),
+    responseDeserialize: (buffer: Buffer) => JSON.parse(buffer.toString()),
+  },
+}
+const grpcServer = new Server()
+grpcServer.addService(grpcService, {
+  Say: (call: { request: { name: string } }, callback: (error: null, response: { message: string }) => void) => {
+    setTimeout(callback, 30, null, { message: `hello ${call.request.name}` })
+  },
+} as never)
+const grpcAddress = await new Promise<string>((resolve, reject) => {
+  grpcServer.bindAsync('127.0.0.1:0', ServerCredentials.createInsecure(), (error, port) => {
+    if (error)
+      reject(error)
+    else
+      resolve(`127.0.0.1:${port}`)
+  })
+})
+const GreeterClient = makeGenericClientConstructor(grpcService, 'Greeter')
+
+function http2Request() {
+  return new Promise<string>((resolve, reject) => {
+    const session = http2.connect(`http://127.0.0.1:${h2port}`)
+    const request = session.request({ ':path': '/http2', ':method': 'GET' })
+    let body = ''
+    request.on('data', (chunk) => {
+      body += chunk
+    })
+    request.on('end', () => {
+      session.close()
+      resolve(body)
+    })
+    request.on('error', reject)
+    request.end()
+  })
+}
+
+function grpcCall() {
+  return new Promise<{ message: string }>((resolve, reject) => {
+    const client = new GreeterClient(grpcAddress, credentials.createInsecure()) as unknown as {
+      Say: (request: { name: string }, options: { deadline: number }, callback: (error: Error | null, response?: { message: string }) => void) => void
+      close: () => void
+    }
+    client.Say({ name: 'world' }, { deadline: Date.now() + 3000 }, (error, response) => {
+      client.close()
+      if (error)
+        reject(error)
+      else
+        resolve(response!)
+    })
+  })
+}
+
 afterAll(() => new Promise<void>((resolve) => {
   upstream.closeAllConnections()
   resetting.closeAllConnections()
+  h2server.close()
+  grpcServer.forceShutdown()
   upstream.close(() => resetting.close(() => resolve()))
 }))
 
@@ -196,6 +271,28 @@ describe('wrappers collector', () => {
     collector.stop()
 
     expect(Object.values(state.requests)).toHaveLength(2)
+  })
+
+  it('records an http2 request', async () => {
+    const { state, collector } = setup()
+    collector.start()
+    expect(await http2Request()).toBe('http2 ok')
+    collector.stop()
+
+    const timings = Object.values(state.requests)
+    expect(timings).toHaveLength(1)
+    expect(timings[0]!.end - timings[0]!.start).toBeGreaterThanOrEqual(30)
+  })
+
+  it('records a grpc call', async () => {
+    const { state, collector } = setup()
+    collector.start()
+    expect(await grpcCall()).toEqual({ message: 'hello world' })
+    collector.stop()
+
+    const timings = Object.values(state.requests)
+    expect(timings).toHaveLength(1)
+    expect(timings[0]!.end - timings[0]!.start).toBeGreaterThanOrEqual(20)
   })
 
   it('attributes requests to the context that started them', async () => {

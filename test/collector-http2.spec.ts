@@ -30,8 +30,10 @@ vi.mock('nitropack/runtime', () => ({
 
 const server = http2.createServer()
 server.on('stream', (stream: http2.ServerHttp2Stream) => {
-  stream.respond({ ':status': 200 })
-  stream.end('http2 ok')
+  setTimeout(() => {
+    stream.respond({ ':status': 200 })
+    stream.end('http2 ok')
+  }, 30)
 })
 await new Promise<void>(resolve => server.listen(0, '127.0.0.1', resolve))
 const port = (server.address() as AddressInfo).port
@@ -77,6 +79,8 @@ describe('http2 transport', () => {
     })
 
     expect(body).toBe('http2 ok')
-    expect(current.context.prometheus.requests).toEqual({})
+    const timings = Object.values(current.context.prometheus.requests)
+    expect(timings).toHaveLength(1)
+    expect(timings[0]!.end - timings[0]!.start).toBeGreaterThanOrEqual(20)
   })
 })

@@ -46,7 +46,7 @@ const service = {
 const server = new Server()
 server.addService(service, {
   Say: (call: { request: { name: string } }, callback: (error: null, response: { message: string }) => void) => {
-    callback(null, { message: `hello ${call.request.name}` })
+    setTimeout(callback, 30, null, { message: `hello ${call.request.name}` })
   },
 } as never)
 
@@ -101,6 +101,8 @@ describe('grpc transport', () => {
     })
 
     expect(result).toEqual({ message: 'hello world' })
-    expect(current.context.prometheus.requests).toEqual({})
+    const timings = Object.values(current.context.prometheus.requests)
+    expect(timings).toHaveLength(1)
+    expect(timings[0]!.end - timings[0]!.start).toBeGreaterThanOrEqual(20)
   })
 })
