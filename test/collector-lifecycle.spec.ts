@@ -1,12 +1,10 @@
-import type { NitroApp, NitroRuntimeHooks } from 'nitropack/types'
-import type { AddressInfo } from 'node:net'
+import type { NitroHooks, RequestEvent } from './utils/nitro'
 import http, { createServer } from 'node:http'
-import { createHooks } from 'hookable'
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import plugin from '../src/runtime/nitro'
 import { calculateTime } from '../src/runtime/utils'
-
-type RequestEvent = Parameters<NitroRuntimeHooks['request']>[0]
+import { portOf } from './utils/net'
+import { createRequestEvent, startNitroPlugin } from './utils/nitro'
 
 const runtime = await vi.hoisted(async () => {
   const { AsyncLocalStorage } = await import('node:async_hooks')
@@ -30,7 +28,7 @@ vi.mock('nitropack/runtime', () => ({
 }))
 
 function event() {
-  return { context: {} } as RequestEvent
+  return createRequestEvent()
 }
 
 const upstream = createServer((request, response) => {
@@ -46,15 +44,14 @@ upstream.on('checkContinue', (request, response) => {
 await new Promise<void>(resolve => upstream.listen(0, '127.0.0.1', resolve))
 
 function upstreamUrl(path: string) {
-  return `http://127.0.0.1:${(upstream.address() as AddressInfo).port}${path}`
+  return `http://127.0.0.1:${portOf(upstream)}${path}`
 }
 
-let hooks: ReturnType<typeof createHooks<NitroRuntimeHooks>>
+let hooks: NitroHooks
 
 beforeEach(() => {
   runtime.params.disableRequestInterceptor = false
-  hooks = createHooks<NitroRuntimeHooks>()
-  plugin({ hooks } as unknown as NitroApp)
+  hooks = startNitroPlugin(plugin)
 })
 
 afterEach(async () => {
@@ -116,7 +113,7 @@ describe('outbound request collection', () => {
       await new Promise<void>((resolve, reject) => {
         const request = http.request({
           host: '127.0.0.1',
-          port: (upstream.address() as AddressInfo).port,
+          port: portOf(upstream),
           path: '/continue',
           method: 'POST',
           headers: { 'Expect': '100-continue', 'content-length': 1 },
@@ -196,8 +193,7 @@ describe('outbound request collection', () => {
   it('does not collect when interception is disabled', async () => {
     await hooks.callHook('close')
     runtime.params.disableRequestInterceptor = true
-    hooks = createHooks<NitroRuntimeHooks>()
-    plugin({ hooks } as unknown as NitroApp)
+    hooks = startNitroPlugin(plugin)
 
     const current = event()
     await runtime.context.run(current, async () => {

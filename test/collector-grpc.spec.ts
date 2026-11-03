@@ -1,11 +1,8 @@
-import type { NitroApp, NitroRuntimeHooks } from 'nitropack/types'
-import { Buffer } from 'node:buffer'
-import { credentials, makeGenericClientConstructor, Server, ServerCredentials } from '@grpc/grpc-js'
-import { createHooks } from 'hookable'
+import type { NitroHooks, RequestEvent } from './utils/nitro'
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import plugin from '../src/runtime/nitro'
-
-type RequestEvent = Parameters<NitroRuntimeHooks['request']>[0]
+import { callGreeter, startGreeterServer } from './utils/grpc'
+import { createRequestEvent, startNitroPlugin } from './utils/nitro'
 
 const runtime = await vi.hoisted(async () => {
   const { AsyncLocalStorage } = await import('node:async_hooks')
@@ -28,44 +25,12 @@ vi.mock('nitropack/runtime', () => ({
   },
 }))
 
-const serialize = (value: unknown) => Buffer.from(JSON.stringify(value))
-const deserialize = (buffer: Buffer) => JSON.parse(buffer.toString())
+const { server, address } = await startGreeterServer()
 
-const service = {
-  Say: {
-    path: '/demo.Greeter/Say',
-    requestStream: false,
-    responseStream: false,
-    requestSerialize: serialize,
-    requestDeserialize: deserialize,
-    responseSerialize: serialize,
-    responseDeserialize: deserialize,
-  },
-}
-
-const server = new Server()
-server.addService(service, {
-  Say: (call: { request: { name: string } }, callback: (error: null, response: { message: string }) => void) => {
-    setTimeout(callback, 30, null, { message: `hello ${call.request.name}` })
-  },
-} as never)
-
-const address = await new Promise<string>((resolve, reject) => {
-  server.bindAsync('127.0.0.1:0', ServerCredentials.createInsecure(), (error, port) => {
-    if (error)
-      reject(error)
-    else
-      resolve(`127.0.0.1:${port}`)
-  })
-})
-
-const Client = makeGenericClientConstructor(service, 'Greeter')
-
-let hooks: ReturnType<typeof createHooks<NitroRuntimeHooks>>
+let hooks: NitroHooks
 
 beforeEach(() => {
-  hooks = createHooks<NitroRuntimeHooks>()
-  plugin({ hooks } as unknown as NitroApp)
+  hooks = startNitroPlugin(plugin)
 })
 
 afterEach(async () => {
@@ -78,26 +43,10 @@ afterAll(() => {
 
 describe('grpc transport', () => {
   it('completes a unary grpc call while outbound collection is enabled', async () => {
-    const current = { context: {} } as RequestEvent
+    const current = createRequestEvent()
     const result = await runtime.context.run(current, async () => {
       await hooks.callHook('request', current)
-      const client = new Client(address, credentials.createInsecure()) as unknown as {
-        Say: (request: { name: string }, options: { deadline: number }, callback: (error: Error | null, response?: { message: string }) => void) => void
-        close: () => void
-      }
-      try {
-        return await new Promise<{ message: string }>((resolve, reject) => {
-          client.Say({ name: 'world' }, { deadline: Date.now() + 3000 }, (error, response) => {
-            if (error)
-              reject(error)
-            else
-              resolve(response!)
-          })
-        })
-      }
-      finally {
-        client.close()
-      }
+      return await callGreeter(address)
     })
 
     expect(result).toEqual({ message: 'hello world' })

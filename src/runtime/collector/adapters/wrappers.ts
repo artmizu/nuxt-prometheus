@@ -4,95 +4,79 @@ import http2 from 'node:http2'
 import https from 'node:https'
 import { createRequestTracker, isFinalStatus } from '../tracker'
 
-type RequestFunction = (this: unknown, ...args: never[]) => unknown
-
-interface ClientRequestLike {
-  protocol?: string
-  host?: string
-  path?: string
-  once: (event: string, listener: () => void) => unknown
-}
-
-function resolveUrl(input: unknown) {
+function resolveUrl(input: RequestInfo | URL) {
   if (typeof input === 'string')
     return input
   if (input instanceof URL)
     return input.href
-  if (input && typeof input === 'object') {
-    const candidate = input as { url?: string, href?: string, path?: string }
-    return candidate.url ?? candidate.href ?? candidate.path ?? ''
-  }
-  return ''
-}
-
-function patchRequestModule<T extends RequestFunction>(
-  module: { request: T, get: T },
-  track: (original: T) => T,
-) {
-  const originalRequest = module.request
-  const originalGet = module.get
-  const trackedRequest = track(originalRequest)
-  const trackedGet = track(originalGet)
-  module.request = trackedRequest
-  module.get = trackedGet
-  return () => {
-    if (module.request === trackedRequest)
-      module.request = originalRequest
-    if (module.get === trackedGet)
-      module.get = originalGet
-  }
-}
-
-interface Http2Headers {
-  [key: string]: string | number | undefined
+  return input.url
 }
 
 export function createWrappersCollector(options: OutboundCollectorOptions): OutboundCollector {
   const tracker = createRequestTracker(options)
   let restore: (() => void) | undefined
 
-  const trackStream = (stream: http2.ClientHttp2Stream, headers: Http2Headers | undefined) => {
+  const trackRequest = (request: http.ClientRequest) => {
+    tracker.begin(request, `${request.protocol ?? 'http:'}//${request.host ?? 'localhost'}${request.path ?? ''}`)
+    request.once('response', () => tracker.settle(request))
+    request.once('error', () => tracker.settle(request))
+  }
+
+  const trackStream = (stream: http2.ClientHttp2Stream, headers: http2.OutgoingHttpHeaders | undefined) => {
     tracker.begin(stream, `${headers?.[':scheme'] ?? 'http'}://${headers?.[':authority'] ?? 'localhost'}${headers?.[':path'] ?? ''}`)
     stream.once('response', (responseHeaders) => {
-      if (isFinalStatus(Number((responseHeaders as Http2Headers)[':status'])))
+      if (isFinalStatus(Number(responseHeaders[':status'])))
         tracker.settle(stream)
     })
     stream.once('error', () => tracker.settle(stream))
     stream.once('close', () => tracker.settle(stream))
   }
 
+  const trackRequestFunction = <T extends typeof http.request | typeof http.get>(target: T) => new Proxy(target, {
+    apply: (target, thisArg, args) => {
+      const request: http.ClientRequest = Reflect.apply(target, thisArg, args)
+      trackRequest(request)
+      return request
+    },
+  })
+
+  const patchRequestModule = (module: { request: typeof http.request, get: typeof http.get }) => {
+    const originalRequest = module.request
+    const originalGet = module.get
+    const trackedRequest = trackRequestFunction(originalRequest)
+    const trackedGet = trackRequestFunction(originalGet)
+    module.request = trackedRequest
+    module.get = trackedGet
+    return () => {
+      if (module.request === trackedRequest)
+        module.request = originalRequest
+      if (module.get === trackedGet)
+        module.get = originalGet
+    }
+  }
+
   const patchHttp2 = () => {
     const originalConnect = http2.connect
-    const trackedConnect = function trackedConnect(this: unknown, ...args: unknown[]) {
-      const session = (originalConnect as unknown as (...connectArgs: unknown[]) => http2.ClientHttp2Session).apply(this, args)
-      const originalRequest = session.request
-      session.request = function trackedRequest(this: unknown, ...requestArgs: unknown[]) {
-        const stream = (originalRequest as unknown as (...streamArgs: unknown[]) => http2.ClientHttp2Stream).apply(this, requestArgs)
-        trackStream(stream, requestArgs[0] as Http2Headers | undefined)
-        return stream
-      } as typeof session.request
-      return session
-    } as unknown as typeof http2.connect
-
+    const trackedConnect = new Proxy(originalConnect, {
+      apply: (target, thisArg, args) => {
+        const session: http2.ClientHttp2Session = Reflect.apply(target, thisArg, args)
+        const originalRequest = session.request
+        const trackedRequest = new Proxy(originalRequest, {
+          apply: (requestTarget, requestThisArg, requestArgs) => {
+            const stream: http2.ClientHttp2Stream = Reflect.apply(requestTarget, requestThisArg, requestArgs)
+            trackStream(stream, requestArgs[0])
+            return stream
+          },
+        })
+        session.request = trackedRequest
+        return session
+      },
+    })
     http2.connect = trackedConnect
     return () => {
       if (http2.connect === trackedConnect)
         http2.connect = originalConnect
     }
-  }
-
-  const trackRequest = <T extends RequestFunction>(original: T): T => {
-    const tracked = function trackedRequest(this: unknown, ...args: Parameters<T>) {
-      const request = Reflect.apply(original, this, args) as ClientRequestLike
-      if (typeof request?.once !== 'function')
-        return request
-
-      tracker.begin(request, `${request.protocol ?? 'http:'}//${request.host ?? 'localhost'}${request.path ?? ''}`)
-      request.once('response', () => tracker.settle(request))
-      request.once('error', () => tracker.settle(request))
-      return request
-    }
-    return tracked as unknown as T
   }
 
   return {
@@ -101,24 +85,21 @@ export function createWrappersCollector(options: OutboundCollectorOptions): Outb
         return
 
       const originalFetch = globalThis.fetch
-      const trackedFetch = async function trackedFetch(this: unknown, input: unknown, init?: RequestInit) {
+      const trackedFetch: typeof fetch = async (input, init) => {
         const key = {}
         tracker.begin(key, resolveUrl(input))
         try {
-          const response = await originalFetch.call(this, input as RequestInfo, init)
-          tracker.settle(key)
-          return response
+          return await originalFetch(input, init)
         }
-        catch (error) {
+        finally {
           tracker.settle(key)
-          throw error
         }
       }
 
       globalThis.fetch = trackedFetch
       const restoreModules = [
-        patchRequestModule(http, trackRequest),
-        patchRequestModule(https, trackRequest),
+        patchRequestModule(http),
+        patchRequestModule(https),
         patchHttp2(),
       ]
 

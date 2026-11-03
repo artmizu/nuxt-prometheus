@@ -1,13 +1,11 @@
-import type { ClientRequest } from 'node:http'
-import type { AddressInfo } from 'node:net'
 import type { OutboundRequestsState } from '../src/runtime/collector/types'
 import { AsyncLocalStorage } from 'node:async_hooks'
-import { Buffer } from 'node:buffer'
 import http, { createServer } from 'node:http'
 import http2 from 'node:http2'
-import { credentials, makeGenericClientConstructor, Server, ServerCredentials } from '@grpc/grpc-js'
 import { afterAll, describe, expect, it } from 'vitest'
 import { createWrappersCollector } from '../src/runtime/collector/adapters/wrappers'
+import { callGreeter, startGreeterServer } from './utils/grpc'
+import { portOf } from './utils/net'
 
 const upstream = createServer((request, response) => {
   setTimeout(() => response.end('ok'), 40)
@@ -17,13 +15,13 @@ upstream.on('checkContinue', (request, response) => {
   setTimeout(() => response.end('continued'), 60)
 })
 await new Promise<void>(resolve => upstream.listen(0, '127.0.0.1', resolve))
-const port = (upstream.address() as AddressInfo).port
+const port = portOf(upstream)
 
 const resetting = createServer((request, response) => {
   setTimeout(() => response.destroy(), 30)
 })
 await new Promise<void>(resolve => resetting.listen(0, '127.0.0.1', resolve))
-const resettingPort = (resetting.address() as AddressInfo).port
+const resettingPort = portOf(resetting)
 
 const h2server = http2.createServer()
 h2server.on('stream', (stream: http2.ServerHttp2Stream) => {
@@ -33,34 +31,9 @@ h2server.on('stream', (stream: http2.ServerHttp2Stream) => {
   }, 40)
 })
 await new Promise<void>(resolve => h2server.listen(0, '127.0.0.1', resolve))
-const h2port = (h2server.address() as AddressInfo).port
+const h2port = portOf(h2server)
 
-const grpcService = {
-  Say: {
-    path: '/demo.Greeter/Say',
-    requestStream: false,
-    responseStream: false,
-    requestSerialize: (value: unknown) => Buffer.from(JSON.stringify(value)),
-    requestDeserialize: (buffer: Buffer) => JSON.parse(buffer.toString()),
-    responseSerialize: (value: unknown) => Buffer.from(JSON.stringify(value)),
-    responseDeserialize: (buffer: Buffer) => JSON.parse(buffer.toString()),
-  },
-}
-const grpcServer = new Server()
-grpcServer.addService(grpcService, {
-  Say: (call: { request: { name: string } }, callback: (error: null, response: { message: string }) => void) => {
-    setTimeout(callback, 30, null, { message: `hello ${call.request.name}` })
-  },
-} as never)
-const grpcAddress = await new Promise<string>((resolve, reject) => {
-  grpcServer.bindAsync('127.0.0.1:0', ServerCredentials.createInsecure(), (error, port) => {
-    if (error)
-      reject(error)
-    else
-      resolve(`127.0.0.1:${port}`)
-  })
-})
-const GreeterClient = makeGenericClientConstructor(grpcService, 'Greeter')
+const { server: grpcServer, address: grpcAddress } = await startGreeterServer()
 
 function http2Request() {
   return new Promise<string>((resolve, reject) => {
@@ -79,22 +52,6 @@ function http2Request() {
   })
 }
 
-function grpcCall() {
-  return new Promise<{ message: string }>((resolve, reject) => {
-    const client = new GreeterClient(grpcAddress, credentials.createInsecure()) as unknown as {
-      Say: (request: { name: string }, options: { deadline: number }, callback: (error: Error | null, response?: { message: string }) => void) => void
-      close: () => void
-    }
-    client.Say({ name: 'world' }, { deadline: Date.now() + 3000 }, (error, response) => {
-      client.close()
-      if (error)
-        reject(error)
-      else
-        resolve(response!)
-    })
-  })
-}
-
 afterAll(() => new Promise<void>((resolve) => {
   upstream.closeAllConnections()
   resetting.closeAllConnections()
@@ -103,8 +60,8 @@ afterAll(() => new Promise<void>((resolve) => {
   upstream.close(() => resetting.close(() => resolve()))
 }))
 
-function callOriginal(target: typeof http.request, self: unknown, args: unknown[]) {
-  return (target as unknown as (...args: unknown[]) => ClientRequest).apply(self, args)
+interface AppInsightsRequestOptions extends http.RequestOptions {
+  disableAppInsightsAutoCollection?: boolean
 }
 
 function setup() {
@@ -214,9 +171,9 @@ describe('wrappers collector', () => {
     const { collector } = setup()
     collector.start()
     const laterRequest = http.request
-    const replacement = function replacement(this: unknown, ...args: unknown[]) {
-      return callOriginal(laterRequest, this, args)
-    } as unknown as typeof http.request
+    const replacement = new Proxy(laterRequest, {
+      apply: (target, thisArg, args) => Reflect.apply(target, thisArg, args),
+    })
     http.request = replacement
     collector.stop()
 
@@ -227,22 +184,25 @@ describe('wrappers collector', () => {
   it('preserves the caller argument shape for downstream patches', async () => {
     const seen: unknown[][] = []
     const original = http.request
-    http.request = function recordingRequest(this: unknown, ...args: unknown[]) {
-      seen.push(args)
-      return callOriginal(original, this, args)
-    } as unknown as typeof http.request
+    http.request = new Proxy(original, {
+      apply: (target, thisArg, args) => {
+        seen.push(args)
+        return Reflect.apply(target, thisArg, args)
+      },
+    })
 
     const { collector } = setup()
     collector.start()
     try {
+      const options: AppInsightsRequestOptions = {
+        host: '127.0.0.1',
+        port,
+        path: '/options-first',
+        headers: { 'x-test': '1' },
+        disableAppInsightsAutoCollection: true,
+      }
       await new Promise<void>((resolve, reject) => {
-        const request = http.request({
-          host: '127.0.0.1',
-          port,
-          path: '/options-first',
-          headers: { 'x-test': '1' },
-          disableAppInsightsAutoCollection: true,
-        } as http.RequestOptions, (response) => {
+        const request = http.request(options, (response) => {
           response.resume()
           response.on('end', resolve)
         })
@@ -287,7 +247,7 @@ describe('wrappers collector', () => {
   it('records a grpc call', async () => {
     const { state, collector } = setup()
     collector.start()
-    expect(await grpcCall()).toEqual({ message: 'hello world' })
+    expect(await callGreeter(grpcAddress)).toEqual({ message: 'hello world' })
     collector.stop()
 
     const timings = Object.values(state.requests)

@@ -1,9 +1,12 @@
-import type { NitroApp, NitroRuntimeHooks } from 'nitropack/types'
-import type { AddressInfo } from 'node:net'
 import http, { createServer } from 'node:http'
-import { createHooks } from 'hookable'
 import { afterAll, describe, expect, it, vi } from 'vitest'
 import plugin from '../src/runtime/nitro'
+import { portOf } from './utils/net'
+import { startNitroPlugin } from './utils/nitro'
+
+interface AppInsightsRequestOptions extends http.RequestOptions {
+  disableAppInsightsAutoCollection?: boolean
+}
 
 vi.mock('nitropack/runtime', () => ({
   defineNitroPlugin: (callback: unknown) => callback,
@@ -23,17 +26,18 @@ vi.mock('nitropack/runtime', () => ({
 
 const seen: unknown[][] = []
 const originalRequest = http.request
-http.request = function (...args: unknown[]) {
-  seen.push(args)
-  return Reflect.apply(originalRequest, this, args)
-}
+http.request = new Proxy(originalRequest, {
+  apply: (target, thisArg, args) => {
+    seen.push(args)
+    return Reflect.apply(target, thisArg, args)
+  },
+})
 
 const server = createServer((_request, response) => response.end('ok'))
 await new Promise<void>(resolve => server.listen(0, '127.0.0.1', resolve))
-const port = (server.address() as AddressInfo).port
+const port = portOf(server)
 
-const hooks = createHooks<NitroRuntimeHooks>()
-plugin({ hooks } as unknown as NitroApp)
+const hooks = startNitroPlugin(plugin)
 
 afterAll(async () => {
   await hooks.callHook('close')
@@ -42,7 +46,7 @@ afterAll(async () => {
   await new Promise<void>(resolve => server.close(() => resolve()))
 })
 
-function request(target: string | http.RequestOptions) {
+function request(target: string | AppInsightsRequestOptions) {
   return new Promise<void>((resolve, reject) => {
     const onResponse = (response: http.IncomingMessage) => {
       response.resume()
@@ -64,7 +68,7 @@ describe('request patches installed before the collector', () => {
       path: '/options-first',
       headers: { 'x-test': '1' },
       disableAppInsightsAutoCollection: true,
-    } as http.RequestOptions)
+    })
 
     expect(seen).toHaveLength(1)
     expect(seen[0]!).toHaveLength(2)

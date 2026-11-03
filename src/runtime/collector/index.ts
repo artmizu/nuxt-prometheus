@@ -4,15 +4,10 @@ import { createWrappersCollector } from './adapters/wrappers'
 
 type RuntimeName = 'bun' | 'deno' | 'node'
 
-interface RuntimeGlobals {
-  Bun?: unknown
-  Deno?: unknown
-}
-
-export function detectRuntime(globals: RuntimeGlobals = globalThis as RuntimeGlobals): RuntimeName {
-  if (globals.Bun)
+export function detectRuntime(): RuntimeName {
+  if ('Bun' in globalThis)
     return 'bun'
-  if (globals.Deno)
+  if ('Deno' in globalThis)
     return 'deno'
   return 'node'
 }

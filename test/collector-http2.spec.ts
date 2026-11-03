@@ -1,11 +1,9 @@
-import type { NitroApp, NitroRuntimeHooks } from 'nitropack/types'
-import type { AddressInfo } from 'node:net'
+import type { NitroHooks, RequestEvent } from './utils/nitro'
 import http2 from 'node:http2'
-import { createHooks } from 'hookable'
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import plugin from '../src/runtime/nitro'
-
-type RequestEvent = Parameters<NitroRuntimeHooks['request']>[0]
+import { portOf } from './utils/net'
+import { createRequestEvent, startNitroPlugin } from './utils/nitro'
 
 const runtime = await vi.hoisted(async () => {
   const { AsyncLocalStorage } = await import('node:async_hooks')
@@ -36,13 +34,12 @@ server.on('stream', (stream: http2.ServerHttp2Stream) => {
   }, 30)
 })
 await new Promise<void>(resolve => server.listen(0, '127.0.0.1', resolve))
-const port = (server.address() as AddressInfo).port
+const port = portOf(server)
 
-let hooks: ReturnType<typeof createHooks<NitroRuntimeHooks>>
+let hooks: NitroHooks
 
 beforeEach(() => {
-  hooks = createHooks<NitroRuntimeHooks>()
-  plugin({ hooks } as unknown as NitroApp)
+  hooks = startNitroPlugin(plugin)
 })
 
 afterEach(async () => {
@@ -55,7 +52,7 @@ afterAll(() => new Promise<void>((resolve) => {
 
 describe('http2 transport', () => {
   it('serves http2 requests while outbound collection is enabled', async () => {
-    const current = { context: {} } as RequestEvent
+    const current = createRequestEvent()
     const body = await runtime.context.run(current, async () => {
       await hooks.callHook('request', current)
       const session = http2.connect(`http://127.0.0.1:${port}`)
