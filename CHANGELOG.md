@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.1.0](https://github.com/artmizu/nuxt-prometheus/compare/v4.0.0...v4.1.0) (2026-11-03)
+
+
+### Features
+
+* collect outbound request timings without intercepting connections ([#112](https://github.com/artmizu/nuxt-prometheus/issues/112)) ([f7ea36b](https://github.com/artmizu/nuxt-prometheus/commit/f7ea36bb8835c72bfcf655d616d0bc8f1c6a3b98))
+
 ## [4.0.0](https://github.com/artmizu/nuxt-prometheus/compare/v3.0.5...v4.0.0) (2026-10-31)
 
 
