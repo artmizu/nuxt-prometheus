@@ -56,7 +56,7 @@ function request(target: string | http.RequestOptions) {
   })
 }
 
-describe('request patches installed before the interceptor', () => {
+describe('request patches installed before the collector', () => {
   it('keeps the options-first call shape used by Application Insights', async () => {
     await request({
       host: '127.0.0.1',

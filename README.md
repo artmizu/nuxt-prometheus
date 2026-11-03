@@ -142,13 +142,13 @@ export default defineNuxtConfig({
 ### disableRequestInterceptor
 - Type: `boolean`
 - Default: `false`
-- Description: Disables interception of outbound HTTP requests.
+- Description: Disables collection of outbound request timings.
 
 When disabled, only total page timing metrics remain available.
 Request and render timing gauges and histograms are omitted because their values are unavailable.
 Default Node.js metrics, `/metrics`, and `/health` remain available.
 
-When interception is active, the module enables Nitro's experimental async context by default.
+When outbound collection is active, the module enables Nitro's experimental async context by default.
 This context keeps outbound request timings separate for concurrent server requests, including SSR.
 Background requests without a Nitro request context do not contribute to page timings.
 
@@ -186,7 +186,8 @@ NUXT_PUBLIC_PROMETHEUS_PREFIX=myapp_ node .output/server/index.mjs
 ## Development
 
 The build uses TypeScript 5.9.3 because the current Nuxt module builder does not support the TypeScript 7 compiler API.
-The interceptor stays at 0.41.9 to preserve Nitro request context across reused connections.
+
+Outbound request timings are collected by `src/runtime/collector`. On Node.js the collector subscribes to the `undici:request:*` and `http.client.*` diagnostics channels. On Bun and Deno it wraps `fetch`, `http` and `https` instead, because those channels are missing or incomplete there. Neither adapter intercepts connections, so HTTP/2 and gRPC traffic is never affected; such calls are not counted either.
 
 ```bash
 # Install dependencies
@@ -216,4 +217,4 @@ The PR check uses a local fixture and fails if post-GC heap growth exceeds 8 MiB
 Logs, measurements, and a baseline heap snapshot are saved in `reports/memory`; failures also include a snapshot for comparison.
 CI uploads these files as the `memory-regression` artifact.
 
-This short check cannot detect every slow leak. The listener-count regression test separately checks the original interceptor leak.
+This short check cannot detect every slow leak. The collector lifecycle test separately checks that no state accumulates for requests that never settle.

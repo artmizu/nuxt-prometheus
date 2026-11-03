@@ -13,4 +13,10 @@ export default antfu({
   languageOptions: {
     globals: { __ENV: 'readonly' },
   },
+}, {
+  files: ['test/runtime/**/*.mjs'],
+  rules: {
+    'antfu/no-import-dist': 'off',
+    'no-console': 'off',
+  },
 })
