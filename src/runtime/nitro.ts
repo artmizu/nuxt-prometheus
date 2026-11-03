@@ -1,23 +1,9 @@
 import type { NuxtPrometheusState } from './type'
-import { BatchInterceptor } from '@mswjs/interceptors'
-import { ClientRequestInterceptor } from '@mswjs/interceptors/ClientRequest'
-import { FetchInterceptor } from '@mswjs/interceptors/fetch'
-import { XMLHttpRequestInterceptor } from '@mswjs/interceptors/XMLHttpRequest'
 import consola from 'consola'
 import { defineNitroPlugin, useEvent, useRuntimeConfig } from 'nitropack/runtime'
+import { createOutboundCollector } from './collector'
 import { initMetrics, metrics } from './registry'
 import { calculateTime, resolveResponseStatus } from './utils'
-
-const interceptor = new BatchInterceptor({
-  name: 'nuxt-prometheus',
-  interceptors: [
-    new XMLHttpRequestInterceptor(),
-    new ClientRequestInterceptor(),
-    new FetchInterceptor(),
-  ],
-})
-
-const pendingRequestTimes = new WeakMap<object, { start: number, end: number }>()
 
 function getRequestState(): NuxtPrometheusState | undefined {
   try {
@@ -37,37 +23,17 @@ export default defineNitroPlugin((nitroApp) => {
   initMetrics(params)
 
   if (!params.disableRequestInterceptor) {
-    interceptor.apply()
-
-    interceptor.on('request', ({ request, requestId }) => {
-      const state = getRequestState()
-      if (!state || /^\/__/.test(new URL(request.url).pathname))
-        return
-
-      const now = Date.now()
-      const entry = { start: now, end: now }
-      state.requests[requestId] = entry
-      pendingRequestTimes.set(request, entry)
-
-      if (params.verbose)
-        consola.info(`[nuxt-prometheus] request: ${request.url}, ${new Date(now).toISOString()}`)
+    const collector = createOutboundCollector({
+      getState: getRequestState,
+      onRequest: params.verbose
+        ? (url, startedAt) => consola.info(`[nuxt-prometheus] request: ${url}, ${new Date(startedAt).toISOString()}`)
+        : undefined,
     })
 
-    interceptor.on('response', ({ request, response }) => {
-      if (response.status < 200 && response.status !== 101)
-        return
-
-      const entry = pendingRequestTimes.get(request)
-      if (!entry)
-        return
-
-      entry.end = Date.now()
-      pendingRequestTimes.delete(request)
-    })
+    collector.start()
 
     nitroApp.hooks.hook('close', () => {
-      interceptor.removeAllListeners()
-      interceptor.dispose()
+      collector.stop()
     })
   }
 

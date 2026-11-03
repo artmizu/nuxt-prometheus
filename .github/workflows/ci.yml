@@ -114,3 +114,88 @@ jobs:
 
       - name: Run type tests
         run: pnpm vitest --dir ./test --typecheck.only --typecheck.ignoreSourceErrors
+
+  collector-node:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version:
+          - 22.22.3
+          - 24.15.0
+          - 26.13.0
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6.1.0
+
+      - name: Set node
+        uses: actions/setup-node@v7.1.0
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Prepare is needed, because it generate types
+        run: pnpm dev:prepare
+
+      - name: Run outbound collector tests
+        run: pnpm vitest run test/collector-channels.spec.ts test/collector-wrappers.spec.ts test/collector-selection.spec.ts
+
+  collector-runtime:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runtime: bun
+            preset: bun
+            command: bun run test/runtime/collector.runtime.mjs
+            playground: bun run test/runtime/playground.e2e.mjs
+          - runtime: deno
+            preset: deno-server
+            command: deno run -A test/runtime/collector.runtime.mjs
+            playground: deno run -A test/runtime/playground.e2e.mjs
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6.1.0
+
+      - name: Set node
+        uses: actions/setup-node@v7.1.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Prepare is needed, because it generate types
+        run: pnpm dev:prepare
+
+      - name: Set up Bun
+        if: matrix.runtime == 'bun'
+        uses: oven-sh/setup-bun@v2.2.0
+        with:
+          bun-version: 1.3.11
+
+      - name: Set up Deno
+        if: matrix.runtime == 'deno'
+        uses: denoland/setup-deno@v2.0.5
+        with:
+          deno-version: 2.8.3
+
+      - name: Build the playground
+        env:
+          NITRO_PRESET: ${{ matrix.preset }}
+        run: pnpm --dir playground exec nuxt build
+
+      - name: Run outbound collector tests
+        run: ${{ matrix.command }}
+
+      - name: Run the playground end-to-end tests
+        run: ${{ matrix.playground }}

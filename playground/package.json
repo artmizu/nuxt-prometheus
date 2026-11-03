@@ -7,6 +7,7 @@
     "nuxt": "^4.6.3"
   },
   "devDependencies": {
+    "@grpc/grpc-js": "1.14.7",
     "typescript": "^5.9.3"
   }
 }

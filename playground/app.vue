@@ -12,6 +12,9 @@
     <NuxtLink to="/c">
       To C
     </NuxtLink>
+    <NuxtLink to="/outbound">
+      To Outbound
+    </NuxtLink>
     <NuxtPage />
   </div>
 </template>

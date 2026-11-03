@@ -23,7 +23,7 @@ A dashboard for the metrics exported by `@artmizu/nuxt-prometheus` 4.x. It focus
 
 `<prefix>` is the `prometheus.prefix` option, empty by default. Set it in the `Metric prefix` field at the top of the dashboard.
 
-The request and render panels need the request interceptor, which is enabled by default. When `disableRequestInterceptor` is on, those metrics are not exported and the panels stay empty; total time keeps working.
+The request and render panels need outbound request collection, which is enabled by default. When `disableRequestInterceptor` is on, those metrics are not exported and the panels stay empty; total time keeps working.
 
 SSR render errors and unmatched-route 404s are exported under the synthetic `/__nuxt_error` path with the real status code, so error traffic appears there rather than under the page you were on. The status panels read `status_code`, which requires 4.0.0 or later.
 

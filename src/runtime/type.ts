@@ -40,7 +40,7 @@ export interface AnalyticsModuleParams {
   prefix?: string
 
   /**
-   * Disable request interception
+   * Disable collection of outbound request timings
    * @default false
    */
   disableRequestInterceptor?: boolean

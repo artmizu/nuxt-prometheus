@@ -390,7 +390,7 @@
         "type": "prometheus",
         "uid": "${datasource}"
       },
-      "description": "Time spent in outbound requests during SSR. Requires the request interceptor.",
+      "description": "Time spent in outbound requests during SSR. Requires outbound request collection.",
       "fieldConfig": {
         "defaults": {
           "unit": "ms",
@@ -442,7 +442,7 @@
         "type": "prometheus",
         "uid": "${datasource}"
       },
-      "description": "Total time minus outbound request time. Requires the request interceptor.",
+      "description": "Total time minus outbound request time. Requires outbound request collection.",
       "fieldConfig": {
         "defaults": {
           "unit": "ms",
