@@ -247,6 +247,21 @@ describe('wrappers collector', () => {
     expect(timings[0]!.end - timings[0]!.start).toBeGreaterThanOrEqual(30)
   })
 
+  it('reports the http2 URL including the port', async () => {
+    const urls: string[] = []
+    const collector = createWrappersCollector({
+      getState: () => ({ requests: {} }),
+      onRequest: (url) => {
+        urls.push(url)
+      },
+    })
+    collector.start()
+    expect(await http2Request()).toBe('http2 ok')
+    collector.stop()
+
+    expect(urls).toEqual([`http://127.0.0.1:${h2port}/http2`])
+  })
+
   it('records a grpc call', async () => {
     const { state, collector } = setup()
     collector.start()

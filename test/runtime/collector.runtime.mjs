@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import http from 'node:http'
+import http2 from 'node:http2'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 import { createOutboundCollector, detectRuntime } from '../../dist/runtime/collector/index.js'
@@ -44,6 +45,16 @@ async function main() {
   await listen(upstream)
   const port = upstream.address().port
 
+  const h2upstream = http2.createServer()
+  h2upstream.on('stream', (stream) => {
+    setTimeout(() => {
+      stream.respond({ ':status': 200 })
+      stream.end('ok')
+    }, delay)
+  })
+  await listen(h2upstream)
+  const h2port = h2upstream.address().port
+
   const seen = []
   const originalRequest = http.request
   http.request = function recordingRequest(...args) {
@@ -86,13 +97,25 @@ async function main() {
   await fetch(`http://127.0.0.1:${port}/fetch`)
   await get(port, '/http')
   await fetch(`http://127.0.0.1:${port}/__nuxt_island/component`)
+  await new Promise((resolve, reject) => {
+    const session = http2.connect(`http://127.0.0.1:${h2port}`)
+    const request = session.request({ ':path': '/http2', ':method': 'GET' })
+    request.resume()
+    request.on('end', () => {
+      session.close()
+      resolve()
+    })
+    request.on('error', reject)
+    request.end()
+  })
 
   const timings = Object.values(state.requests)
-  assert.equal(timings.length, 3, `expected 3 recorded requests, received ${timings.length}`)
+  assert.equal(timings.length, 4, `expected 4 recorded requests, received ${timings.length}`)
   for (const timing of timings)
     assert.ok(timing.end - timing.start >= delay - 10, `expected a measured request, received ${timing.end - timing.start}ms`)
   assert.ok(urls.includes(`http://127.0.0.1:${port}/fetch`), `the fetch url must include the port, received ${urls.join(', ')}`)
   assert.ok(urls.includes(`http://127.0.0.1:${port}/http`), `the http url must include the port, received ${urls.join(', ')}`)
+  assert.ok(urls.includes(`http://127.0.0.1:${h2port}/http2`), `the http2 url must include the port, received ${urls.join(', ')}`)
 
   collector.stop()
   assert.equal(globalThis.fetch, originalFetch, 'the collector must restore fetch on stop')
@@ -110,7 +133,9 @@ async function main() {
   assert.notEqual(errorExitCode, 0, 'an unhandled request error must surface on this runtime')
 
   upstream.closeAllConnections?.()
+  h2upstream.closeAllConnections?.()
   await new Promise(resolve => upstream.close(resolve))
+  await new Promise(resolve => h2upstream.close(resolve))
 
   process.stdout.write(`collector runtime ok: ${runtime}\n`)
 }

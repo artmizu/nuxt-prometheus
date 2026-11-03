@@ -5,6 +5,21 @@ import https from 'node:https'
 import { createRequestTracker, isFinalStatus } from '../tracker'
 import { clientRequestUrl, streamRequestUrl } from '../url'
 
+interface StreamTarget {
+  scheme?: string
+  authority?: string
+}
+
+function http2Target(target: unknown): StreamTarget | undefined {
+  if (typeof target === 'string' || target instanceof URL) {
+    const url = new URL(target)
+    return {
+      scheme: url.protocol.replace(':', ''),
+      authority: url.host,
+    }
+  }
+}
+
 function resolveUrl(input: RequestInfo | URL) {
   if (typeof input === 'string')
     return input
@@ -34,8 +49,8 @@ export function createWrappersCollector(options: OutboundCollectorOptions): Outb
     })
   }
 
-  const trackStream = (stream: http2.ClientHttp2Stream, headers: http2.OutgoingHttpHeaders | undefined) => {
-    tracker.begin(stream, streamRequestUrl(headers))
+  const trackStream = (stream: http2.ClientHttp2Stream, headers: http2.OutgoingHttpHeaders | undefined, target: StreamTarget | undefined) => {
+    tracker.begin(stream, streamRequestUrl(headers, target))
     stream.once('response', (responseHeaders) => {
       if (isFinalStatus(Number(responseHeaders[':status'])))
         tracker.settle(stream)
@@ -76,11 +91,12 @@ export function createWrappersCollector(options: OutboundCollectorOptions): Outb
     const trackedConnect = new Proxy(originalConnect, {
       apply: (target, thisArg, args) => {
         const session: http2.ClientHttp2Session = Reflect.apply(target, thisArg, args)
+        const streamTarget = http2Target(args[0])
         const originalRequest = session.request
         const trackedRequest = new Proxy(originalRequest, {
           apply: (requestTarget, requestThisArg, requestArgs) => {
             const stream: http2.ClientHttp2Stream = Reflect.apply(requestTarget, requestThisArg, requestArgs)
-            trackStream(stream, requestArgs[0])
+            trackStream(stream, requestArgs[0], streamTarget)
             return stream
           },
         })
