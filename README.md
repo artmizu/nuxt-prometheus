@@ -24,7 +24,7 @@ Prometheus metrics for your Nuxt server. See how long each route takes, how much
 | Deno | 2.8.3 (tested) |
 | Nitro presets | `node-server`, `bun`, `deno-server` |
 | Outbound calls counted | `fetch` and undici, `http` and `https`, HTTP/2, gRPC |
-| Outbound calls not counted | Raw TCP connections and database clients |
+| Outbound calls not counted | Raw TCP connections, database clients and XMLHttpRequest |
 | Grafana | [Example dashboard](./examples/grafana) |
 
 ## Routes

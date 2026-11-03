@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import http from 'node:http'
 import process from 'node:process'
+import { fileURLToPath } from 'node:url'
 import { createOutboundCollector, detectRuntime } from '../../dist/runtime/collector/index.js'
 
 const delay = 40
@@ -21,6 +22,18 @@ function get(port, path) {
   })
 }
 
+function spawnChild(script) {
+  if (typeof globalThis.Bun !== 'undefined')
+    return globalThis.Bun.spawn([process.execPath, script], { stdout: 'ignore', stderr: 'ignore' }).exited
+
+  const child = new globalThis.Deno.Command(globalThis.Deno.execPath(), {
+    args: ['run', '-A', script],
+    stdout: 'null',
+    stderr: 'null',
+  }).spawn()
+  return child.status.then(status => status.code)
+}
+
 async function main() {
   const runtime = detectRuntime()
   assert.ok(runtime === 'bun' || runtime === 'deno', `expected bun or deno, received ${runtime}`)
@@ -39,8 +52,12 @@ async function main() {
   }
 
   const state = { requests: {} }
+  const urls = []
   const collector = createOutboundCollector({
     getState: () => state,
+    onRequest: (url) => {
+      urls.push(url)
+    },
   })
   const originalFetch = globalThis.fetch
   collector.start()
@@ -74,6 +91,8 @@ async function main() {
   assert.equal(timings.length, 3, `expected 3 recorded requests, received ${timings.length}`)
   for (const timing of timings)
     assert.ok(timing.end - timing.start >= delay - 10, `expected a measured request, received ${timing.end - timing.start}ms`)
+  assert.ok(urls.includes(`http://127.0.0.1:${port}/fetch`), `the fetch url must include the port, received ${urls.join(', ')}`)
+  assert.ok(urls.includes(`http://127.0.0.1:${port}/http`), `the http url must include the port, received ${urls.join(', ')}`)
 
   collector.stop()
   assert.equal(globalThis.fetch, originalFetch, 'the collector must restore fetch on stop')
@@ -86,6 +105,10 @@ async function main() {
   await fetch(`http://127.0.0.1:${port}/background`)
   stateless.stop()
 
+  const errorScript = fileURLToPath(new URL('./collector-error.runtime.mjs', import.meta.url))
+  const errorExitCode = await spawnChild(errorScript)
+  assert.notEqual(errorExitCode, 0, 'an unhandled request error must surface on this runtime')
+
   upstream.closeAllConnections?.()
   await new Promise(resolve => upstream.close(resolve))
 
@@ -94,5 +117,5 @@ async function main() {
 
 main().catch((error) => {
   console.error(error)
-  process.exitCode = 1
+  process.exit(1)
 })

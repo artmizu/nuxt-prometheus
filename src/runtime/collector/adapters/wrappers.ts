@@ -3,6 +3,7 @@ import http from 'node:http'
 import http2 from 'node:http2'
 import https from 'node:https'
 import { createRequestTracker, isFinalStatus } from '../tracker'
+import { clientRequestUrl, streamRequestUrl } from '../url'
 
 function resolveUrl(input: RequestInfo | URL) {
   if (typeof input === 'string')
@@ -16,26 +17,40 @@ export function createWrappersCollector(options: OutboundCollectorOptions): Outb
   const tracker = createRequestTracker(options)
   let restore: (() => void) | undefined
 
-  const trackRequest = (request: http.ClientRequest) => {
-    tracker.begin(request, `${request.protocol ?? 'http:'}//${request.host ?? 'localhost'}${request.path ?? ''}`)
+  const rethrowIfUnhandled = (target: { listenerCount: (event: string) => number }, error: unknown) => {
+    if (target.listenerCount('error') === 0) {
+      queueMicrotask(() => {
+        throw error
+      })
+    }
+  }
+
+  const trackRequest = (request: http.ClientRequest, args: readonly unknown[]) => {
+    tracker.begin(request, clientRequestUrl(request, args))
     request.once('response', () => tracker.settle(request))
-    request.once('error', () => tracker.settle(request))
+    request.once('error', (error) => {
+      tracker.settle(request)
+      rethrowIfUnhandled(request, error)
+    })
   }
 
   const trackStream = (stream: http2.ClientHttp2Stream, headers: http2.OutgoingHttpHeaders | undefined) => {
-    tracker.begin(stream, `${headers?.[':scheme'] ?? 'http'}://${headers?.[':authority'] ?? 'localhost'}${headers?.[':path'] ?? ''}`)
+    tracker.begin(stream, streamRequestUrl(headers))
     stream.once('response', (responseHeaders) => {
       if (isFinalStatus(Number(responseHeaders[':status'])))
         tracker.settle(stream)
     })
-    stream.once('error', () => tracker.settle(stream))
+    stream.once('error', (error) => {
+      tracker.settle(stream)
+      rethrowIfUnhandled(stream, error)
+    })
     stream.once('close', () => tracker.settle(stream))
   }
 
   const trackRequestFunction = <T extends typeof http.request | typeof http.get>(target: T) => new Proxy(target, {
     apply: (target, thisArg, args) => {
       const request: http.ClientRequest = Reflect.apply(target, thisArg, args)
-      trackRequest(request)
+      trackRequest(request, args)
       return request
     },
   })
@@ -56,6 +71,7 @@ export function createWrappersCollector(options: OutboundCollectorOptions): Outb
   }
 
   const patchHttp2 = () => {
+    const patchedSessions = new Set<() => void>()
     const originalConnect = http2.connect
     const trackedConnect = new Proxy(originalConnect, {
       apply: (target, thisArg, args) => {
@@ -68,7 +84,14 @@ export function createWrappersCollector(options: OutboundCollectorOptions): Outb
             return stream
           },
         })
+        const restoreSession = () => {
+          if (session.request === trackedRequest)
+            session.request = originalRequest
+          patchedSessions.delete(restoreSession)
+        }
         session.request = trackedRequest
+        session.once('close', restoreSession)
+        patchedSessions.add(restoreSession)
         return session
       },
     })
@@ -76,6 +99,8 @@ export function createWrappersCollector(options: OutboundCollectorOptions): Outb
     return () => {
       if (http2.connect === trackedConnect)
         http2.connect = originalConnect
+      for (const restoreSession of [...patchedSessions])
+        restoreSession()
     }
   }
 

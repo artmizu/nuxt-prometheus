@@ -2,6 +2,7 @@ import type { IncomingHttpHeaders, OutgoingHttpHeaders } from 'node:http2'
 import type { OutboundCollector, OutboundCollectorOptions } from '../types'
 import diagnosticsChannel from 'node:diagnostics_channel'
 import { createRequestTracker, isFinalStatus } from '../tracker'
+import { clientRequestUrl, streamRequestUrl } from '../url'
 
 interface FetchRequestMessage {
   request: { origin?: string, path?: string }
@@ -13,7 +14,7 @@ interface FetchResponseMessage {
 }
 
 interface HttpClientRequestMessage {
-  request: { protocol?: string, host?: string, path?: string }
+  request: { protocol?: string, host?: string, path?: string, getHeader?: (name: string) => unknown }
 }
 
 interface HttpClientResponseMessage {
@@ -46,14 +47,6 @@ function channelSubscription<T>(channel: string, listener: (message: T) => void)
   }
 }
 
-function httpRequestUrl(request: HttpClientRequestMessage['request']) {
-  return `${request.protocol ?? 'http:'}//${request.host ?? 'localhost'}${request.path ?? ''}`
-}
-
-function http2RequestUrl(headers: OutgoingHttpHeaders) {
-  return `${headers[':scheme'] ?? 'http'}://${headers[':authority'] ?? 'localhost'}${headers[':path'] ?? ''}`
-}
-
 export function createChannelsCollector(options: OutboundCollectorOptions): OutboundCollector {
   const tracker = createRequestTracker(options)
 
@@ -69,7 +62,7 @@ export function createChannelsCollector(options: OutboundCollectorOptions): Outb
       tracker.settle(request)
     }),
     channelSubscription<HttpClientRequestMessage>('http.client.request.created', ({ request }) => {
-      tracker.begin(request, httpRequestUrl(request))
+      tracker.begin(request, clientRequestUrl(request))
     }),
     channelSubscription<HttpClientResponseMessage>('http.client.response.finish', ({ request, response }) => {
       if (isFinalStatus(response?.statusCode))
@@ -79,7 +72,7 @@ export function createChannelsCollector(options: OutboundCollectorOptions): Outb
       tracker.settle(request)
     }),
     channelSubscription<Http2StreamCreatedMessage>('http2.client.stream.created', ({ stream, headers }) => {
-      tracker.begin(stream, http2RequestUrl(headers))
+      tracker.begin(stream, streamRequestUrl(headers))
     }),
     channelSubscription<Http2StreamFinishedMessage>('http2.client.stream.finish', ({ stream, headers }) => {
       if (isFinalStatus(Number(headers[':status'])))

@@ -17,5 +17,3 @@ export function createOutboundCollector(options: OutboundCollectorOptions): Outb
     ? createChannelsCollector(options)
     : createWrappersCollector(options)
 }
-
-export type { OutboundCollector, OutboundCollectorOptions, OutboundRequestsState, OutboundRequestTiming } from './types'

@@ -104,6 +104,22 @@ describe('channels collector', () => {
     expect(timings[0]!.end - timings[0]!.start).toBeGreaterThanOrEqual(30)
   })
 
+  it('reports the full request URL including the port', async () => {
+    const urls: string[] = []
+    const state: OutboundRequestsState = { requests: {} }
+    const collector = createChannelsCollector({
+      getState: () => state,
+      onRequest: (url) => {
+        urls.push(url)
+      },
+    })
+    collector.start()
+    await get('/http-url')
+    collector.stop()
+
+    expect(urls).toEqual([`http://127.0.0.1:${port}/http-url`])
+  })
+
   it('records a timing for error responses', async () => {
     const { state, collector } = setup()
     collector.start()
