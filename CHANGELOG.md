@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.1.1](https://github.com/artmizu/nuxt-prometheus/compare/v4.1.0...v4.1.1) (2026-11-15)
+
+
+### Bug Fixes
+
+* point npm metadata at the repository ([1cf7c72](https://github.com/artmizu/nuxt-prometheus/commit/1cf7c72a9a32aa2a837c32a3ff85da200932a0fa))
+
 ## [4.1.0](https://github.com/artmizu/nuxt-prometheus/compare/v4.0.0...v4.1.0) (2026-11-03)
 
 
