@@ -5,7 +5,14 @@
   "packageManager": "pnpm@12.16.1",
   "description": "Allows you to better understand what's going on with your application and how to optimize performance and other things in production",
   "license": "MIT",
-  "repository": "artmizu/nuxt-prometheus",
+  "homepage": "https://github.com/artmizu/nuxt-prometheus#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/artmizu/nuxt-prometheus.git"
+  },
+  "bugs": {
+    "url": "https://github.com/artmizu/nuxt-prometheus/issues"
+  },
   "publishConfig": {
     "access": "public"
   },
